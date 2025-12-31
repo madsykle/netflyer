@@ -174,7 +174,7 @@ const SignUp = () => {
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <Input
                   type="text"
-                  variant="bordered"
+                  variant="flat"
                   placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -184,7 +184,7 @@ const SignUp = () => {
                 />
                 <Input
                   type="email"
-                  variant="bordered"
+                  variant="flat"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -194,7 +194,7 @@ const SignUp = () => {
                 />
                 <Input
                   type="password"
-                  variant="bordered"
+                  variant="flat"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
