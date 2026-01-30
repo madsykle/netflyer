@@ -1,7 +1,14 @@
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap");
+@import "./design-system.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  background: #1C1C1E;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

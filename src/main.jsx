@@ -1,4 +1,5 @@
 import App from "./App";
+import { SettingsProvider } from "./hooks/useSettings";
 import About from "./pages/About";
 import ActorInfo from "./pages/ActorInfo";
 import AdminDashboard from "./pages/Admin";
@@ -7,6 +8,7 @@ import InfoPage from "./pages/Info";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import SearchPage from "./pages/Search";
+import Settings from "./pages/Settings";
 import SignUp from "./pages/SignUp";
 import Watch from "./pages/Watch";
 import WatchlistPage from "./pages/Watchlist";
@@ -32,7 +34,7 @@ const routes = [
   },
   {
     path: "/discover",
-    element: <Discover />
+    element: <Discover />,
   },
   {
     path: "/info/:type/:id",
@@ -51,6 +53,10 @@ const routes = [
     element: <SearchPage />,
   },
   {
+    path: "/settings",
+    element: <Settings />,
+  },
+  {
     path: "/signup",
     element: <SignUp />,
   },
@@ -63,9 +69,9 @@ const routes = [
     element: <WatchlistPage />,
   },
   {
-    path: '/admin',
-    element: <AdminDashboard />
-  }
+    path: "/admin",
+    element: <AdminDashboard />,
+  },
 ];
 
 const router = createBrowserRouter(routes);
@@ -73,9 +79,11 @@ const router = createBrowserRouter(routes);
 ReactDOM.createRoot(document.querySelector("#root")).render(
   <React.StrictMode>
     <HeroUIProvider>
-      <main className="w-full h-full ">
-        <RouterProvider router={router} />
-      </main>
+      <SettingsProvider>
+        <main className="w-full h-full ">
+          <RouterProvider router={router} />
+        </main>
+      </SettingsProvider>
     </HeroUIProvider>
   </React.StrictMode>
 );

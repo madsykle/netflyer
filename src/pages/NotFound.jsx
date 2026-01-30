@@ -1,8 +1,7 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import { Button, Card, CardBody } from "@heroui/react";
 import { motion } from "framer-motion";
 import { Home, Search, ArrowLeft, Film, Tv, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const NotFound = () => {
   const navigate = useNavigate();
@@ -35,7 +34,7 @@ const NotFound = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+    <div className="min-h-screen bg-bg-primary text-text-primary flex items-center justify-center px-6">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -47,7 +46,7 @@ const NotFound = () => {
           <motion.div
             variants={floatingVariants}
             animate="animate"
-            className="absolute top-1/4 left-1/4 text-zinc-800"
+            className="absolute top-1/4 left-1/4 text-bg-tertiary"
           >
             <Film className="w-16 h-16" />
           </motion.div>
@@ -55,7 +54,7 @@ const NotFound = () => {
             variants={floatingVariants}
             animate="animate"
             style={{ animationDelay: "2s" }}
-            className="absolute top-1/3 right-1/4 text-zinc-800"
+            className="absolute top-1/3 right-1/4 text-bg-tertiary"
           >
             <Tv className="w-20 h-20" />
           </motion.div>
@@ -63,63 +62,59 @@ const NotFound = () => {
             variants={floatingVariants}
             animate="animate"
             style={{ animationDelay: "4s" }}
-            className="absolute bottom-1/4 left-1/3 text-zinc-800"
+            className="absolute bottom-1/4 left-1/3 text-bg-tertiary"
           >
             <Search className="w-12 h-12" />
           </motion.div>
         </div>
 
         {/* Error Icon */}
-        <motion.div
-          variants={itemVariants}
-          className="relative z-10 mb-8"
-        >
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-500 to-pink-600 rounded-full mb-6">
-            <AlertTriangle className="w-12 h-12 text-white" />
+        <motion.div variants={itemVariants} className="relative z-10 mb-8">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-olive-drab rounded-full mb-6">
+            <AlertTriangle className="w-12 h-12 text-floral-white" />
           </div>
         </motion.div>
 
         {/* Error Message */}
         <motion.div variants={itemVariants} className="mb-8">
-          <h1 className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-red-400 to-pink-500 bg-clip-text text-transparent">
+          <h1 className="text-6xl md:text-8xl font-bold mb-4 text-floral-white">
             404
           </h1>
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-zinc-200">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-text-secondary">
             Content Not Found
           </h2>
-          <p className="text-lg text-zinc-400 mb-2">
-            Oops! The page you're looking for seems to have wandered off into the digital void.
+          <p className="text-lg text-text-tertiary mb-2">
+            Oops! The page you're looking for seems to have wandered off into
+            the digital void.
           </p>
-          <p className="text-zinc-500">
+          <p className="text-text-muted">
             Maybe it's binge-watching something else right now.
           </p>
         </motion.div>
 
         {/* Action Buttons */}
         <motion.div variants={itemVariants}>
-          <Card className="bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-xl">
+          <Card className="bg-bg-secondary border border-border-default rounded-2xl shadow-xl">
             <CardBody className="p-8">
-              <h3 className="text-xl font-semibold mb-6 text-zinc-200">
+              <h3 className="text-xl font-semibold mb-6 text-floral-white">
                 What would you like to do?
               </h3>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button
-                  color="primary"
+                  className="bg-olive-drab text-floral-white rounded-xl font-semibold shadow-lg hover:bg-olive-drab-hover w-full sm:w-auto"
                   size="lg"
                   startContent={<Home className="w-5 h-5" />}
-                  className="rounded-xl font-semibold shadow-lg shadow-blue-500/25 w-full sm:w-auto"
                   onPress={() => navigate("/")}
                 >
                   Go Home
                 </Button>
 
                 <Button
-                  color="secondary"
                   variant="bordered"
+                  className="rounded-xl font-semibold w-full sm:w-auto border-border-default text-text-secondary hover:text-floral-white hover:border-border-hover"
                   size="lg"
                   startContent={<Search className="w-5 h-5" />}
-                  className="rounded-xl font-semibold w-full sm:w-auto"
                   onPress={() => navigate("/search")}
                 >
                   Search Content
@@ -129,7 +124,7 @@ const NotFound = () => {
                   variant="light"
                   size="lg"
                   startContent={<ArrowLeft className="w-5 h-5" />}
-                  className="rounded-xl font-semibold text-zinc-400 hover:text-white w-full sm:w-auto"
+                  className="rounded-xl font-semibold text-text-tertiary hover:text-floral-white w-full sm:w-auto"
                   onPress={() => navigate(-1)}
                 >
                   Go Back
@@ -140,18 +135,15 @@ const NotFound = () => {
         </motion.div>
 
         {/* Popular Suggestions */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-12 text-center"
-        >
-          <p className="text-sm text-zinc-500 mb-4">
+        <motion.div variants={itemVariants} className="mt-12 text-center">
+          <p className="text-sm text-text-muted mb-4">
             Or explore these popular sections:
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button
               size="sm"
               variant="flat"
-              className="rounded-lg text-zinc-400 hover:text-white"
+              className="rounded-lg text-text-tertiary hover:text-floral-white"
               onPress={() => navigate("/discover")}
             >
               Discover
@@ -159,7 +151,7 @@ const NotFound = () => {
             <Button
               size="sm"
               variant="flat"
-              className="rounded-lg text-zinc-400 hover:text-white"
+              className="rounded-lg text-text-tertiary hover:text-floral-white"
               onPress={() => navigate("/watchlist")}
             >
               Watchlist
@@ -167,7 +159,7 @@ const NotFound = () => {
             <Button
               size="sm"
               variant="flat"
-              className="rounded-lg text-zinc-400 hover:text-white"
+              className="rounded-lg text-text-tertiary hover:text-floral-white"
               onPress={() => navigate("/about")}
             >
               About
@@ -176,11 +168,8 @@ const NotFound = () => {
         </motion.div>
 
         {/* Bottom Text */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-16 text-center"
-        >
-          <p className="text-xs text-zinc-600">
+        <motion.div variants={itemVariants} className="mt-16 text-center">
+          <p className="text-xs text-text-muted">
             Error Code: 404 • Page Not Found • Netflyer
           </p>
         </motion.div>
@@ -190,4 +179,3 @@ const NotFound = () => {
 };
 
 export default NotFound;
-

@@ -1,20 +1,20 @@
+import { BACKEND_URL } from "../services/Api";
 import { auth } from "../services/Firebase";
-import { Spinner, Input, Button, Card } from "@heroui/react";
+import { Input, Button, Card } from "@heroui/react";
 import axios from "axios";
 import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createToast } from "vercel-toast";
-import { BACKEND_URL } from "../services/Api";
-import { motion } from "framer-motion";
 
 const TMDB_API_URL = `${BACKEND_URL}/api/backdrop/movie/27205`;
-const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/original";
+const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
 
 const useAuthListener = (navigate) => {
   const [loading, setLoading] = useState(true);
@@ -72,6 +72,7 @@ const Login = () => {
     try {
       setLoggedIn(true);
       await signInWithEmailAndPassword(auth, email, password);
+      createToast("Welcome back!", { type: "success", timeout: 2000 });
       navigate("/");
     } catch (error) {
       setLoggedIn(false);
@@ -95,7 +96,7 @@ const Login = () => {
     sendPasswordResetEmail(auth, email)
       .then(() =>
         createToast("Password reset email sent", {
-          type: "info",
+          type: "success",
           timeout: 3000,
         })
       )
@@ -112,29 +113,45 @@ const Login = () => {
   }, []);
 
   return loading ? (
-    <div className="flex justify-center items-center min-h-screen bg-black text-white">
-      <Spinner color="primary" size="lg" />
+    <div className="flex justify-center items-center min-h-screen bg-bg-primary text-text-primary">
+      <div className="relative w-12 h-12">
+        <motion.div
+          className="absolute inset-0 rounded-full border-2 border-olive-drab"
+          style={{ borderTopColor: "transparent" }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
     </div>
   ) : (
     <div
       className="relative min-h-screen flex items-center justify-center px-6"
       style={{
-        backgroundImage: `url(${backdrop})`,
+        backgroundImage: backdrop ? `url(${backdrop})` : "none",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      {backdrop && (
+        <div className="absolute inset-0 bg-bg-primary/80 backdrop-blur-sm" />
+      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative z-10 w-full max-w-sm"
       >
-        <Card className="bg-zinc-900/80 border border-zinc-800 p-8 rounded-2xl shadow-xl space-y-6">
+        <Card className="bg-bg-secondary border border-border-default p-8 rounded-2xl shadow-xl space-y-6">
           <div className="flex flex-col items-center text-center">
-            <LogIn className="text-blue-400 h-10 w-10 mb-3" />
-            <h1 className="text-3xl font-bold text-white">Login</h1>
+            <div className="w-12 h-12 bg-olive-drab rounded-full flex items-center justify-center mb-3">
+              <LogIn className="text-floral-white h-6 w-6" />
+            </div>
+            <h1 className="text-3xl font-bold text-floral-white">
+              Welcome Back
+            </h1>
+            <p className="text-text-tertiary mt-2">
+              Sign in to continue watching
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -145,7 +162,11 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               radius="lg"
-              className="text-white"
+              classNames={{
+                input: "text-floral-white",
+                inputWrapper:
+                  "bg-bg-tertiary border-border-default hover:border-border-hover",
+              }}
               isRequired
             />
 
@@ -157,13 +178,17 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 radius="lg"
-                className="text-white"
+                classNames={{
+                  input: "text-floral-white",
+                  inputWrapper:
+                    "bg-bg-tertiary border-border-default hover:border-border-hover",
+                }}
                 isRequired
               />
               <button
                 type="button"
                 onClick={toggleVisibility}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-floral-white transition-colors"
               >
                 {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -171,20 +196,19 @@ const Login = () => {
 
             <Button
               type="submit"
-              color="primary"
-              className="w-full rounded-lg font-semibold shadow-md"
+              className="w-full rounded-xl font-semibold bg-olive-drab text-floral-white hover:bg-olive-drab-hover"
               isLoading={loggedIn}
             >
-              {loggedIn ? "Logging in..." : "Login"}
+              {loggedIn ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
-          <div className="text-center text-sm text-zinc-400 space-y-2">
+          <div className="text-center text-sm text-text-tertiary space-y-2">
             <p>
               Forgot password?{" "}
               <button
                 onClick={resetPassword}
-                className="text-blue-400 hover:underline"
+                className="text-bone hover:text-bone-hover underline-offset-2 hover:underline transition-all"
               >
                 Reset here
               </button>
@@ -193,9 +217,9 @@ const Login = () => {
               New here?{" "}
               <Link
                 to="/signup"
-                className="text-blue-400 hover:underline"
+                className="text-bone hover:text-bone-hover underline-offset-2 hover:underline transition-all"
               >
-                Sign up
+                Create account
               </Link>
             </p>
           </div>
