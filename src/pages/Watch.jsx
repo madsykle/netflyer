@@ -18,9 +18,14 @@ const Watch = () => {
   const navigate = useNavigate();
 
   const providers = [
+    { key: "vidsrc-icu", label: "VidSrc ICU", description: "Default - Stable" },
     { key: "vidplus", label: "VidPlus", description: "HD Quality" },
     { key: "vidsrc-pk", label: "VidSrc PK", description: "Fast Loading" },
-    { key: "vidsrc-icu", label: "VidSrc ICU", description: "Stable" },
+    { key: "vidsrc-ru", label: "Vidsrc RU", description: "Backup Source" },
+    { key: "vidsrc-su", label: "Vidsrc SU", description: "Backup Source" },
+    { key: "vidsrcme-su", label: "VidsrcMe", description: "Backup Source" },
+    { key: "vsrc-su", label: "Vsrc SU", description: "Backup Source" },
+    { key: "embed-su", label: "Embed SU", description: "Backup Source" },
   ];
 
   const [provider, setProvider] = useState(providers[0].key);
@@ -39,18 +44,31 @@ const Watch = () => {
         url += `&s=${season}&e=${episode}`;
       }
       const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(`Provider ${provider} unavailable (${res.status})`);
+      }
+
       const data = await res.json();
 
       if (data.url) {
         setEmbedUrl(data.url);
+        setLoading(false);
       } else {
-        setError("No video source available for this provider");
+        throw new Error("No video source available for this provider");
       }
     } catch (err) {
       console.error("Failed to fetch embed URL:", err);
-      setError("Failed to load video source");
+      
+      const currentIndex = providers.findIndex((p) => p.key === provider);
+      if (currentIndex !== -1 && currentIndex < providers.length - 1) {
+        const nextProvider = providers[currentIndex + 1];
+        setProvider(nextProvider.key);
+      } else {
+        setError("Video source unavailable. Try another provider.");
+        setLoading(false);
+      }
     }
-    setLoading(false);
   };
 
   // Fetch title info
@@ -313,6 +331,7 @@ const Watch = () => {
                     className="w-full h-full"
                     frameBorder="0"
                     allowFullScreen
+                    sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   />
                 </motion.div>
@@ -376,7 +395,7 @@ const Watch = () => {
               </span>
             </div>
             <p className="text-sm text-[var(--color-text-secondary)]">
-              If video doesn't load, try a different provider
+              If video doesn&apos;t load, try a different provider
             </p>
           </div>
           <div className="flex items-center gap-3 p-4 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-border)]">

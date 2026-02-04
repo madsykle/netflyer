@@ -31,7 +31,14 @@ const useAuthListener = (navigate) => {
 const fetchBackdrop = async (setBackdrop) => {
   try {
     const { data } = await axios.get(TMDB_API_URL);
-    setBackdrop(`${BACKDROP_BASE_URL}${data.backdrops[8].file_path}`);
+    if (data.backdrops && data.backdrops.length > 0) {
+      const randomIndex = Math.floor(
+        Math.random() * Math.min(data.backdrops.length, 10)
+      );
+      setBackdrop(
+        `${BACKDROP_BASE_URL}${data.backdrops[randomIndex].file_path}`
+      );
+    }
   } catch (error) {
     console.error("Error fetching backdrop:", error);
   }

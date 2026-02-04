@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { BACKEND_URL } from "../services/Api";
-import { useSettings } from "../hooks/useSettings";
 import Navbar from "../components/Navbar";
+import { useSettings } from "../hooks/useSettings";
+import { BACKEND_URL } from "../services/Api";
 import {
   Spinner,
   Select,
@@ -14,6 +12,7 @@ import {
   Pagination,
   Slider,
 } from "@heroui/react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Grid,
   List,
@@ -23,7 +22,8 @@ import {
   SlidersHorizontal,
   Play,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Discover = () => {
   const [loading, setLoading] = useState(true);
@@ -304,7 +304,9 @@ const Discover = () => {
                         }}
                       >
                         {typeOptions.map((option) => (
-                          <SelectItem key={option.key}>{option.label}</SelectItem>
+                          <SelectItem key={option.key}>
+                            {option.label}
+                          </SelectItem>
                         ))}
                       </Select>
                     </div>
@@ -316,10 +318,7 @@ const Discover = () => {
                       <Select
                         selectedKeys={filters.genre ? [filters.genre] : []}
                         onSelectionChange={(keys) =>
-                          handleFilterChange(
-                            "genre",
-                            Array.from(keys)[0] || ""
-                          )
+                          handleFilterChange("genre", Array.from(keys)[0] || "")
                         }
                         placeholder="All Genres"
                         className="w-full"
@@ -350,10 +349,7 @@ const Discover = () => {
                       <Select
                         selectedKeys={filters.year ? [filters.year] : []}
                         onSelectionChange={(keys) =>
-                          handleFilterChange(
-                            "year",
-                            Array.from(keys)[0] || ""
-                          )
+                          handleFilterChange("year", Array.from(keys)[0] || "")
                         }
                         placeholder="Any Year"
                         className="w-full"
@@ -390,7 +386,9 @@ const Discover = () => {
                         }}
                       >
                         {sortOptions.map((option) => (
-                          <SelectItem key={option.key}>{option.label}</SelectItem>
+                          <SelectItem key={option.key}>
+                            {option.label}
+                          </SelectItem>
                         ))}
                       </Select>
                     </div>
@@ -465,7 +463,10 @@ const Discover = () => {
             )}
 
             {totalPages > 1 && (
-              <motion.div variants={itemVariants} className="flex justify-center">
+              <motion.div
+                variants={itemVariants}
+                className="flex justify-center"
+              >
                 <Pagination
                   total={totalPages}
                   page={filters.page}
@@ -501,7 +502,7 @@ const ResultCard = ({ item, navigate, getImageUrl }) => {
       <div className="relative rounded-2xl overflow-hidden bg-bg-secondary shadow-lg group-hover:shadow-xl transition-all duration-300 border border-border-default group-hover:border-border-hover">
         <div className="relative overflow-hidden">
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-bg-tertiary skeleton aspect-[2/3]" />
+            <div className="absolute inset-0 bg-bg-tertiary aspect-[2/3]" />
           )}
           <img
             src={getImageUrl(item.poster_path, "poster")}
@@ -543,7 +544,6 @@ const ResultCard = ({ item, navigate, getImageUrl }) => {
   );
 };
 
-
 const ResultListItem = ({ item, navigate, getImageUrl }) => {
   const mediaType = item.title ? "movie" : "tv";
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -562,7 +562,7 @@ const ResultListItem = ({ item, navigate, getImageUrl }) => {
           <div className="flex gap-4">
             <div className="relative overflow-hidden rounded-xl">
               {!imageLoaded && (
-                <div className="absolute inset-0 bg-bg-tertiary skeleton w-20 h-28" />
+                <div className="absolute inset-0 bg-bg-tertiary w-20 h-28" />
               )}
               <img
                 src={getImageUrl(item.poster_path, "poster")}

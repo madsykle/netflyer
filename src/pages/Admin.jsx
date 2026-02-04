@@ -310,7 +310,7 @@ export default function AdminDashboard() {
           <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <span className="text-lg text-red-400">Access Denied</span>
           <p className="text-[var(--color-text-tertiary)] mt-2">
-            You don't have permission to access this area
+            You don&apos;t have permission to access this area
           </p>
         </div>
       </div>

@@ -1,73 +1,44 @@
+# ⚠️ ARCHIVED PROJECT
+
+**Status:** This project is no longer actively maintained. It has been archived for portfolio purposes.
+Streaming sources and APIs may stop working over time.
+
+---
+
 # NetFlyer: Free + Ad-Free Movie/Series Streaming Platform
 
-NetFlyer is a free and ad-free movie/series streaming platform. Anyone can use the code, but attribution is appreciated.
+NetFlyer is a free and ad-free movie/series streaming platform.
+
+## Tech Stack
+
+- **Frontend:** React, Vite, TailwindCSS, HeroUI
+- **Backend:** Node.js, Express (Optional)
+- **Services:** Firebase (Auth/DB), TMDB (Metadata)
 
 ## Setup
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/unknnsb/netflyer.git
+   git clone https://github.com/madsykle/netflyer.git
    ```
 
-2. Install dependencies using yarn:
+2. Install dependencies using **Bun**:
 
    ```bash
-   yarn install
+   bun install
    ```
 
-   Or npm:
-
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file based on `.env.example` or rename it and fill in your own values. You can obtain Firebase and TMDB API keys by following these steps:
-
-   ### Firebase Configuration
-
-   - Go to the [Firebase Console](https://console.firebase.google.com/).
-   - Create a new project or select an existing one.
-   - Make sure to enable firestore and email and pass auth
-   - Navigate to Project Settings > General.
-   - Under Your apps, click on the Web app (</>) icon to register a new app.
-   - Copy the config object's values into your `.env` file.
-
-   ### TMDB API Key
-
-   - Go to the [TMDB website](https://www.themoviedb.org/).
-   - Sign up or log in to your account.
-   - Navigate to Account Settings > API.
-   - Request an API key if you don't have one already.
-   - Copy your API key into your `.env` file.
+3. Create a `.env` file based on `.env.example` and fill in your values (Firebase & TMDB).
 
 4. Start the development server:
 
    ```bash
-   yarn dev
+   bun run dev
    ```
 
-   Or npm:
-
-   ```bash
-   npm run dev
-   ```
-
-5. Open your browser and navigate to [http://localhost:5173](http://localhost:5173) to view the application.
-
-## Love My Work?
-
-- Support My Work By Donating *USDT(tron20)*:
-  `TZHDCKmV1q2pThK37cGgZjgWPLKUk8AJ7p`
-
-## Contribution
-
-Feel free to fork and contribute to this project. If you have any ideas, bug fixes, or feature requests, please open an issue or submit a pull request.
+5. Open [http://localhost:5173](http://localhost:5173).
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-Happy streaming! 🍿🎬

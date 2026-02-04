@@ -190,7 +190,7 @@ const Header = () => {
 
           {loading ? (
             <NavbarItem>
-              <div className="w-20 h-9 bg-[var(--color-bg-tertiary)] rounded-full skeleton" />
+              <div className="w-20 h-9 bg-[var(--color-bg-tertiary)] rounded-full" />
             </NavbarItem>
           ) : user ? (
             <NavbarItem>
@@ -290,7 +290,7 @@ const Header = () => {
 
                 <NavbarMenuItem className="mt-4 pt-4 border-t border-[var(--color-border)]">
                   {loading ? (
-                    <div className="w-full h-12 bg-[var(--color-bg-tertiary)] rounded-lg skeleton" />
+                    <div className="w-full h-12 bg-[var(--color-bg-tertiary)] rounded-lg" />
                   ) : user ? (
                     <Button
                       color="primary"

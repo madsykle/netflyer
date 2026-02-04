@@ -84,11 +84,11 @@ const NotFound = () => {
             Content Not Found
           </h2>
           <p className="text-lg text-text-tertiary mb-2">
-            Oops! The page you're looking for seems to have wandered off into
+            Oops! The page you&apos;re looking for seems to have wandered off into
             the digital void.
           </p>
           <p className="text-text-muted">
-            Maybe it's binge-watching something else right now.
+            Maybe it&apos;s binge-watching something else right now.
           </p>
         </motion.div>
 

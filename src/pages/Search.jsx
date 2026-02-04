@@ -181,13 +181,20 @@ const SearchPage = () => {
                       </button>
                     </div>
                     {recentSearches.map((search, index) => (
-                      <motion.button
+                      <motion.div
                         key={search}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                         onClick={() => setQuery(search)}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--color-bg-tertiary)] transition-colors text-left"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            setQuery(search);
+                          }
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--color-bg-tertiary)] transition-colors text-left cursor-pointer"
+                        role="button"
+                        tabIndex={0}
                       >
                         <div className="flex items-center gap-3">
                           <Clock className="w-4 h-4 text-[var(--color-text-muted)]" />
@@ -201,10 +208,11 @@ const SearchPage = () => {
                             removeRecentSearch(search);
                           }}
                           className="text-[var(--color-text-muted)] hover:text-white p-1"
+                          aria-label={`Remove ${search} from recent searches`}
                         >
                           <X className="w-4 h-4" />
                         </button>
-                      </motion.button>
+                      </motion.div>
                     ))}
                   </div>
                 </motion.div>
@@ -226,7 +234,7 @@ const SearchPage = () => {
             >
               <Search className="w-16 h-16 text-[var(--color-text-muted)] mx-auto mb-4" />
               <p className="text-xl text-[var(--color-text-secondary)]">
-                No results found for "{query}"
+                No results found for &quot;{query}&quot;
               </p>
               <p className="text-[var(--color-text-tertiary)] mt-2">
                 Try a different search term
@@ -278,7 +286,7 @@ const SearchResultCard = ({
       >
         <div className="relative overflow-hidden rounded-lg">
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] skeleton aspect-[2/3]" />
+            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] aspect-[2/3]" />
           )}
           <img
             src={posterUrl}

@@ -106,7 +106,7 @@ const HeroSection = () => {
         {/* Background Image with lazy loading */}
         <div className="relative w-full h-[400px] md:h-[600px]">
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] skeleton" />
+            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)]" />
           )}
           <img
             src={backdropUrl}

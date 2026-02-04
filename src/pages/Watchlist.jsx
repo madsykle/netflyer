@@ -133,7 +133,7 @@ const WatchlistPage = () => {
             {Array.from({ length: 10 }).map((_, i) => (
               <div
                 key={i}
-                className="aspect-[2/3] bg-bg-tertiary rounded-2xl skeleton"
+                className="aspect-[2/3] bg-bg-tertiary rounded-2xl"
               />
             ))}
           </div>

@@ -1,11 +1,10 @@
 import { useSettings } from "../hooks/useSettings";
-import { MovieCardSkeleton } from "./Skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Row = ({ items, title, loading = false }) => {
+const Row = React.memo(({ items, title, loading = false }) => {
   const rowRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -36,18 +35,7 @@ const Row = ({ items, title, loading = false }) => {
   };
 
   if (loading) {
-    return (
-      <div className="my-8">
-        {title && (
-          <div className="h-7 w-48 bg-[var(--color-bg-tertiary)] rounded mb-4 ml-2 skeleton" />
-        )}
-        <div className="flex space-x-4 overflow-hidden">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <MovieCardSkeleton key={index} />
-          ))}
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!items || items.length === 0) {
@@ -77,40 +65,42 @@ const Row = ({ items, title, loading = false }) => {
       <div className="relative">
         {/* Left scroll button */}
         <AnimatePresence>
-          {canScrollLeft && isHovering && (
-            <motion.button
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => scroll("left")}
-              className="absolute left-0 top-0 bottom-0 z-20 w-16 bg-gradient-to-r from-[var(--color-bg-primary)] to-transparent flex items-center justify-start pl-2"
-              aria-label="Scroll left"
-            >
-              <div className="w-10 h-10 rounded-full bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm flex items-center justify-center hover:bg-[var(--color-bg-elevated)] transition-all duration-200 hover:scale-110">
-                <ChevronLeft className="w-6 h-6 text-white" />
-              </div>
-            </motion.button>
-          )}
+          {canScrollLeft &&
+            (isHovering || window.matchMedia("(max-width: 768px)").matches) && (
+              <motion.button
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => scroll("left")}
+                className="absolute left-0 top-0 bottom-0 z-20 w-16 bg-gradient-to-r from-[var(--color-bg-primary)] to-transparent flex items-center justify-start pl-2"
+                aria-label="Scroll left"
+              >
+                <div className="w-10 h-10 rounded-full bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm flex items-center justify-center hover:bg-[var(--color-bg-elevated)] transition-all duration-200 hover:scale-110">
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </div>
+              </motion.button>
+            )}
         </AnimatePresence>
 
         {/* Right scroll button */}
         <AnimatePresence>
-          {canScrollRight && isHovering && (
-            <motion.button
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => scroll("right")}
-              className="absolute right-0 top-0 bottom-0 z-20 w-16 bg-gradient-to-l from-[var(--color-bg-primary)] to-transparent flex items-center justify-end pr-2"
-              aria-label="Scroll right"
-            >
-              <div className="w-10 h-10 rounded-full bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm flex items-center justify-center hover:bg-[var(--color-bg-elevated)] transition-all duration-200 hover:scale-110">
-                <ChevronRight className="w-6 h-6 text-white" />
-              </div>
-            </motion.button>
-          )}
+          {canScrollRight &&
+            (isHovering || window.matchMedia("(max-width: 768px)").matches) && (
+              <motion.button
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => scroll("right")}
+                className="absolute right-0 top-0 bottom-0 z-20 w-16 bg-gradient-to-l from-[var(--color-bg-primary)] to-transparent flex items-center justify-end pr-2"
+                aria-label="Scroll right"
+              >
+                <div className="w-10 h-10 rounded-full bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm flex items-center justify-center hover:bg-[var(--color-bg-elevated)] transition-all duration-200 hover:scale-110">
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </div>
+              </motion.button>
+            )}
         </AnimatePresence>
 
         {/* Scrollable container */}
@@ -126,7 +116,7 @@ const Row = ({ items, title, loading = false }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 function RowCard({ item, index }) {
   const navigate = useNavigate();
@@ -170,9 +160,6 @@ function RowCard({ item, index }) {
       <div className="relative group/card">
         {/* Image container with aspect ratio */}
         <div className="relative w-40 h-60 rounded-lg overflow-hidden bg-bg-tertiary">
-          {/* Skeleton placeholder */}
-          {!imageLoaded && <div className="absolute inset-0 skeleton" />}
-
           {/* Actual image */}
           <img
             src={posterUrl}
@@ -206,3 +193,4 @@ function RowCard({ item, index }) {
 }
 
 export default Row;
+Row.displayName = "MovieRow";

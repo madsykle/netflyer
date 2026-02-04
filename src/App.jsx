@@ -2,7 +2,6 @@ import HeroSection from "./components/Hero";
 import Loading from "./components/Loading";
 import Row from "./components/MovieRow";
 import Header from "./components/Navbar";
-import { MovieRowSkeleton } from "./components/Skeleton";
 import { endpoints } from "./services/Api";
 import { BACKEND_URL } from "./services/Api";
 import axios from "axios";
@@ -51,21 +50,7 @@ const App = () => {
   const { loading, data, error } = useFetchData();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--color-bg-primary)]">
-        <Header />
-        <div className="pt-4">
-          <div className="px-4 sm:px-6 lg:px-8 mb-8">
-            <div className="relative w-full h-[400px] md:h-[600px] rounded-3xl overflow-hidden bg-[var(--color-bg-tertiary)] skeleton" />
-          </div>
-          <div className="container mx-auto px-4">
-            <MovieRowSkeleton title={true} count={6} />
-            <MovieRowSkeleton title={true} count={6} />
-            <MovieRowSkeleton title={true} count={6} />
-          </div>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error) {

@@ -103,7 +103,9 @@ const ActorInfo = () => {
           {/* Profile Image */}
           <div className="lg:col-span-1">
             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--color-bg-tertiary)]">
-              {!imageLoaded && <div className="absolute inset-0 skeleton" />}
+              {!imageLoaded && (
+                <div className="absolute inset-0 bg-[var(--color-bg-tertiary)]" />
+              )}
               <img
                 src={profileUrl}
                 alt={actor.name}

@@ -83,17 +83,22 @@ const InfoPage = () => {
       if (user) {
         setUser(true);
         setUserID(user.uid);
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setUserName(userDoc.data().username);
-        } else {
-          let username = prompt("Please enter a username:");
-          if (username) {
-            await setDoc(doc(db, "users", user.uid), { username });
-            setUserName(username);
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUserName(userDoc.data().username);
+          } else {
+            let username = prompt("Please enter a username:");
+            if (username) {
+              await setDoc(doc(db, "users", user.uid), { username });
+              setUserName(username);
+            }
           }
+          qFunc(user.uid);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setWatchlistLoading(false);
         }
-        qFunc(user.uid);
       } else {
         setUser(false);
         setWatchlistLoading(false);
@@ -102,17 +107,21 @@ const InfoPage = () => {
   }, []);
 
   const qFunc = async (user_id) => {
-    const q = query(
-      collection(db, "watchlist"),
-      where("userID", "==", user_id)
-    );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      if (doc.data().type === type && doc.data().id === id) {
-        setWatchlistLoading(false);
-        setWatchlist(true);
-      }
-    });
+    try {
+      const q = query(
+        collection(db, "watchlist"),
+        where("userID", "==", user_id)
+      );
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        if (doc.data().type === type && doc.data().id === id) {
+          setWatchlistLoading(false);
+          setWatchlist(true);
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching watchlist:", error);
+    }
     setWatchlistLoading(false);
   };
 
@@ -225,45 +234,53 @@ const InfoPage = () => {
   };
 
   const handleLikeReview = async (reviewId) => {
-    const reviewRef = doc(db, "reviews", reviewId);
-    const reviewSnap = await getDoc(reviewRef);
+    try {
+      const reviewRef = doc(db, "reviews", reviewId);
+      const reviewSnap = await getDoc(reviewRef);
 
-    if (!reviewSnap.exists()) return;
+      if (!reviewSnap.exists()) return;
 
-    const reviewData = reviewSnap.data();
-    const currentLikes = Array.isArray(reviewData.likes)
-      ? reviewData.likes
-      : [];
+      const reviewData = reviewSnap.data();
+      const currentLikes = Array.isArray(reviewData.likes)
+        ? reviewData.likes
+        : [];
 
-    if (!currentLikes.includes(userUID)) {
-      await updateDoc(reviewRef, {
-        likes: [...currentLikes, userUID],
-        likeCount: (reviewData.likeCount || 0) + 1,
-        updatedAt: serverTimestamp(),
-      });
-      fetchReviews();
+      if (!currentLikes.includes(userUID)) {
+        await updateDoc(reviewRef, {
+          likes: [...currentLikes, userUID],
+          likeCount: (reviewData.likeCount || 0) + 1,
+          updatedAt: serverTimestamp(),
+        });
+        fetchReviews();
+      }
+    } catch (error) {
+      console.error("Error liking review:", error);
     }
   };
 
   const handleUnlikeReview = async (reviewId) => {
-    const reviewRef = doc(db, "reviews", reviewId);
-    const reviewSnap = await getDoc(reviewRef);
+    try {
+      const reviewRef = doc(db, "reviews", reviewId);
+      const reviewSnap = await getDoc(reviewRef);
 
-    if (!reviewSnap.exists()) return;
+      if (!reviewSnap.exists()) return;
 
-    const reviewData = reviewSnap.data();
-    const currentLikes = Array.isArray(reviewData.likes)
-      ? reviewData.likes
-      : [];
+      const reviewData = reviewSnap.data();
+      const currentLikes = Array.isArray(reviewData.likes)
+        ? reviewData.likes
+        : [];
 
-    if (currentLikes.includes(userUID)) {
-      await updateDoc(reviewRef, {
-        likes: currentLikes.filter((uid) => uid !== userUID),
-        likeCount: Math.max((reviewData.likeCount || 1) - 1, 0),
-        updatedAt: serverTimestamp(),
-      });
+      if (currentLikes.includes(userUID)) {
+        await updateDoc(reviewRef, {
+          likes: currentLikes.filter((uid) => uid !== userUID),
+          likeCount: Math.max((reviewData.likeCount || 1) - 1, 0),
+          updatedAt: serverTimestamp(),
+        });
 
-      fetchReviews();
+        fetchReviews();
+      }
+    } catch (error) {
+      console.error("Error unliking review:", error);
     }
   };
 
@@ -276,21 +293,26 @@ const InfoPage = () => {
   };
 
   const fetchReviews = async () => {
-    const q = query(
-      collection(db, "reviews"),
-      where("itemId", "==", id),
-      where("type", "==", type)
-    );
-    const querySnapshot = await getDocs(q);
-    const reviewsData = [];
-    querySnapshot.forEach((doc) => {
-      const reviewData = doc.data();
-      if (!Array.isArray(reviewData.likes)) {
-        reviewData.likes = [];
-      }
-      reviewsData.push({ ...reviewData, id: doc.id });
-    });
-    setReviews(reviewsData);
+    try {
+      const q = query(
+        collection(db, "reviews"),
+        where("itemId", "==", id),
+        where("type", "==", type)
+      );
+      const querySnapshot = await getDocs(q);
+      const reviewsData = [];
+      querySnapshot.forEach((doc) => {
+        const reviewData = doc.data();
+        if (!Array.isArray(reviewData.likes)) {
+          reviewData.likes = [];
+        }
+        reviewsData.push({ ...reviewData, id: doc.id });
+      });
+      setReviews(reviewsData);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setReviews([]);
+    }
   };
 
   if (isLoading || !details) {
@@ -350,38 +372,40 @@ const InfoPage = () => {
       collection(db, "watchlist"),
       where("userID", "==", userUID)
     );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      const data = doc.data();
-      if (data.type === type && data.id === id) {
-        const docRef = doc.ref;
-        await deleteDoc(docRef).then(() => {
-          setWatchlist(false);
-          setWatchlistLoading(false);
-          createToast("Removed from watchlist", {
-            type: "success",
-            timeout: 2000,
+    try {
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (doc) => {
+        const data = doc.data();
+        if (data.type === type && data.id === id) {
+          const docRef = doc.ref;
+          await deleteDoc(docRef).then(() => {
+            setWatchlist(false);
+            setWatchlistLoading(false);
+            createToast("Removed from watchlist", {
+              type: "success",
+              timeout: 2000,
+            });
           });
-        });
-      }
-    });
+        }
+      });
+    } catch (error) {
+      console.error("Error removing from watchlist:", error);
+      setWatchlistLoading(false);
+    }
   };
 
   const toggleText = () => {
     setShowFullText(!showFullText);
   };
 
-  const seasonItems = [];
-  for (
-    let seasonNumber = 1;
-    seasonNumber <= details.number_of_seasons;
-    seasonNumber++
-  ) {
-    seasonItems.push({
-      key: seasonNumber.toString(),
-      label: `Season ${seasonNumber}`,
-    });
-  }
+  const seasonItems = Array.from(
+    { length: details.number_of_seasons },
+    (_, i) => ({
+      key: (i + 1).toString(),
+      label: `Season ${i + 1}`,
+    })
+  );
+
   if (
     details.number_of_seasons === 0 ||
     details.seasons?.some((s) => s.season_number === 0)
@@ -403,7 +427,7 @@ const InfoPage = () => {
       <div className="relative">
         <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
           {!imageLoaded.backdrop && (
-            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] skeleton" />
+            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)]" />
           )}
           <motion.img
             initial={{ scale: 1.1 }}
@@ -436,7 +460,7 @@ const InfoPage = () => {
             >
               <div className="relative w-48 md:w-64 lg:w-72 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl bg-[var(--color-bg-tertiary)]">
                 {!imageLoaded.poster && (
-                  <div className="absolute inset-0 skeleton" />
+                  <div className="absolute inset-0 bg-[var(--color-bg-tertiary)]" />
                 )}
                 <img
                   src={posterUrl}
@@ -540,7 +564,7 @@ const InfoPage = () => {
                 </motion.button>
 
                 {watchlistLoading ? (
-                  <div className="w-32 h-12 bg-[var(--color-bg-tertiary)] rounded-xl skeleton" />
+                  <div className="w-32 h-12 bg-[var(--color-bg-tertiary)] rounded-xl" />
                 ) : watchlist ? (
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -765,7 +789,7 @@ const EpisodeCard = ({
       >
         <div className="relative overflow-hidden">
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] skeleton aspect-video" />
+            <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] aspect-video" />
           )}
           <img
             src={stillUrl}
@@ -812,7 +836,7 @@ const EpisodeCard = ({
 };
 
 // Review Card Component
-const ReviewCard = ({ review, userUID, user, onDelete, onLike, onUnlike }) => {
+const ReviewCard = React.memo(({ review, userUID, user, onDelete, onLike, onUnlike }) => {
   const isLiked = review.likes.includes(userUID);
   const isOwner = review.userId === userUID;
 
@@ -879,6 +903,8 @@ const ReviewCard = ({ review, userUID, user, onDelete, onLike, onUnlike }) => {
       </Card>
     </motion.div>
   );
-};
+});
+
+ReviewCard.displayName = "ReviewCard";
 
 export default InfoPage;

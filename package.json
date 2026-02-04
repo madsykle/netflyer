@@ -10,15 +10,15 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-  "author": "unknnsb <Nesbeer As nesbeeras3@gmail.com>",
+  "author": "madsykle <Nesbeer As nesbeeras3@gmail.com>",
   "license": "MIT",
   "homepage": "https://netflyer.vercel.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/unknnsb/netflyer.git"
+    "url": "https://github.com/madsykle/netflyer.git"
   },
   "bugs": {
-    "url": "https://github.com/unknnsb/netflyer/issues"
+    "url": "https://github.com/madsykle/netflyer/issues"
   },
   "keywords": [
     "netflyer",
@@ -40,6 +40,8 @@
     "@p-stream/providers": "github:p-stream/providers#production",
     "@vitejs/plugin-react": "^4.2.0",
     "bad-words": "^3.0.4",
+    "baseline-browser-mapping": "^2.9.19",
+    "caniuse-lite": "^1.0.30001767",
     "embla-carousel-react": "^8.0.0-rc15",
     "firebase": "^10.4.0",
     "framer-motion": "12.23.12",
