@@ -5,10 +5,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "dev": "next dev -p 3001",
+    "build": "NODE_OPTIONS='--max-old-space-size=2048' next build",
+    "start": "next start -p 3001",
+    "lint": "next lint"
   },
   "author": "madsykle <Nesbeer As nesbeeras3@gmail.com>",
   "license": "MIT",
@@ -30,49 +30,28 @@
     "streaming"
   ],
   "dependencies": {
-    "@consumet/extensions": "^1.5.2",
-    "@heroui/button": "^2.2.26",
-    "@heroui/card": "^2.2.24",
-    "@heroui/input": "2.4.27",
     "@heroui/react": "2.8.4",
-    "@heroui/system": "2.4.22",
-    "@heroui/theme": "2.4.22",
-    "@p-stream/providers": "github:p-stream/providers#production",
-    "@vitejs/plugin-react": "^4.2.0",
     "bad-words": "^3.0.4",
-    "baseline-browser-mapping": "^2.9.19",
-    "caniuse-lite": "^1.0.30001767",
-    "embla-carousel-react": "^8.0.0-rc15",
     "firebase": "^10.4.0",
     "framer-motion": "12.23.12",
     "lucide-react": "^0.542.0",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
-    "react-horizontal-scrolling-menu": "^4.1.1",
+    "next": "^15.3.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "react-icons": "^4.10.1",
-    "react-router-dom": "^6.14.2",
-    "sharp": "^0.34.3",
-    "vercel-toast": "^1.8.0"
+    "sharp": "^0.34.3"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "7.11.0",
-    "@eslint-kit/eslint-config-base": "^5.0.2",
-    "@eslint-kit/eslint-config-patch": "^1.0.0",
-    "@eslint-kit/eslint-config-prettier": "^5.0.0",
-    "@eslint-kit/eslint-config-react": "^3.0.0",
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "autoprefixer": "^10.4.14",
-    "eslint": "7.32.0",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.3",
+    "@tailwindcss/postcss": "^4.2.1",
+    "@types/node": "^25.3.5",
+    "@types/react": "19",
+    "@types/react-dom": "19",
+    "eslint": "8.57.0",
+    "eslint-config-next": "15.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "postcss": "^8.4.27",
-    "prettier": "2.8.8",
     "tailwindcss": "^4.0.0",
-    "@tailwindcss/vite": "^4.0.0",
-    "vite": "^4.5.2",
-    "vite-plugin-image-optimizer": "^1.1.6"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+    "typescript": "^5.9.3"
+  }
 }
