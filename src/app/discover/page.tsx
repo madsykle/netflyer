@@ -219,12 +219,12 @@ const Discover = () => {
 
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`btn btn-secondary relative ${showFilters ? 'bg-white/10 border-white/30' : ''}`}
+              className={`btn btn-secondary !px-8 !py-3 relative h-12 ${showFilters ? 'bg-white/10 border-white/30 text-white' : ''}`}
             >
-              <SlidersHorizontal className="w-4 h-4 mr-2" />
-              Filters
+              <SlidersHorizontal className="w-4 h-4 mr-2.5" />
+              <span className="font-bold uppercase tracking-widest text-xs">Filters</span>
               {getActiveFiltersCount() > 0 && (
-                <span className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--color-accent-primary)] text-white rounded-full text-[10px] font-bold flex items-center justify-center shadow-lg border-2 border-[var(--color-bg-primary)]">
+                <span className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--color-accent-primary)] text-white rounded-full text-[10px] font-bold flex items-center justify-center shadow-xl border-2 border-[var(--color-bg-primary)]">
                   {getActiveFiltersCount()}
                 </span>
               )}
@@ -261,10 +261,8 @@ const Discover = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                   <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">
-                      Content Type
-                    </label>
                     <Select
+                      label="Content Type"
                       selectedKeys={[filters.type]}
                       onSelectionChange={(keys) =>
                         handleFilterChange("type", Array.from(keys)[0])
@@ -272,11 +270,22 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        trigger: "border-white/10 hover:border-white/30 text-white",
+                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
+                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        value: "font-bold text-white text-sm",
+                        listbox: "bg-[#1a1a1e] p-2",
+                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
                       }}
                     >
                       {typeOptions.map((option) => (
-                        <SelectItem key={option.key}>
+                        <SelectItem 
+                          key={option.key}
+                          textValue={option.label}
+                          classNames={{
+                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
+                            title: "font-bold text-sm text-white"
+                          }}
+                        >
                           {option.label}
                         </SelectItem>
                       ))}
@@ -284,10 +293,8 @@ const Discover = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">
-                      Genre
-                    </label>
                     <Select
+                      label="Genre"
                       selectedKeys={filters.genre ? [filters.genre] : []}
                       onSelectionChange={(keys) =>
                         handleFilterChange("genre", Array.from(keys)[0] || "")
@@ -296,7 +303,11 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        trigger: "border-white/10 hover:border-white/30 text-white",
+                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
+                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        value: "font-bold text-white text-sm",
+                        listbox: "bg-[#1a1a1e] p-2",
+                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
                       }}
                     >
                       {(filters.type === "movie"
@@ -305,7 +316,14 @@ const Discover = () => {
                         ? genres.tv
                         : [...genres.movie, ...genres.tv]
                       ).map((genre) => (
-                        <SelectItem key={genre.id.toString()}>
+                        <SelectItem 
+                          key={genre.id.toString()}
+                          textValue={genre.name}
+                          classNames={{
+                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
+                            title: "font-bold text-sm text-white"
+                          }}
+                        >
                           {genre.name}
                         </SelectItem>
                       ))}
@@ -313,10 +331,8 @@ const Discover = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">
-                      Year
-                    </label>
                     <Select
+                      label="Year"
                       selectedKeys={filters.year ? [filters.year] : []}
                       onSelectionChange={(keys) =>
                         handleFilterChange("year", Array.from(keys)[0] || "")
@@ -325,22 +341,33 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        trigger: "border-white/10 hover:border-white/30 text-white",
+                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
+                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        value: "font-bold text-white text-sm",
+                        listbox: "bg-[#1a1a1e] p-2",
+                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
                       }}
                     >
                       {generateYearOptions()
                         .slice(0, 50)
                         .map((year) => (
-                          <SelectItem key={year.key}>{year.label}</SelectItem>
+                          <SelectItem 
+                            key={year.key}
+                            textValue={year.label}
+                            classNames={{
+                              base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
+                              title: "font-bold text-sm text-white"
+                            }}
+                          >
+                            {year.label}
+                          </SelectItem>
                         ))}
                     </Select>
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">
-                      Sort By
-                    </label>
                     <Select
+                      label="Sort By"
                       selectedKeys={[filters.sort_by]}
                       onSelectionChange={(keys) =>
                         handleFilterChange("sort_by", Array.from(keys)[0])
@@ -348,11 +375,22 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        trigger: "border-white/10 hover:border-white/30 text-white",
+                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
+                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        value: "font-bold text-white text-sm",
+                        listbox: "bg-[#1a1a1e] p-2",
+                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
                       }}
                     >
                       {sortOptions.map((option) => (
-                        <SelectItem key={option.key}>
+                        <SelectItem 
+                          key={option.key}
+                          textValue={option.label}
+                          classNames={{
+                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
+                            title: "font-bold text-sm text-white"
+                          }}
+                        >
                           {option.label}
                         </SelectItem>
                       ))}
@@ -489,7 +527,7 @@ const ResultCard = ({ item, router, getImageUrl }: any) => {
           </div>
         </div>
       </div>
-      <div className="pt-4 px-1">
+      <div className="card-padding">
         <h3 className="font-bold text-sm md:text-base mb-1 line-clamp-1 group-hover:text-[var(--color-accent-primary)] transition-colors text-white">
           {item.title || item.name}
         </h3>

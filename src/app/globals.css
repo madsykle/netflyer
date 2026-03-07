@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --aspect-poster: 2 / 3;
+  --aspect-video: 16 / 9;
+}
+
 /* ========================
    CSS CUSTOM PROPERTIES
    ======================== */
@@ -198,14 +203,35 @@ html {
 .card {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-subtle);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   overflow: hidden;
-  transition: all 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: all 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
 }
 
 .card:hover {
   border-color: var(--color-border-default);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px);
+}
+
+.card-padding {
+  @apply p-4 md:p-5;
+}
+
+/* ========================
+   CHIPS
+   ======================== */
+.chip-base {
+  @apply px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 border;
+}
+
+.chip-primary {
+  @apply bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-[0_0_15px_rgba(229,9,20,0.3)];
+}
+
+.chip-secondary {
+  @apply bg-white/5 text-[var(--color-text-secondary)] border-white/10 hover:border-white/20 hover:bg-white/10 hover:text-white;
 }
 
 /* ========================

@@ -166,11 +166,11 @@ const SearchPage = () => {
             />
 
             {/* Filter Chips */}
-            <div className="flex overflow-x-auto scrollbar-hide gap-3 mt-6 justify-center">
-              {['All', 'Movies', 'TV', 'Anime'].map(filter => (
+            <div className="flex overflow-x-auto scrollbar-hide gap-3.5 mt-8 justify-center">
+              {['All', 'Movies', 'TV', 'Anime'].map((filter, idx) => (
                 <button 
                   key={filter}
-                  className="px-5 py-2 rounded-full text-sm font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-colors whitespace-nowrap"
+                  className={`chip-base ${idx === 0 ? 'chip-primary' : 'chip-secondary'} !text-xs !py-2.5 !px-7 whitespace-nowrap h-10`}
                 >
                   {filter}
                 </button>
@@ -333,7 +333,7 @@ const SearchResultCard = ({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
       </div>
-      <div className="pt-4 px-1">
+      <div className="card-padding">
         <h3 className="font-bold text-sm md:text-base mb-1 line-clamp-1 group-hover:text-[var(--color-accent-primary)] transition-colors text-white">
           {result.title || result.name}
         </h3>

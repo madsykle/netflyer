@@ -135,6 +135,7 @@ const Header = () => {
                 fill
                 className="object-contain"
                 priority
+                sizes="(max-width: 768px) 40px, 48px"
               />
             </motion.div>
             <span className="ml-3 text-2xl font-bold font-display uppercase tracking-widest hidden md:block text-white">

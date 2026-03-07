@@ -243,12 +243,16 @@ const WatchlistPage = () => {
                               removeFromWatchlist(item.id, item.mediaType);
                             }}
                             disabled={removingId === item.id}
-                            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-red-500 hover:bg-red-500/20 transition-all opacity-0 group-hover:opacity-100"
+                            className={`absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-red-500 hover:bg-red-500/20 transition-all ${removingId === item.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {removingId === item.id ? (
+                              <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
-                        <div className="pt-3 px-1">
+                        <div className="card-padding">
                           <h3 className="text-sm font-bold line-clamp-1 group-hover:text-[var(--color-accent-primary)] transition-colors">
                             {title}
                           </h3>
@@ -325,9 +329,13 @@ const WatchlistPage = () => {
                           <button
                             onClick={() => removeFromWatchlist(item.id, item.mediaType)}
                             disabled={removingId === item.id}
-                            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {removingId === item.id ? (
+                              <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
                       </motion.div>

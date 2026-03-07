@@ -88,6 +88,7 @@ const HeroSection = ({ movie, loading = false }: HeroSectionProps) => {
             }`}
             onLoad={() => setImageLoaded(true)}
             unoptimized
+            sizes="100vw"
           />
           
           {/* Multi-layered cinematic gradient */}

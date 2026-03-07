@@ -87,16 +87,16 @@ export default function HomeClient({
   return (
     <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-20">
       {/* Genre Tags */}
-      <div className="flex overflow-x-auto scrollbar-hide gap-3 mb-8 py-2">
+      <div className="flex overflow-x-auto scrollbar-hide gap-3.5 mb-10 py-4 -mx-4 px-4">
         {genres.map(genre => (
           <button 
             key={genre}
             onClick={() => setActiveGenre(genre)}
-            className={`px-6 py-2 rounded-full text-sm font-bold tracking-widest uppercase transition-all duration-300 whitespace-nowrap ${
+            className={`chip-base ${
               activeGenre === genre 
-                ? "bg-[var(--color-accent-primary)] text-white shadow-[0_0_15px_rgba(229,9,20,0.4)]" 
-                : "bg-white/5 border border-white/10 hover:bg-white/10 text-[var(--color-text-secondary)] hover:text-white"
-            }`}
+                ? "chip-primary" 
+                : "chip-secondary"
+            } !text-xs !py-2.5 !px-7 whitespace-nowrap h-10`}
           >
             {genre}
           </button>

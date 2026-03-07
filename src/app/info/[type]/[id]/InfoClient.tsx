@@ -444,19 +444,25 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
               </button>
 
               {watchlistLoading ? (
-                <div className="w-40 h-[52px] bg-white/5 animate-pulse rounded-lg border border-white/10" />
+                <button
+                  disabled
+                  className="btn btn-secondary px-8 py-4 text-sm opacity-70 cursor-not-allowed min-w-[160px]"
+                >
+                  <div className="w-4 h-4 border-2 border-[var(--color-text-secondary)] border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Processing...
+                </button>
               ) : watchlist ? (
                 <button
                   onClick={removeFromWatchlist}
-                  className="btn btn-secondary px-6 py-4 text-sm text-[var(--color-text-secondary)]"
+                  className="btn btn-secondary px-8 py-4 text-sm text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 min-w-[160px]"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Remove
+                  In Watchlist
                 </button>
               ) : (
                 <button
                   onClick={addToWatchList}
-                  className="btn btn-secondary px-6 py-4 text-sm"
+                  className="btn btn-secondary px-8 py-4 text-sm min-w-[160px]"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add to Watchlist
@@ -543,21 +549,36 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <div className="mb-8 max-w-xs">
+                <div className="mb-8 max-w-[240px]">
                   <Select
+                    label="Select Season"
                     selectedKeys={[String(selectedSeason)]}
                     onSelectionChange={(keys) => {
                       const val = Array.from(keys)[0];
-                      setSelectedSeason(Number(val));
+                      if (val) setSelectedSeason(Number(val));
                     }}
                     className="w-full"
                     variant="bordered"
-                    aria-label="Select Season"
+                    scrollShadow={true}
+                    classNames={{
+                      label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
+                      trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                      value: "font-bold text-white text-base",
+                      listbox: "bg-[#1a1a1e] p-2",
+                      popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
+                    }}
                   >
                     {(details as TVShowDetails).seasons
                       ?.filter(s => s.season_number > 0)
                       .map(season => (
-                        <SelectItem key={String(season.season_number)}>
+                        <SelectItem 
+                          key={String(season.season_number)}
+                          textValue={`Season ${season.season_number}`}
+                          classNames={{
+                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-3",
+                            title: "font-bold text-sm text-white"
+                          }}
+                        >
                           Season {season.season_number}
                         </SelectItem>
                       )) || []}

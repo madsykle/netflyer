@@ -10,6 +10,7 @@ export default function Loading() {
         height={64} 
         className="animate-pulse drop-shadow-[0_0_15px_rgba(229,9,20,0.5)]" 
         priority
+        style={{ width: 'auto', height: 'auto' }}
       />
     </div>
   );
