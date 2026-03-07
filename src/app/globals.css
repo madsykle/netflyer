@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,324 +5,325 @@
   --aspect-video: 16 / 9;
 }
 
-/* ========================
-   CSS CUSTOM PROPERTIES
-   ======================== */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+/* ================================
+   TOKENS
+   ================================ */
 :root {
-  /* Backgrounds — layered dark neutrals, NOT pure black */
-  --color-bg-primary: #0a0a0b;
-  --color-bg-secondary: #111113;
-  --color-bg-tertiary: #1a1a1e;
-  --color-bg-elevated: #222228;
+  /* Backgrounds — layered, never pure black */
+  --bg-base:        #080809;
+  --bg-surface:     #0f0f11;
+  --bg-raised:      #161619;
+  --bg-overlay:     #1e1e22;
 
-  /* Text hierarchy */
-  --color-text-primary: #f0f0f2;
-  --color-text-secondary: #a0a0aa;
-  --color-text-tertiary: #606068;
+  /* Text */
+  --text-primary:   #f2f2f4;
+  --text-secondary: #8a8a96;
+  --text-muted:     #4a4a54;
 
-  /* Accent — Netflyer signature red */
-  --color-accent-primary: #e50914;
-  --color-accent-secondary: #ff2d20;
-  --color-accent-glow: rgba(229, 9, 20, 0.4);
+  /* Accent — use sparingly */
+  --accent:         #e5091a;
+  --accent-dim:     rgba(229, 9, 26, 0.18);
+  --accent-glow:    rgba(229, 9, 26, 0.35);
 
   /* Borders */
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-default: rgba(255, 255, 255, 0.1);
-  --color-border-strong: rgba(255, 255, 255, 0.18);
+  --border-faint:   rgba(255,255,255,0.05);
+  --border-subtle:  rgba(255,255,255,0.09);
+  --border-visible: rgba(255,255,255,0.15);
+
+  /* Radii — restrained */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+
+  /* Easing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-expo:  cubic-bezier(0.7, 0, 0.84, 0);
 }
 
-/* ========================
-   TYPOGRAPHY
-   ======================== */
+/* ================================
+   BASE
+   ================================ */
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
   font-family: 'DM Sans', -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-base);
+  color: var(--text-primary);
 }
 
-.font-display {
-  font-family: 'Unbounded', sans-serif;
+body { min-height: 100svh; }
+
+::selection {
+  background: var(--accent);
+  color: white;
 }
 
-.heading-display {
-  font-family: 'Unbounded', sans-serif;
-  font-size: clamp(2rem, 5vw, 4.5rem);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  color: var(--color-text-primary);
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--bg-overlay); border-radius: 2px; }
+
+/* ================================
+   TYPOGRAPHY SCALE
+   ================================ */
+
+/* Hero title — Bebas, massive, cinematic */
+.t-hero {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3.5rem, 10vw, 8rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
 }
 
-.heading-1 {
-  font-family: 'Unbounded', sans-serif;
-  font-size: clamp(1.5rem, 3.5vw, 3rem);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--color-text-primary);
+/* Section/page title */
+.t-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
 }
 
-.heading-2 {
-  font-family: 'Unbounded', sans-serif;
-  font-size: clamp(1.25rem, 2.5vw, 2rem);
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
-  color: var(--color-text-primary);
-}
-
-.heading-3 {
+/* Row/section labels */
+.t-label {
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-size: 0.6875rem;
   font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-text-primary);
+  color: var(--text-muted);
 }
 
-/* ========================
-   LAYOUT UTILITIES
-   ======================== */
+/* Meta data — years, ratings, runtime */
+.t-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+/* Body */
+.t-body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* ================================
+   LAYOUT
+   ================================ */
 .container {
   width: 100%;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-left: clamp(1rem, 4vw, 3rem);
+  padding-right: clamp(1rem, 4vw, 3rem);
 }
 
-@media (min-width: 768px) {
-  .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
+/* ================================
+   GLASS / SURFACE
+   ================================ */
+.surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-faint);
 }
 
-@media (min-width: 1280px) {
-  .container {
-    padding-left: 3rem;
-    padding-right: 3rem;
-  }
-}
-
-/* ========================
-   GLASS PANELS
-   ======================== */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.glass-panel {
-  background: rgba(15, 15, 18, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--color-border-subtle);
+  background: rgba(8, 8, 9, 0.75);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--border-faint);
 }
 
 .glass-strong {
-  background: rgba(20, 20, 24, 0.95);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border: 1px solid var(--color-border-default);
+  background: rgba(8, 8, 9, 0.92);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--border-subtle);
 }
 
-/* ========================
+/* ================================
    BUTTONS
-   ======================== */
+   ================================ */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   font-family: 'DM Sans', sans-serif;
+  font-size: 0.8125rem;
   font-weight: 600;
-  font-size: 0.875rem;
-  letter-spacing: 0.02em;
-  border-radius: 0.5rem;
-  transition: all 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-sm);
+  transition: all 180ms var(--ease-out-expo);
   cursor: pointer;
   white-space: nowrap;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid transparent;
 }
 
+/* Sharp corners on buttons — no pill shapes anywhere */
 .btn:focus-visible {
-  outline: 2px solid var(--color-accent-primary);
-  outline-offset: 2px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .btn-primary {
-  background: var(--color-accent-primary);
-  color: #ffffff;
-  border: 1px solid transparent;
-  box-shadow: 0 0 0 rgba(229, 9, 20, 0);
+  background: var(--accent);
+  color: #fff;
+  padding: 0.75rem 1.75rem;
 }
-
 .btn-primary:hover {
-  background: var(--color-accent-secondary);
-  box-shadow: 0 0 20px var(--color-accent-glow), 0 4px 12px rgba(0,0,0,0.3);
+  background: #ff1a2a;
+  box-shadow: 0 0 24px var(--accent-glow);
   transform: translateY(-1px);
 }
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
+.btn-primary:active { transform: translateY(0); box-shadow: none; }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-default);
+  background: rgba(255,255,255,0.07);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+  padding: 0.75rem 1.75rem;
 }
-
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.13);
-  border-color: var(--color-border-strong);
+  background: rgba(255,255,255,0.11);
+  border-color: var(--border-visible);
   transform: translateY(-1px);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
 }
-
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-primary);
+  background: rgba(255,255,255,0.05);
+  color: var(--text-primary);
 }
 
-/* ========================
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  border-color: var(--border-faint);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.btn-icon:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+/* ================================
    CARDS
-   ======================== */
+   ================================ */
 .card {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  transition: all 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  position: relative;
+  transition: border-color 250ms var(--ease-out-expo),
+              transform 250ms var(--ease-out-expo),
+              box-shadow 250ms var(--ease-out-expo);
 }
-
 .card:hover {
-  border-color: var(--color-border-default);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-  transform: translateY(-4px);
+  border-color: var(--border-subtle);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
 }
 
-.card-padding {
-  @apply p-4 md:p-5;
-}
-
-/* ========================
-   CHIPS
-   ======================== */
-.chip-base {
-  @apply px-5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-300 border;
-}
-
-.chip-primary {
-  @apply bg-[var(--color-accent-primary)] text-white border-[var(--color-accent-primary)] shadow-[0_0_15px_rgba(229,9,20,0.3)];
-}
-
-.chip-secondary {
-  @apply bg-white/5 text-[var(--color-text-secondary)] border-white/10 hover:border-white/20 hover:bg-white/10 hover:text-white;
-}
-
-/* ========================
-   SKELETON / LOADING
-   ======================== */
+/* ================================
+   SKELETON
+   ================================ */
 .skeleton {
   background: linear-gradient(
     90deg,
-    var(--color-bg-tertiary) 0%,
-    var(--color-bg-elevated) 50%,
-    var(--color-bg-tertiary) 100%
+    var(--bg-raised) 0%,
+    var(--bg-overlay) 40%,
+    var(--bg-raised) 100%
   );
-  background-size: 200% 100%;
-  animation: skeleton-sweep 1.6s ease-in-out infinite;
-  border-radius: 0.375rem;
+  background-size: 300% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
-@keyframes skeleton-sweep {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+/* ================================
+   UTILITIES
+   ================================ */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
-/* ========================
-   VIGNETTE / SCROLLBAR
-   ======================== */
-.vignette::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
-  pointer-events: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* ========================
-   SCREEN READER ONLY
-   ======================== */
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border-width: 0;
+}
+
+/* Tab underline nav pattern */
+.tab-item {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.75rem 0;
+  border-bottom: 2px solid transparent;
+  transition: color 150ms ease, border-color 150ms ease;
+  cursor: pointer;
+}
+.tab-item.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}
+.tab-item:hover:not(.active) {
+  color: var(--text-secondary);
+}
+
+/* Meta chip — no colors, just monochrome */
+.meta-chip {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.5rem;
   white-space: nowrap;
-  border-width: 0;
 }
 
-/* ========================
-   ACCENT GLOW UTILITIES
-   ======================== */
-.glow-accent {
-  box-shadow: 0 0 20px var(--color-accent-glow);
+/* Genre chip — accent outline only for genres */
+.genre-chip {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid rgba(229,9,26,0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.5rem;
+  white-space: nowrap;
 }
 
-.text-accent {
-  color: var(--color-accent-primary);
-}
-
-/* ========================
-   SCROLLBAR CUSTOM
-   ======================== */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-bg-elevated);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-strong);
-}
-
-/* ========================
-   GLOBAL SELECTION
-   ======================== */
-::selection {
-  background: var(--color-accent-primary);
-  color: white;
+/* Rating — gold, monospaced */
+.rating-chip {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #c9a227;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }

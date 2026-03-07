@@ -2,13 +2,8 @@
 
 import { useSettings } from "../../hooks/useSettings";
 import {
-  Spinner,
   Select,
   SelectItem,
-  Button,
-  Chip,
-  Card,
-  CardBody,
   Pagination,
   Slider,
 } from "@heroui/react";
@@ -176,7 +171,7 @@ const Discover = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] text-white pt-24 pb-12">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pt-24 pb-12">
       <div className="container relative z-10">
         {/* Header Section */}
         <motion.div
@@ -185,35 +180,37 @@ const Discover = () => {
           className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-12"
         >
           <div>
-            <h1 className="heading-1 mb-2">
+            <h1 className="t-title mb-2 text-5xl">
               Discover
             </h1>
-            <p className="text-[var(--color-text-tertiary)] font-bold tracking-widest uppercase text-sm">
-              {totalResults.toLocaleString()} results found
-            </p>
+            {totalResults > 0 && (
+              <p className="t-meta uppercase opacity-50">
+                {totalResults.toLocaleString()} results found
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex gap-1 p-1 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
+            <div className="flex gap-1 p-1 bg-white/5 rounded-[var(--radius-md)] border border-white/10 backdrop-blur-md">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2.5 rounded-lg transition-all ${
+                className={`p-2 rounded-[var(--radius-sm)] transition-all ${
                   viewMode === "grid"
-                    ? "bg-[var(--color-accent-primary)] text-white shadow-lg"
-                    : "text-[var(--color-text-tertiary)] hover:text-white"
+                    ? "bg-[var(--accent)] text-white shadow-lg"
+                    : "text-[var(--text-muted)] hover:text-white"
                 }`}
               >
-                <Grid className="w-5 h-5" />
+                <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2.5 rounded-lg transition-all ${
+                className={`p-2 rounded-[var(--radius-sm)] transition-all ${
                   viewMode === "list"
-                    ? "bg-[var(--color-accent-primary)] text-white shadow-lg"
-                    : "text-[var(--color-text-tertiary)] hover:text-white"
+                    ? "bg-[var(--accent)] text-white shadow-lg"
+                    : "text-[var(--text-muted)] hover:text-white"
                 }`}
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4" />
               </button>
             </div>
 
@@ -222,9 +219,9 @@ const Discover = () => {
               className={`btn btn-secondary !px-8 !py-3 relative h-12 ${showFilters ? 'bg-white/10 border-white/30 text-white' : ''}`}
             >
               <SlidersHorizontal className="w-4 h-4 mr-2.5" />
-              <span className="font-bold uppercase tracking-widest text-xs">Filters</span>
+              <span className="font-bold uppercase tracking-widest text-xs text-white">Filters</span>
               {getActiveFiltersCount() > 0 && (
-                <span className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--color-accent-primary)] text-white rounded-full text-[10px] font-bold flex items-center justify-center shadow-xl border-2 border-[var(--color-bg-primary)]">
+                <span className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--accent)] text-white rounded-full text-[10px] font-bold flex items-center justify-center shadow-xl border-2 border-[var(--bg-base)]">
                   {getActiveFiltersCount()}
                 </span>
               )}
@@ -241,22 +238,20 @@ const Discover = () => {
               exit={{ opacity: 0, y: -20 }}
               className="mb-12"
             >
-              <div className="glass-panel p-8 rounded-2xl shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--color-accent-primary)] to-transparent"></div>
+              <div className="glass-panel p-8 rounded-[var(--radius-md)] shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent"></div>
                 
                 <div className="flex justify-between items-center mb-8">
-                  <h3 className="text-xl font-bold font-display uppercase tracking-widest text-white">
+                  <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em', fontSize: '1.5rem' }} className="text-white uppercase">
                     Advanced Filters
-                  </h3>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={clearFilters}
-                      className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-tertiary)] hover:text-[var(--color-accent-primary)] transition-colors flex items-center gap-2"
-                    >
-                      <X className="w-4 h-4" />
-                      Clear All
-                    </button>
-                  </div>
+                  </h2>
+                  <button
+                    onClick={clearFilters}
+                    className="t-label text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors flex items-center gap-2 text-[10px]"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Clear All
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -270,22 +265,15 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
-                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        label: "t-label text-[10px]",
+                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[#1a1a1e] p-2",
-                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
                       }}
                     >
                       {typeOptions.map((option) => (
-                        <SelectItem 
-                          key={option.key}
-                          textValue={option.label}
-                          classNames={{
-                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
-                            title: "font-bold text-sm text-white"
-                          }}
-                        >
+                        <SelectItem key={option.key} textValue={option.label} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
                           {option.label}
                         </SelectItem>
                       ))}
@@ -303,27 +291,15 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
-                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        label: "t-label text-[10px]",
+                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[#1a1a1e] p-2",
-                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
                       }}
                     >
-                      {(filters.type === "movie"
-                        ? genres.movie
-                        : filters.type === "tv"
-                        ? genres.tv
-                        : [...genres.movie, ...genres.tv]
-                      ).map((genre) => (
-                        <SelectItem 
-                          key={genre.id.toString()}
-                          textValue={genre.name}
-                          classNames={{
-                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
-                            title: "font-bold text-sm text-white"
-                          }}
-                        >
+                      {(filters.type === "movie" ? genres.movie : filters.type === "tv" ? genres.tv : [...genres.movie, ...genres.tv]).map((genre) => (
+                        <SelectItem key={genre.id.toString()} textValue={genre.name} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
                           {genre.name}
                         </SelectItem>
                       ))}
@@ -341,27 +317,18 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
-                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        label: "t-label text-[10px]",
+                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[#1a1a1e] p-2",
-                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
                       }}
                     >
-                      {generateYearOptions()
-                        .slice(0, 50)
-                        .map((year) => (
-                          <SelectItem 
-                            key={year.key}
-                            textValue={year.label}
-                            classNames={{
-                              base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
-                              title: "font-bold text-sm text-white"
-                            }}
-                          >
-                            {year.label}
-                          </SelectItem>
-                        ))}
+                      {generateYearOptions().slice(0, 50).map((year) => (
+                        <SelectItem key={year.key} textValue={year.label} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
+                          {year.label}
+                        </SelectItem>
+                      ))}
                     </Select>
                   </div>
 
@@ -375,22 +342,15 @@ const Discover = () => {
                       className="w-full"
                       variant="bordered"
                       classNames={{
-                        label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
-                        trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
+                        label: "t-label text-[10px]",
+                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[#1a1a1e] p-2",
-                        popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
                       }}
                     >
                       {sortOptions.map((option) => (
-                        <SelectItem 
-                          key={option.key}
-                          textValue={option.label}
-                          classNames={{
-                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-2.5",
-                            title: "font-bold text-sm text-white"
-                          }}
-                        >
+                        <SelectItem key={option.key} textValue={option.label} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
                           {option.label}
                         </SelectItem>
                       ))}
@@ -400,10 +360,10 @@ const Discover = () => {
 
                 <div className="mt-10 pt-8 border-t border-white/5">
                   <div className="flex justify-between items-center mb-6">
-                    <label className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">
+                    <label className="t-label text-[10px]">
                       Rating Range
                     </label>
-                    <span className="px-3 py-1 bg-white/5 rounded text-sm font-bold text-[var(--color-accent-primary)]">
+                    <span className="rating-chip">
                       {filters.rating[0]} - {filters.rating[1]} ★
                     </span>
                   </div>
@@ -415,9 +375,9 @@ const Discover = () => {
                     onChange={(value) => handleFilterChange("rating", value)}
                     className="w-full"
                     classNames={{
-                      track: "bg-white/5 h-1.5",
-                      filler: "bg-[var(--color-accent-primary)]",
-                      thumb: "bg-white border-2 border-[var(--color-accent-primary)] shadow-lg"
+                      track: "bg-white/5 h-1",
+                      filler: "bg-[var(--accent)]",
+                      thumb: "bg-white w-4 h-4 after:bg-white shadow-xl"
                     }}
                   />
                 </div>
@@ -429,7 +389,7 @@ const Discover = () => {
         {/* Results Section */}
         {loading ? (
           <div className="flex justify-center items-center py-32">
-            <div className="w-12 h-12 border-4 border-[var(--color-accent-primary)] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
           <motion.div
@@ -438,7 +398,7 @@ const Discover = () => {
             animate="visible"
           >
             {viewMode === "grid" ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8 mb-16">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 mb-16">
                 {results.map((item) => (
                   <motion.div key={item.id} variants={itemVariants}>
                     <ResultCard
@@ -450,7 +410,7 @@ const Discover = () => {
                 ))}
               </div>
             ) : (
-              <div className="space-y-6 mb-16">
+              <div className="space-y-4 mb-16">
                 {results.map((item) => (
                   <motion.div key={item.id} variants={itemVariants}>
                     <ResultListItem
@@ -464,10 +424,7 @@ const Discover = () => {
             )}
 
             {totalPages > 1 && (
-              <motion.div
-                variants={itemVariants}
-                className="flex justify-center"
-              >
+              <motion.div variants={itemVariants} className="flex justify-center mt-12">
                 <Pagination
                   total={totalPages}
                   page={filters.page}
@@ -475,10 +432,10 @@ const Discover = () => {
                   showControls
                   classNames={{
                     wrapper: "gap-2",
-                    item: "bg-transparent border border-transparent hover:bg-white/5 text-[var(--color-text-secondary)] hover:text-white font-bold",
+                    item: "bg-transparent border border-transparent hover:bg-white/5 text-[var(--text-secondary)] hover:text-white font-bold text-xs",
                     cursor: "bg-white/10 border border-white/20 text-white",
-                    next: "bg-transparent text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5",
-                    prev: "bg-transparent text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5",
+                    next: "bg-transparent text-[var(--text-secondary)] hover:text-white",
+                    prev: "bg-transparent text-[var(--text-secondary)] hover:text-white",
                   }}
                 />
               </motion.div>
@@ -493,48 +450,49 @@ const Discover = () => {
 const ResultCard = ({ item, router, getImageUrl }: any) => {
   const mediaType = 'title' in item ? "movie" : "tv";
   const [imageLoaded, setImageLoaded] = useState(false);
+  const title = item.title || item.name;
+  const year = item.release_date?.split("-")[0] || item.first_air_date?.split("-")[0];
 
   return (
     <motion.div
-      className="cursor-pointer group card"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -8 }}
-      onTap={() => router.push(`/info/${mediaType}/${item.id}`)}
+      className="cursor-pointer group"
+      onClick={() => router.push(`/info/${mediaType}/${item.id}`)}
     >
-      <div className="relative aspect-poster overflow-hidden bg-[var(--color-bg-tertiary)] vignette">
+      <div className="relative aspect-poster overflow-hidden bg-[var(--bg-raised)] rounded-[var(--radius-md)] border border-[var(--border-faint)] group-hover:border-[var(--border-subtle)] transition-colors vignette">
         {!imageLoaded && (
           <div className="absolute inset-0 skeleton" />
         )}
         <Image
           src={getImageUrl(item.poster_path, "poster")}
-          alt={item.title || item.name}
+          alt={title}
           fill
-          className={`object-cover group-hover:scale-110 transition-transform duration-700 ${
+          className={`object-cover group-hover:scale-105 transition-transform duration-700 ${
             imageLoaded ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => setImageLoaded(true)}
-          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
+          sizes="(max-width: 768px) 50vw, 20vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400">
-          <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-400">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center gap-1 bg-yellow-500/20 backdrop-blur-md rounded border border-yellow-500/30 px-2 py-0.5">
-                <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                <span className="text-[10px] font-bold text-white">
-                  {item.vote_average?.toFixed(1)}
-                </span>
-              </div>
+        
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform">
+              <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-3 text-left">
+            <p className="text-white text-sm font-bold line-clamp-2 leading-tight mb-1">{title}</p>
+            <div className="flex items-center gap-2">
+              <span className="t-meta text-white/80">{year}</span>
+              {item.vote_average > 0 && (
+                <span className="rating-chip text-[10px]">★ {item.vote_average.toFixed(1)}</span>
+              )}
             </div>
           </div>
         </div>
-      </div>
-      <div className="card-padding">
-        <h3 className="font-bold text-sm md:text-base mb-1 line-clamp-1 group-hover:text-[var(--color-accent-primary)] transition-colors text-white">
-          {item.title || item.name}
-        </h3>
-        <p className="text-[var(--color-text-tertiary)] text-xs font-bold uppercase tracking-wider">
-          {item.release_date?.split("-")[0] ||
-            item.first_air_date?.split("-")[0]}
-        </p>
       </div>
     </motion.div>
   );
@@ -543,54 +501,49 @@ const ResultCard = ({ item, router, getImageUrl }: any) => {
 const ResultListItem = ({ item, router, getImageUrl }: any) => {
   const mediaType = 'title' in item ? "movie" : "tv";
   const [imageLoaded, setImageLoaded] = useState(false);
+  const title = item.title || item.name;
+  const year = item.release_date?.split("-")[0] || item.first_air_date?.split("-")[0];
 
   return (
     <motion.div
-      whileHover={{ x: 10 }}
-      className="glass-panel p-5 rounded-xl cursor-pointer border border-white/5 hover:border-[var(--color-accent-primary)]/30 hover:bg-white/5 transition-all duration-300"
+      whileHover={{ x: 8 }}
+      className="surface p-4 rounded-[var(--radius-md)] border border-[var(--border-subtle)] cursor-pointer hover:bg-white/5 transition-all duration-300 group"
       onClick={() => router.push(`/info/${mediaType}/${item.id}`)}
     >
       <div className="flex gap-6">
-        <div className="relative overflow-hidden rounded-lg w-24 md:w-32 aspect-poster flex-shrink-0 vignette">
+        <div className="relative w-20 md:w-24 aspect-poster flex-shrink-0 rounded-[var(--radius-sm)] overflow-hidden bg-[var(--bg-raised)] border border-[var(--border-faint)]">
           {!imageLoaded && (
             <div className="absolute inset-0 skeleton" />
           )}
           <Image
             src={getImageUrl(item.poster_path, "poster")}
-            alt={item.title || item.name}
+            alt={title}
             fill
             className={`object-cover ${
               imageLoaded ? "opacity-100" : "opacity-0"
             }`}
             onLoad={() => setImageLoaded(true)}
-            sizes="(max-width: 768px) 96px, 128px"
+            sizes="96px"
           />
         </div>
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-xl md:text-2xl font-bold line-clamp-1 group-hover:text-[var(--color-accent-primary)] transition-colors text-white">
-              {item.title || item.name}
+          <div className="flex justify-between items-start mb-1">
+            <h3 className="text-lg md:text-xl font-bold line-clamp-1 group-hover:text-[var(--accent)] transition-colors text-white">
+              {title}
             </h3>
-            <div className="flex items-center gap-2 bg-yellow-500/20 border border-yellow-500/30 rounded px-2.5 py-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-sm font-bold text-yellow-400">
-                {item.vote_average?.toFixed(1)}
-              </span>
+            <div className="rating-chip">
+              <Star className="w-3 h-3 fill-current" />
+              <span>{item.vote_average?.toFixed(1)}</span>
             </div>
           </div>
-          <div className="flex items-center gap-4 mb-4 text-sm font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">
+          <div className="flex items-center gap-3 mb-3 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              <span>
-                {item.release_date?.split("-")[0] ||
-                  item.first_air_date?.split("-")[0]}
-              </span>
+              <Calendar className="w-3 h-3" />
+              <span className="t-meta">{year}</span>
             </div>
-            <span className="px-3 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px]">
-              {mediaType === "movie" ? "Movie" : "TV Series"}
-            </span>
+            <span className="meta-chip py-0.5">{mediaType === "movie" ? "Film" : "Series"}</span>
           </div>
-          <p className="text-[var(--color-text-secondary)] text-base line-clamp-2 leading-relaxed font-medium max-w-4xl">
+          <p className="t-body text-xs md:text-sm line-clamp-2 leading-relaxed opacity-70 max-w-3xl">
             {item.overview}
           </p>
         </div>
@@ -602,8 +555,8 @@ const ResultListItem = ({ item, router, getImageUrl }: any) => {
 export default function DiscoverPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[var(--color-accent-primary)] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
       </div>
     }>
       <Discover />

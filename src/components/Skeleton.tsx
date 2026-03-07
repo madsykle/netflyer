@@ -17,11 +17,11 @@ export const SkeletonBlock = ({
   className = "",
   width,
   height,
-  rounded = "rounded-lg",
+  rounded = "rounded-[var(--radius-sm)]",
 }: SkeletonBlockProps) => {
   return (
     <div
-      className={`bg-[var(--color-bg-tertiary)] animate-pulse ${rounded} ${className}`}
+      className={`bg-[var(--bg-raised)] animate-pulse ${rounded} ${className}`}
       style={{ width, height }}
     />
   );
@@ -32,15 +32,16 @@ export const SkeletonBlock = ({
  */
 export const HeroSkeleton = () => {
   return (
-    <div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden bg-[var(--color-bg-secondary)]">
-      <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] animate-pulse" />
-      <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 bg-gradient-to-t from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/80 to-transparent">
-        <div className="w-2/3 h-8 bg-[var(--color-bg-elevated)] rounded-lg mb-3 animate-pulse" />
-        <div className="w-full h-4 bg-[var(--color-bg-elevated)] rounded mb-2 animate-pulse" />
-        <div className="w-4/5 h-4 bg-[var(--color-bg-elevated)] rounded mb-4 animate-pulse" />
+    <div className="relative w-full h-[70vh] md:h-[85vh] lg:h-[90vh] bg-[var(--bg-base)] overflow-hidden">
+      <div className="absolute inset-0 bg-[var(--bg-raised)] animate-pulse opacity-20" />
+      <div className="container h-full flex flex-col justify-end pb-12 md:pb-24 relative z-10">
+        <div className="w-24 h-4 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-4 animate-pulse" />
+        <div className="w-2/3 h-16 md:h-24 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-6 animate-pulse" />
+        <div className="w-full max-w-xl h-4 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-2 animate-pulse opacity-60" />
+        <div className="w-4/5 max-w-lg h-4 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-8 animate-pulse opacity-60" />
         <div className="flex gap-3">
-          <div className="w-28 h-10 bg-[var(--color-bg-elevated)] rounded-xl animate-pulse" />
-          <div className="w-28 h-10 bg-[var(--color-bg-elevated)] rounded-xl animate-pulse" />
+          <div className="w-36 h-12 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
+          <div className="w-36 h-12 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
         </div>
       </div>
     </div>
@@ -53,9 +54,9 @@ export const HeroSkeleton = () => {
 export const MovieCardSkeleton = () => {
   return (
     <div className="w-full">
-      <div className="aspect-[2/3] w-full bg-[var(--color-bg-tertiary)] rounded-xl mb-2 animate-pulse" />
-      <div className="h-4 w-4/5 bg-[var(--color-bg-tertiary)] rounded mb-1.5 animate-pulse" />
-      <div className="h-3 w-1/2 bg-[var(--color-bg-tertiary)] rounded animate-pulse" />
+      <div className="aspect-poster w-full bg-[var(--bg-raised)] rounded-[var(--radius-md)] mb-3 animate-pulse border border-[var(--border-faint)]" />
+      <div className="h-3 w-4/5 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-2 animate-pulse" />
+      <div className="h-2 w-1/3 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse opacity-40" />
     </div>
   );
 };
@@ -65,14 +66,18 @@ export const MovieCardSkeleton = () => {
  */
 export const MovieRowSkeleton = ({ title = true, count = 6 }: { title?: boolean; count?: number }) => {
   return (
-    <div className="my-6 md:my-8">
-      {title && (
-        <div className="h-6 w-40 bg-[var(--color-bg-tertiary)] rounded mb-4 animate-pulse" />
-      )}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
-        {Array.from({ length: count }).map((_, index) => (
-          <MovieCardSkeleton key={index} />
-        ))}
+    <div className="my-10">
+      <div className="container">
+        {title && (
+          <div className="h-4 w-32 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-6 animate-pulse" />
+        )}
+        <div className="flex gap-4 overflow-hidden">
+          {Array.from({ length: count }).map((_, index) => (
+            <div key={index} className="flex-shrink-0 w-40 md:w-48">
+              <MovieCardSkeleton />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -83,36 +88,42 @@ export const MovieRowSkeleton = ({ title = true, count = 6 }: { title?: boolean;
  */
 export const InfoSkeleton = () => {
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)]">
+    <div className="min-h-screen bg-[var(--bg-base)]">
       {/* Hero */}
-      <div className="h-[50vh] bg-[var(--color-bg-tertiary)] animate-pulse" />
+      <div className="h-[45vw] min-h-[220px] max-h-[420px] bg-[var(--bg-raised)] animate-pulse opacity-20" />
 
       {/* Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 -mt-20 relative z-10">
-        <div className="flex gap-4 md:gap-6 mb-8">
-          <div className="w-24 md:w-32 lg:w-40 aspect-[2/3] bg-[var(--color-bg-secondary)] rounded-xl animate-pulse flex-shrink-0" />
-          <div className="flex-1 pt-4">
-            <div className="h-8 w-3/4 bg-[var(--color-bg-tertiary)] rounded mb-3 animate-pulse" />
-            <div className="flex gap-2 mb-4">
-              <div className="h-6 w-16 bg-[var(--color-bg-tertiary)] rounded-full animate-pulse" />
-              <div className="h-6 w-16 bg-[var(--color-bg-tertiary)] rounded-full animate-pulse" />
-            </div>
-            <div className="space-y-2">
-              <div className="h-4 w-full bg-[var(--color-bg-tertiary)] rounded animate-pulse" />
-              <div className="h-4 w-full bg-[var(--color-bg-tertiary)] rounded animate-pulse" />
-              <div className="h-4 w-4/5 bg-[var(--color-bg-tertiary)] rounded animate-pulse" />
+      <div className="container relative -mt-24 sm:-mt-32 z-10 pb-20">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-end">
+          <div className="w-32 sm:w-40 md:w-48 aspect-poster bg-[var(--bg-raised)] rounded-[var(--radius-md)] animate-pulse border border-[var(--border-subtle)] shadow-2xl" />
+          <div className="flex-1 w-full space-y-4 pt-4">
+            <div className="h-12 w-2/3 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse mx-auto sm:mx-0" />
+            <div className="h-4 w-1/3 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse mx-auto sm:mx-0 opacity-40" />
+            <div className="flex gap-2 justify-center sm:justify-start">
+              <div className="h-6 w-16 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
+              <div className="h-6 w-16 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 mb-8">
-          <div className="h-11 w-28 bg-[var(--color-bg-tertiary)] rounded-xl animate-pulse" />
-          <div className="h-11 w-28 bg-[var(--color-bg-tertiary)] rounded-xl animate-pulse" />
+        <div className="flex gap-3 mt-10 justify-center sm:justify-start">
+          <div className="h-11 w-36 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
+          <div className="h-11 w-36 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
         </div>
 
         {/* Cast Row */}
-        <MovieRowSkeleton title={true} count={6} />
+        <div className="mt-16">
+          <div className="h-4 w-24 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-8 animate-pulse" />
+          <div className="flex gap-6 overflow-hidden">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex-shrink-0 w-24 text-center">
+                <div className="w-20 h-20 mx-auto rounded-full bg-[var(--bg-raised)] animate-pulse mb-3" />
+                <div className="h-2 w-full bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -123,14 +134,10 @@ export const InfoSkeleton = () => {
  */
 export const SearchSkeleton = () => {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-      <div className="h-8 w-48 bg-[var(--color-bg-tertiary)] rounded mb-2 animate-pulse" />
-      <div className="h-4 w-24 bg-[var(--color-bg-tertiary)] rounded mb-8 animate-pulse" />
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
-        {Array.from({ length: 12 }).map((_, index) => (
-          <MovieCardSkeleton key={index} />
-        ))}
-      </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+      {Array.from({ length: 12 }).map((_, index) => (
+        <MovieCardSkeleton key={index} />
+      ))}
     </div>
   );
 };
@@ -140,21 +147,14 @@ export const SearchSkeleton = () => {
  */
 export const PageSkeleton = () => {
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="flex flex-col items-center"
       >
-        <div className="relative w-12 h-12 mb-4">
-          <motion.div
-            className="absolute inset-0 rounded-full border-2 border-[var(--color-accent-primary)]"
-            style={{ borderTopColor: "transparent" }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-        </div>
-        <p className="text-[var(--color-text-tertiary)] text-sm">Loading...</p>
+        <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="t-meta uppercase tracking-widest opacity-40">Loading</p>
       </motion.div>
     </div>
   );
@@ -165,33 +165,31 @@ export const PageSkeleton = () => {
  */
 export const ActorInfoSkeleton = () => {
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        <div className="h-10 w-20 bg-[var(--color-bg-tertiary)] rounded mb-6 animate-pulse" />
+    <div className="min-h-screen bg-[var(--bg-base)] pt-32 pb-20">
+      <div className="container">
+        <div className="h-4 w-20 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-10 animate-pulse" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
-          {/* Profile Image */}
-          <div className="aspect-[3/4] bg-[var(--color-bg-tertiary)] rounded-2xl animate-pulse" />
-
-          {/* Info */}
-          <div className="lg:col-span-2">
-            <div className="h-10 w-3/4 bg-[var(--color-bg-tertiary)] rounded mb-4 animate-pulse" />
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-              <div className="h-20 bg-[var(--color-bg-tertiary)] rounded-xl animate-pulse" />
-              <div className="h-20 bg-[var(--color-bg-tertiary)] rounded-xl animate-pulse" />
-              <div className="h-20 bg-[var(--color-bg-tertiary)] rounded-xl animate-pulse" />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
+          <div className="lg:col-span-1">
+            <div className="aspect-[2/3] bg-[var(--bg-raised)] rounded-[var(--radius-md)] animate-pulse border border-[var(--border-subtle)] mb-8" />
+            <div className="space-y-6">
+              <div className="h-10 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse w-2/3" />
+              <div className="h-10 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse w-3/4" />
             </div>
-            <div className="h-32 bg-[var(--color-bg-tertiary)] rounded-xl animate-pulse" />
           </div>
-        </div>
 
-        {/* Filmography */}
-        <div className="border-t border-[var(--color-border)] pt-8">
-          <div className="h-8 w-48 bg-[var(--color-bg-tertiary)] rounded mb-6 animate-pulse" />
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
-            {Array.from({ length: 12 }).map((_, index) => (
-              <MovieCardSkeleton key={index} />
-            ))}
+          <div className="lg:col-span-3 space-y-8">
+            <div className="h-20 w-2/3 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
+            <div className="h-32 w-full bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
+            
+            <div className="pt-8 border-t border-[var(--border-faint)]">
+              <div className="h-8 w-48 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-8 animate-pulse" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <MovieCardSkeleton key={index} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -204,13 +202,13 @@ export const ActorInfoSkeleton = () => {
  */
 export const CastRowSkeleton = ({ count = 8 }: { count?: number }) => {
   return (
-    <div className="my-6 md:my-8">
-      <div className="h-6 w-32 bg-[var(--color-bg-tertiary)] rounded mb-4 animate-pulse" />
-      <div className="flex gap-3 overflow-hidden">
+    <div className="my-10">
+      <div className="h-4 w-24 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] mb-8 animate-pulse ml-1" />
+      <div className="flex gap-6 overflow-hidden px-1">
         {Array.from({ length: count }).map((_, index) => (
-          <div key={index} className="flex-shrink-0 w-24 md:w-28">
-            <div className="aspect-[2/3] w-full bg-[var(--color-bg-tertiary)] rounded-xl mb-2 animate-pulse" />
-            <div className="h-3 w-full bg-[var(--color-bg-tertiary)] rounded animate-pulse" />
+          <div key={index} className="flex-shrink-0 w-24 sm:w-28 text-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full bg-[var(--bg-raised)] animate-pulse mb-3" />
+            <div className="h-2 w-full bg-[var(--bg-raised)] rounded-[var(--radius-sm)] animate-pulse" />
           </div>
         ))}
       </div>

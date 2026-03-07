@@ -49,7 +49,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)]">
+    <div>
       <main className="pb-16">
         <HeroSection movie={heroMovie} />
         <HomeClient 

@@ -6,6 +6,7 @@ import {
   Select,
   SelectItem,
   Textarea,
+  Avatar,
 } from "@heroui/react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import {
@@ -26,10 +27,8 @@ import {
   Trash2,
   Plus,
   Star,
-  Calendar,
   MessageSquare,
   ThumbsUp,
-  Clock,
   Film,
   X
 } from "lucide-react";
@@ -61,7 +60,7 @@ interface Review {
   rating: number;
   likes: string[];
   likeCount: number;
-  createdAt: any; // Firestore Timestamp
+  createdAt: any; 
   updatedAt: any;
 }
 
@@ -69,7 +68,6 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
-  const [expandedOverview, setExpandedOverview] = useState<Record<number, boolean>>({});
   const [user, setUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
   const [watchlistLoading, setWatchlistLoading] = useState(true);
@@ -79,6 +77,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
   const [reviewRating, setReviewRating] = useState(5);
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [showFullText, setShowFullText] = useState(false);
   const [imageLoaded, setImageLoaded] = useState({
     backdrop: false,
     poster: false,
@@ -93,9 +92,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
       try {
         const videos = await tmdbService.getVideos(type, parseInt(id));
         const trailer = videos.results?.find((v: { type: string; site: string; key: string }) => v.type === "Trailer" && v.site === "YouTube");
-        if (trailer) {
-          setTrailerKey(trailer.key);
-        }
+        if (trailer) setTrailerKey(trailer.key);
       } catch (e) {
         console.error("Error fetching videos:", e);
       }
@@ -105,9 +102,9 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
 
   const isTV = type === "tv";
   const title = (details as MovieDetails).title || (details as TVShowDetails).name;
-  const releaseYear = isTV 
-    ? (details as TVShowDetails).first_air_date?.split("-")[0] 
-    : (details as MovieDetails).release_date?.split("-")[0];
+  const releaseDate = isTV 
+    ? (details as TVShowDetails).first_air_date
+    : (details as MovieDetails).release_date;
   const runtime = (details as MovieDetails).runtime 
     ? `${Math.floor((details as MovieDetails).runtime / 60)}h ${(details as MovieDetails).runtime % 60}m`
     : (details as TVShowDetails).episode_run_time?.[0]
@@ -129,7 +126,6 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
         const reviewData = doc.data() as Omit<Review, "id">;
         reviewsData.push({ ...reviewData, id: doc.id });
       });
-      // Sort by newest
       reviewsData.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
       setReviews(reviewsData);
     } catch (error) {
@@ -157,13 +153,11 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
+      if (firebaseUser && !firebaseUser.isAnonymous) {
         setUser(firebaseUser);
         try {
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-          if (userDoc.exists()) {
-            setUserName(userDoc.data().username);
-          }
+          if (userDoc.exists()) setUserName(userDoc.data().username);
           checkWatchlist(firebaseUser.uid);
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -215,518 +209,358 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
     setNewReview("");
     setReviewRating(5);
     fetchReviews();
-    createToast("Review posted successfully", {
-      type: "success",
-      timeout: 2000,
-    });
+    createToast("Review posted successfully", { type: "success", timeout: 2000 });
   };
 
-  const handleLikeReview = async (reviewId: string) => {
-    if (!user) return;
-    try {
-      const reviewRef = doc(db, "reviews", reviewId);
-      const reviewSnap = await getDoc(reviewRef);
-      if (!reviewSnap.exists()) return;
-
-      const reviewData = reviewSnap.data();
-      const currentLikes = Array.isArray(reviewData.likes) ? reviewData.likes : [];
-
-      if (!currentLikes.includes(user.uid)) {
-        await updateDoc(reviewRef, {
-          likes: [...currentLikes, user.uid],
-          likeCount: (reviewData.likeCount || 0) + 1,
-          updatedAt: serverTimestamp(),
-        });
-        fetchReviews();
-      }
-    } catch (error) {
-      console.error("Error liking review:", error);
-    }
-  };
-
-  const handleUnlikeReview = async (reviewId: string) => {
-    if (!user) return;
-    try {
-      const reviewRef = doc(db, "reviews", reviewId);
-      const reviewSnap = await getDoc(reviewRef);
-      if (!reviewSnap.exists()) return;
-
-      const reviewData = reviewSnap.data();
-      const currentLikes = Array.isArray(reviewData.likes) ? reviewData.likes : [];
-
-      if (currentLikes.includes(user.uid)) {
-        await updateDoc(reviewRef, {
-          likes: currentLikes.filter((uid: string) => uid !== user.uid),
-          likeCount: Math.max((reviewData.likeCount || 1) - 1, 0),
-          updatedAt: serverTimestamp(),
-        });
-        fetchReviews();
-      }
-    } catch (error) {
-      console.error("Error unliking review:", error);
-    }
-  };
-
-  const handleDeleteReview = async (reviewId: string) => {
-    if (confirm("Are you sure you want to delete this review?")) {
-      await deleteDoc(doc(db, "reviews", reviewId));
-      fetchReviews();
-      createToast("Review deleted", { type: "success", timeout: 2000 });
-    }
-  };
-
-  const addToWatchList = async () => {
+  const handleWatchlistToggle = async () => {
     if (!user) {
-      createToast("You need to be logged in to use this feature.", {
-        action: {
-          text: "Login",
-          callback(toast) {
-            router.push("/login");
-            toast.destroy();
-          },
-        },
+      createToast("You need to be logged in.", {
+        action: { text: "Login", callback(toast) { router.push("/login"); toast.destroy(); } },
         timeout: 3000,
         type: "dark",
       });
       return;
     }
-    setWatchlistLoading(true);
-    await addDoc(collection(db, "watchlist"), {
-      type: type,
-      id: id,
-      userID: user.uid,
-      title: title,
-      posterPath: details.poster_path,
-      addedAt: serverTimestamp(),
-    });
-    setWatchlist(true);
-    setWatchlistLoading(false);
-    createToast("Added to watchlist", { type: "success", timeout: 2000 });
-  };
 
-  const removeFromWatchlist = async () => {
-    if (!user) return;
     setWatchlistLoading(true);
-    const q = query(
-      collection(db, "watchlist"),
-      where("userID", "==", user.uid),
-      where("id", "==", id.toString()),
-      where("type", "==", type)
-    );
-    try {
-      const querySnapshot = await getDocs(q);
-      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(deletePromises);
-      setWatchlist(false);
-      createToast("Removed from watchlist", { type: "success", timeout: 2000 });
-    } catch (error) {
-      console.error("Error removing from watchlist:", error);
-    } finally {
-      setWatchlistLoading(false);
+    if (watchlist) {
+      const q = query(
+        collection(db, "watchlist"),
+        where("userID", "==", user.uid),
+        where("id", "==", id.toString()),
+        where("type", "==", type)
+      );
+      try {
+        const querySnapshot = await getDocs(q);
+        const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+        setWatchlist(false);
+        createToast("Removed from watchlist", { type: "success", timeout: 2000 });
+      } catch (error) {
+        console.error("Error removing:", error);
+      }
+    } else {
+      await addDoc(collection(db, "watchlist"), {
+        type: type,
+        id: id,
+        userID: user.uid,
+        title: title,
+        posterPath: details.poster_path,
+        addedAt: serverTimestamp(),
+      });
+      setWatchlist(true);
+      createToast("Added to watchlist", { type: "success", timeout: 2000 });
     }
-  };
-
-  const toggleOverview = (episodeId: number) => {
-    setExpandedOverview((prevState) => ({
-      ...prevState,
-      [episodeId]: !prevState[episodeId],
-    }));
+    setWatchlistLoading(false);
   };
 
   const backdropUrl = getImageUrl(details.backdrop_path, "backdrop");
   const posterUrl = getImageUrl(details.poster_path, "poster");
 
+  const tabs = ["cast", ...(isTV ? ["episodes"] : []), "similar", "reviews"];
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] text-white pb-20">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pb-20 pt-14">
       {/* Top Section */}
-      <div className="relative h-[40vh] md:h-[50vh] overflow-hidden w-full flex justify-center items-end pb-8">
-        {!imageLoaded.backdrop && (
-          <div className="absolute inset-0 bg-[var(--color-bg-tertiary)] skeleton" />
-        )}
-        <Image
-          src={backdropUrl}
-          alt="Backdrop"
-          fill
-          priority
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            imageLoaded.backdrop ? "opacity-30" : "opacity-0"
-          }`}
-          onLoad={() => setImageLoaded((prev) => ({ ...prev, backdrop: true }))}
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/80 to-transparent"></div>
-      </div>
-
-      <div className="container relative z-10 -mt-[15vh] md:-mt-[20vh] px-6">
-        <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center md:items-start">
-          {/* Poster */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="flex-shrink-0"
-          >
-            <div className="relative w-48 md:w-64 lg:w-72 aspect-poster rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 group bg-[var(--color-bg-tertiary)]">
-              {!imageLoaded.poster && (
-                <div className="absolute inset-0 skeleton" />
-              )}
-              <Image
-                src={posterUrl}
-                alt="Poster"
-                fill
-                className={`object-cover transition-all duration-700 ${
-                  imageLoaded.poster ? "opacity-100" : "opacity-0"
-                }`}
-                onLoad={() => setImageLoaded((prev) => ({ ...prev, poster: true }))}
-                sizes="(max-width: 768px) 192px, (max-width: 1024px) 256px, 288px"
-              />
-            </div>
-          </motion.div>
-
-          {/* Details */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex-1 text-center md:text-left pt-2 md:pt-10"
-          >
-            <h1 className="heading-1 mb-2 drop-shadow-md">{title}</h1>
-            
-            {details.tagline && (
-              <p className="text-[var(--color-text-secondary)] italic text-lg mb-6 font-serif">
-                &quot;{details.tagline}&quot;
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-6">
-              {releaseYear && (
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono tracking-widest">
-                  {releaseYear}
-                </span>
-              )}
-              {details.vote_average > 0 && (
-                <span className="flex items-center gap-1 px-3 py-1 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded-full text-xs font-bold tracking-widest">
-                  <Star className="w-3 h-3 fill-current" />
-                  {details.vote_average.toFixed(1)}
-                </span>
-              )}
-              {runtime && (
-                <span className="flex items-center gap-1 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono tracking-widest">
-                  <Clock className="w-3 h-3" />
-                  {runtime}
-                </span>
-              )}
-              {details.genres?.slice(0,3).map(g => (
-                <span key={g.id} className="px-3 py-1 bg-[var(--color-accent-primary)]/10 text-[var(--color-accent-primary)] border border-[var(--color-accent-primary)]/20 rounded-full text-xs font-bold tracking-widest uppercase">
-                  {g.name}
-                </span>
-              ))}
-            </div>
-
-            <p className="text-base md:text-lg text-[var(--color-text-secondary)] leading-relaxed max-w-3xl mb-8">
-              {details.overview}
-            </p>
-
-            {/* Actions */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-              <button
-                onClick={() => {
-                  if (type === "tv") {
-                    router.push(`/watch/${type}/${id}/${selectedSeason}/1`);
-                  } else {
-                    router.push(`/watch/${type}/${id}`);
-                  }
-                }}
-                className="btn btn-primary px-8 py-4 text-sm"
-              >
-                <Play className="w-4 h-4 mr-2 fill-current" />
-                Play Now
-              </button>
-
-              {watchlistLoading ? (
-                <button
-                  disabled
-                  className="btn btn-secondary px-8 py-4 text-sm opacity-70 cursor-not-allowed min-w-[160px]"
-                >
-                  <div className="w-4 h-4 border-2 border-[var(--color-text-secondary)] border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Processing...
-                </button>
-              ) : watchlist ? (
-                <button
-                  onClick={removeFromWatchlist}
-                  className="btn btn-secondary px-8 py-4 text-sm text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 min-w-[160px]"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  In Watchlist
-                </button>
-              ) : (
-                <button
-                  onClick={addToWatchList}
-                  className="btn btn-secondary px-8 py-4 text-sm min-w-[160px]"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add to Watchlist
-                </button>
-              )}
-
-              {/* Trailer button */}
-              {trailerKey && (
-                <button 
-                  onClick={() => setShowTrailer(true)}
-                  className="btn btn-ghost px-6 py-4 text-sm uppercase tracking-widest"
-                >
-                  <Film className="w-4 h-4 mr-2" />
-                  Trailer
-                </button>
-              )}
-            </div>
-          </motion.div>
+      <div className="relative">
+        {/* Backdrop */}
+        <div className="relative w-full h-[45vw] min-h-[220px] max-h-[420px] overflow-hidden">
+          <img
+            src={backdropUrl}
+            alt=""
+            className="w-full h-full object-cover object-top transition-opacity duration-1000"
+            style={{ opacity: imageLoaded.backdrop ? 0.45 : 0 }}
+            onLoad={() => setImageLoaded(p => ({...p, backdrop: true}))}
+          />
+          {/* Gradient fades */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-base)]/60 to-transparent" />
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="mt-20 border-b border-white/10 flex overflow-x-auto scrollbar-hide">
-          {["cast", ...(isTV ? ["episodes"] : []), "similar", "reviews"].map((tab) => (
+        {/* Content Overlap */}
+        <div className="container relative -mt-24 sm:-mt-32 z-10">
+          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-end text-center sm:text-left">
+            
+            {/* Poster */}
+            <div className="flex-shrink-0 w-32 sm:w-40 md:w-48">
+              <div className="relative aspect-[2/3] rounded-[var(--radius-md)] overflow-hidden border border-[var(--border-subtle)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] bg-[var(--bg-raised)]">
+                {!imageLoaded.poster && <div className="absolute inset-0 skeleton" />}
+                <img
+                  src={posterUrl}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                  onLoad={() => setImageLoaded(p => ({...p, poster: true}))}
+                />
+              </div>
+            </div>
+
+            {/* Details */}
+            <div className="flex-1 min-w-0 pb-2">
+              <h1 
+                className="text-white font-bold leading-tight mb-2 line-clamp-3"
+                style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(2rem, 6vw, 4rem)', letterSpacing: '0.02em' }}
+              >
+                {title}
+              </h1>
+
+              {details.tagline && (
+                <p className="text-[var(--text-muted)] italic text-sm md:text-base mb-4 line-clamp-1 max-w-xl">
+                  &quot;{details.tagline}&quot;
+                </p>
+              )}
+
+              {/* Meta row */}
+              <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mb-4">
+                <span className="t-meta">{new Date(releaseDate).getFullYear()}</span>
+                {runtime && <><span className="t-meta opacity-30">|</span><span className="t-meta">{runtime}</span></>}
+                {details.vote_average > 0 && (
+                  <><span className="t-meta opacity-30">|</span>
+                  <span className="rating-chip">★ {details.vote_average.toFixed(1)}</span></>
+                )}
+              </div>
+
+              {/* Genres */}
+              <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                {details.genres?.slice(0, 3).map((g: any) => (
+                  <span key={g.id} className="genre-chip">{g.name}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Overview */}
+          <div className="mt-12 text-left">
+            <h3 className="t-label mb-4 opacity-50">Overview</h3>
+            <p className="t-body max-w-3xl text-[var(--text-secondary)] text-lg leading-relaxed">
+              {showFullText ? details.overview : details.overview?.slice(0, 280) + (details.overview?.length > 280 ? '...' : '')}
+            </p>
+            {details.overview?.length > 280 && (
+              <button
+                onClick={() => setShowFullText(!showFullText)}
+                className="t-label text-[var(--accent)] mt-4 hover:opacity-75 transition-opacity font-bold"
+              >
+                {showFullText ? '↑ Show Less' : 'Read full overview →'}
+              </button>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-center sm:justify-start gap-4 mt-12 flex-wrap pb-12">
+            <button
+              onClick={() => router.push(type === 'tv' ? `/watch/tv/${id}/1/1` : `/watch/movie/${id}`)}
+              className="btn btn-primary min-w-[160px] h-14 text-base"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              Play Now
+            </button>
+
+            {watchlistLoading ? (
+              <div className="w-40 h-14 skeleton rounded-[var(--radius-sm)]" />
+            ) : (
+              <button
+                onClick={handleWatchlistToggle}
+                className="btn btn-secondary min-w-[160px] h-14 text-base"
+              >
+                {watchlist ? <><Trash2 className="w-4 h-4" /> Remove</> : <><Plus className="w-4 h-4" /> Watchlist</>}
+              </button>
+            )}
+
+            {trailerKey && (
+              <button 
+                onClick={() => setShowTrailer(true)}
+                className="btn btn-ghost text-xs uppercase tracking-[0.2em] h-14 px-8"
+              >
+                <Film className="w-4 h-4 mr-2.5" />
+                Trailer
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="container mt-20">
+        <div className="flex gap-10 border-b border-[var(--border-faint)] overflow-x-auto scrollbar-hide">
+          {tabs.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`px-8 py-4 text-sm font-bold uppercase tracking-widest whitespace-nowrap transition-colors relative ${
-                activeTab === tab ? "text-white" : "text-[var(--color-text-secondary)] hover:text-white"
-              }`}
+              className={`tab-item pb-4 ${activeTab === tab ? 'active' : ''}`}
             >
               {tab}
-              {activeTab === tab && (
-                <motion.div
-                  layoutId="infoTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-accent-primary)]"
-                />
-              )}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Tab Content */}
-        <div className="mt-12 min-h-[400px]">
-          <AnimatePresence mode="wait">
-            
-            {activeTab === "cast" && (
-              <motion.div
-                key="cast"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex overflow-x-auto gap-6 pb-6 scrollbar-hide"
-              >
-                {cast?.length === 0 ? (
-                  <p className="text-[var(--color-text-tertiary)]">No cast information available.</p>
-                ) : (
-                  cast?.map((person) => (
-                    <Link
-                      href={`/actor/${person.id}`}
-                      key={person.id}
-                      className="flex-shrink-0 group text-center w-28"
-                    >
-                      <div className="w-24 h-24 mx-auto rounded-full overflow-hidden mb-3 bg-[var(--color-bg-tertiary)] border border-white/10 group-hover:border-[var(--color-accent-primary)] transition-colors relative">
-                        <Image
-                          src={person.profile_path ? getImageUrl(person.profile_path, "profile") : "/placeholder-avatar.svg"}
-                          alt={person.name}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                          sizes="96px"
-                        />
-                      </div>
-                      <p className="text-sm font-bold text-white line-clamp-1">{person.name}</p>
-                      <p className="text-xs text-[var(--color-text-tertiary)] line-clamp-2 mt-1">{person.character}</p>
-                    </Link>
-                  ))
-                )}
-              </motion.div>
-            )}
-
-            {activeTab === "episodes" && isTV && (
-              <motion.div
-                key="episodes"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <div className="mb-8 max-w-[240px]">
-                  <Select
-                    label="Select Season"
-                    selectedKeys={[String(selectedSeason)]}
-                    onSelectionChange={(keys) => {
-                      const val = Array.from(keys)[0];
-                      if (val) setSelectedSeason(Number(val));
-                    }}
-                    className="w-full"
-                    variant="bordered"
-                    scrollShadow={true}
-                    classNames={{
-                      label: "text-[var(--color-text-tertiary)] font-bold uppercase tracking-widest text-[10px]",
-                      trigger: "border-white/10 hover:border-white/30 text-white h-14 px-4 bg-white/5",
-                      value: "font-bold text-white text-base",
-                      listbox: "bg-[#1a1a1e] p-2",
-                      popoverContent: "bg-[#1a1a1e] border border-white/10 shadow-2xl !opacity-100",
-                    }}
-                  >
-                    {(details as TVShowDetails).seasons
-                      ?.filter(s => s.season_number > 0)
-                      .map(season => (
-                        <SelectItem 
-                          key={String(season.season_number)}
-                          textValue={`Season ${season.season_number}`}
-                          classNames={{
-                            base: "rounded-lg data-[hover=true]:bg-white/10 px-3 py-3",
-                            title: "font-bold text-sm text-white"
-                          }}
-                        >
-                          Season {season.season_number}
-                        </SelectItem>
-                      )) || []}
-                  </Select>
-                </div>
-
-                {episodesLoading ? (
-                  <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-[var(--color-accent-primary)] border-t-transparent rounded-full animate-spin"></div>
+      {/* Tab Content */}
+      <div className="container mt-12 min-h-[400px]">
+        <AnimatePresence mode="wait">
+          {activeTab === "cast" && (
+            <motion.div
+              key="cast"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex overflow-x-auto gap-8 pb-10 scrollbar-hide"
+            >
+              {cast?.map((person) => (
+                <Link
+                  href={`/actor/${person.id}`}
+                  key={person.id}
+                  className="flex-shrink-0 group text-center w-28 sm:w-32"
+                >
+                  <div className="w-24 h-24 sm:w-28 sm:h-24 mx-auto rounded-full overflow-hidden mb-4 bg-[var(--bg-raised)] border border-white/5 group-hover:border-[var(--accent)] transition-colors relative shadow-2xl">
+                    <Image
+                      src={person.profile_path ? getImageUrl(person.profile_path, "profile") : "/placeholder-avatar.svg"}
+                      alt={person.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="112px"
+                    />
                   </div>
-                ) : episodes.length === 0 ? (
-                  <p className="text-[var(--color-text-tertiary)]">No episodes found.</p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {episodes.map((episode, index) => (
-                      <EpisodeCard
-                        key={episode.id}
-                        episode={episode}
-                        index={index}
-                        type={type}
-                        id={id}
-                        selectedSeason={selectedSeason}
-                        expandedOverview={expandedOverview}
-                        toggleOverview={toggleOverview}
-                        getImageUrl={getImageUrl}
-                        router={router}
-                      />
+                  <p className="text-sm font-bold text-white line-clamp-1">{person.name}</p>
+                  <p className="text-[11px] text-[var(--text-muted)] line-clamp-2 mt-1.5 uppercase tracking-tighter">{person.character}</p>
+                </Link>
+              ))}
+            </motion.div>
+          )}
+
+          {activeTab === "episodes" && isTV && (
+            <motion.div
+              key="episodes"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="pb-12"
+            >
+              <div className="mb-10 max-w-[240px]">
+                <Select
+                  label="Season"
+                  selectedKeys={[String(selectedSeason)]}
+                  onSelectionChange={(keys) => {
+                    const val = Array.from(keys)[0];
+                    if (val) setSelectedSeason(Number(val));
+                  }}
+                  variant="bordered"
+                  classNames={{
+                    trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-[var(--bg-surface)] rounded-[var(--radius-sm)]",
+                    value: "font-bold text-sm",
+                    listbox: "bg-[var(--bg-overlay)] p-2",
+                    popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
+                  }}
+                >
+                  {(details as TVShowDetails).seasons
+                    ?.filter(s => s.season_number > 0)
+                    .map(season => (
+                      <SelectItem 
+                        key={String(season.season_number)}
+                        textValue={`Season ${season.season_number}`}
+                        classNames={{
+                          base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-3",
+                          title: "font-bold text-sm text-white"
+                        }}
+                      >
+                        Season {season.season_number}
+                      </SelectItem>
+                    )) || []}
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {episodes.map((episode, index) => (
+                  <EpisodeCard key={episode.id} episode={episode} index={index} type={type} id={id} selectedSeason={selectedSeason} getImageUrl={getImageUrl} router={router} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "similar" && (
+            <motion.div key="similar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-12">
+              <div className="-mx-[var(--container-padding)] space-y-16">
+                <MovieRow items={similar} />
+                {recommendations.length > 0 && (
+                  <MovieRow items={recommendations} title="Recommendations" />
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "reviews" && (
+            <motion.div key="reviews" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl pb-12">
+              {user ? (
+                <div className="mb-12 surface p-8 rounded-[var(--radius-md)] border border-[var(--border-subtle)] shadow-xl">
+                  <h3 className="t-label mb-6 text-[var(--text-primary)]">Write a review</h3>
+                  <div className="flex items-center gap-2 mb-6">
+                    {[1,2,3,4,5].map(star => (
+                      <button key={star} onClick={() => setReviewRating(star)} className="hover:scale-110 transition-transform">
+                        <Star className={`w-6 h-6 ${star <= reviewRating ? "text-yellow-500 fill-current" : "text-white/10"}`} />
+                      </button>
                     ))}
                   </div>
-                )}
-              </motion.div>
-            )}
-
-            {activeTab === "similar" && (
-              <motion.div
-                key="similar"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <div className="-mt-12">
-                  <MovieRow items={similar} />
-                  {recommendations.length > 0 && (
-                    <>
-                      <h3 className="heading-3 mt-12 mb-[-30px]">Recommendations</h3>
-                      <MovieRow items={recommendations} />
-                    </>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === "reviews" && (
-              <motion.div
-                key="reviews"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="max-w-4xl"
-              >
-                {user ? (
-                  <div className="mb-12 glass-panel p-6 rounded-xl border border-white/5">
-                    <div className="flex items-center gap-2 mb-4">
-                      {[1,2,3,4,5].map(star => (
-                        <button key={star} onClick={() => setReviewRating(star)} className="focus:outline-none">
-                          <Star className={`w-6 h-6 ${star <= reviewRating ? "text-[var(--color-accent-primary)] fill-current" : "text-white/20"}`} />
-                        </button>
-                      ))}
-                    </div>
+                  <div className="space-y-6">
                     <Textarea
                       variant="bordered"
-                      placeholder="Write your review here..."
+                      placeholder="Share your thoughts on this title..."
+                      minRows={4}
                       value={newReview}
                       onChange={(e) => setNewReview(e.target.value)}
-                      className="mb-4"
-                      minRows={3}
                       classNames={{
-                        input: "text-base text-white",
-                        inputWrapper: "border-white/10 hover:border-white/30 focus-within:!border-[var(--color-accent-primary)]"
+                        input: "text-base text-white font-['DM_Sans'] py-2",
+                        inputWrapper: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] focus-within:!border-[var(--accent)] bg-white/5 rounded-[var(--radius-sm)] p-4"
                       }}
                     />
-                    <div className="flex justify-end">
-                      <button
-                        onClick={handleAddReview}
-                        className="btn btn-primary px-6"
+                    <div className="flex justify-end pt-2">
+                      <button 
+                        onClick={handleAddReview} 
+                        className="btn btn-primary px-10 h-12 text-sm shadow-xl" 
                         disabled={!newReview.trim()}
                       >
                         Post Review
                       </button>
                     </div>
                   </div>
-                ) : (
-                  <div className="mb-12 p-8 border border-white/10 rounded-xl text-center">
-                    <MessageSquare className="w-10 h-10 text-[var(--color-text-tertiary)] mx-auto mb-4" />
-                    <p className="text-[var(--color-text-secondary)] mb-6">Sign in to write a review.</p>
-                    <button onClick={() => router.push("/login")} className="btn btn-secondary px-8">
-                      Sign In
-                    </button>
-                  </div>
-                )}
-
-                <div className="space-y-6">
-                  {reviews.length === 0 ? (
-                    <p className="text-[var(--color-text-tertiary)]">No reviews yet. Be the first!</p>
-                  ) : (
-                    <AnimatePresence>
-                      {reviews.map((review) => (
-                        <ReviewCard
-                          key={review.id}
-                          review={review}
-                          userUID={user?.uid || ""}
-                          user={!!user}
-                          onDelete={handleDeleteReview}
-                          onLike={handleLikeReview}
-                          onUnlike={handleUnlikeReview}
-                        />
-                      ))}
-                    </AnimatePresence>
-                  )}
                 </div>
-              </motion.div>
-            )}
+              ) : (
+                <div className="mb-12 p-12 border border-[var(--border-faint)] rounded-[var(--radius-md)] text-center bg-white/2">
+                  <p className="t-body mb-8 text-lg">Sign in to join the conversation.</p>
+                  <button onClick={() => router.push("/login")} className="btn btn-primary px-12 h-12">Sign In</button>
+                </div>
+              )}
 
-          </AnimatePresence>
-        </div>
+              <div className="space-y-8 mt-12">
+                <h3 className="t-label mb-8 opacity-50">{reviews.length} Reviews</h3>
+                {reviews.map((review) => (
+                  <ReviewCard key={review.id} review={review} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
+      {/* Trailer Modal */}
       <AnimatePresence>
         {showTrailer && trailerKey && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 md:p-10"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 md:p-10"
             onClick={() => setShowTrailer(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-6xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+              className="relative w-full max-w-5xl aspect-video bg-black rounded-[var(--radius-md)] overflow-hidden shadow-2xl border border-white/5"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-red-500 transition-colors border border-white/10"
+                className="absolute top-4 right-4 z-10 btn btn-icon rounded-full bg-black/50"
                 onClick={() => setShowTrailer(false)}
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
               <iframe
                 src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=0&controls=1`}
@@ -743,144 +577,60 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
   );
 };
 
-// Episode Card Component
-interface EpisodeCardProps {
-  episode: Episode;
-  index: number;
-  type: string;
-  id: string;
-  selectedSeason: number;
-  expandedOverview: Record<number, boolean>;
-  toggleOverview: (id: number) => void;
-  getImageUrl: (path: string | null, size: "poster" | "backdrop" | "profile" | "still") => string;
-  router: any;
-}
-
-const EpisodeCard = ({
-  episode,
-  index,
-  type,
-  id,
-  selectedSeason,
-  expandedOverview,
-  toggleOverview,
-  getImageUrl,
-  router
-}: EpisodeCardProps) => {
+// Simple Episode Card
+const EpisodeCard = ({ episode, index, type, id, selectedSeason, getImageUrl, router }: any) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const stillUrl = episode.still_path ? getImageUrl(episode.still_path, "still") : "/not-found.png";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="card border border-white/5 group cursor-pointer"
+      transition={{ delay: index * 0.04 }}
+      className="card cursor-pointer group"
       onClick={() => router.push(`/watch/${type}/${id}/${selectedSeason}/${episode.episode_number}`)}
     >
-      <div className="relative overflow-hidden aspect-video vignette bg-[var(--color-bg-tertiary)]">
+      <div className="relative aspect-video overflow-hidden bg-[var(--bg-raised)]">
         {!imageLoaded && <div className="absolute inset-0 skeleton" />}
-        <Image
+        <img
           src={stillUrl}
-          alt={episode.name}
-          fill
-          className={`object-cover transition-transform duration-700 group-hover:scale-105 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+          alt=""
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           onLoad={() => setImageLoaded(true)}
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-[var(--color-accent-primary)] text-white flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-all duration-300">
-             <Play className="w-5 h-5 ml-1 fill-current" />
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform">
+             <Play className="w-4 h-4 text-white fill-current ml-0.5" />
           </div>
         </div>
       </div>
-
       <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[var(--color-text-tertiary)] font-mono text-xs">E{episode.episode_number}</span>
-          <span className="text-[var(--color-text-tertiary)] font-mono text-xs">{episode.air_date?.split("-")[0]}</span>
+        <div className="flex items-center justify-between mb-1">
+          <span className="t-meta opacity-50">EP {episode.episode_number}</span>
+          <span className="t-meta opacity-50">{episode.air_date?.split("-")[0]}</span>
         </div>
-        <h3 className="font-bold text-white line-clamp-1 mb-2 group-hover:text-[var(--color-accent-primary)] transition-colors">
+        <h3 className="font-bold text-sm text-white line-clamp-1 group-hover:text-[var(--accent)] transition-colors">
           {episode.name}
         </h3>
-        <p className="text-sm text-[var(--color-text-secondary)] line-clamp-3">
-          {expandedOverview[episode.id] ? episode.overview : `${episode.overview.substring(0, 100)}${episode.overview.length > 100 ? '...' : ''}`}
-        </p>
-        {episode.overview.length > 100 && (
-          <button
-            className="text-[var(--color-accent-primary)] text-xs font-bold uppercase tracking-wider mt-2 hover:text-white transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleOverview(episode.id);
-            }}
-          >
-            {expandedOverview[episode.id] ? "Less" : "More"}
-          </button>
-        )}
       </div>
     </motion.div>
   );
 };
 
-// Review Card Component
-interface ReviewCardProps {
-  review: Review;
-  userUID: string;
-  user: boolean;
-  onDelete: (id: string) => void;
-  onLike: (id: string) => void;
-  onUnlike: (id: string) => void;
-}
-
-const ReviewCard = React.memo(({ review, userUID, user, onDelete, onLike, onUnlike }: ReviewCardProps) => {
-  const isLiked = review.likes.includes(userUID);
-  const isOwner = review.userId === userUID;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="glass-panel p-6 rounded-xl border border-white/5"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[var(--color-bg-elevated)] flex items-center justify-center text-[var(--color-text-secondary)] font-bold font-display uppercase border border-white/10">
-            {review.userName.charAt(0)}
-          </div>
-          <div>
-            <h4 className="font-bold text-white text-sm">{review.userName}</h4>
-            <div className="flex items-center mt-1">
-              {[1,2,3,4,5].map(star => (
-                <Star key={star} className={`w-3 h-3 ${star <= (review.rating || 5) ? "text-[var(--color-accent-primary)] fill-current" : "text-white/20"}`} />
-              ))}
-            </div>
-          </div>
-        </div>
-        {isOwner && (
-          <button onClick={() => onDelete(review.id)} className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
+// Simple Review Card
+const ReviewCard = ({ review, userUID, user }: any) => (
+  <div className="surface p-6 rounded-[var(--radius-md)] border-[var(--border-subtle)]">
+    <div className="flex items-center gap-3 mb-4">
+      <div className="w-9 h-9 rounded-full bg-[var(--bg-raised)] flex items-center justify-center text-[var(--text-muted)] font-bold text-xs border border-[var(--border-faint)] uppercase">
+        {review.userName.charAt(0)}
       </div>
-      <p className="text-[var(--color-text-secondary)] text-sm leading-relaxed mb-4">
-        {review.text}
-      </p>
-      <div className="flex items-center">
-        <button
-          onClick={() => user ? (isLiked ? onUnlike(review.id) : onLike(review.id)) : null}
-          disabled={!user}
-          className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-colors ${
-            isLiked ? "text-[var(--color-accent-primary)]" : "text-[var(--color-text-tertiary)] hover:text-white"
-          }`}
-        >
-          <ThumbsUp className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-          {review.likes?.length || 0}
-        </button>
+      <div>
+        <h4 className="font-bold text-white text-xs">{review.userName}</h4>
+        <div className="rating-chip text-[10px] mt-0.5">★ {review.rating}</div>
       </div>
-    </motion.div>
-  );
-});
-ReviewCard.displayName = "ReviewCard";
+    </div>
+    <p className="t-body text-sm leading-relaxed">{review.text}</p>
+  </div>
+);
 
 export default InfoClient;

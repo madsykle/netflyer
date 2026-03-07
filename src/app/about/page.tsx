@@ -20,7 +20,7 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] text-white pb-20 pt-24">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pb-20 pt-32">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -28,38 +28,39 @@ export default function AboutPage() {
         className="container relative z-10 max-w-5xl"
       >
         {/* Header */}
-        <motion.section variants={itemVariants} className="text-center mb-20">
-          <h1 className="heading-1 mb-6 drop-shadow-lg uppercase tracking-widest">
+        <motion.section variants={itemVariants} className="text-left mb-20">
+          <h1 className="t-title text-6xl mb-6 uppercase tracking-wider">
             About Netflyer
           </h1>
-          <p className="text-xl text-[var(--color-text-secondary)] max-w-3xl mx-auto leading-relaxed font-medium">
-            An open-source streaming interface for discovering and organizing
-            movies and TV shows. Immersive, cinematic, and private.
+          <p className="t-body text-xl text-[var(--text-secondary)] max-w-3xl leading-relaxed">
+            A premium, open-source cinematic interface for discovering and organizing
+            the world's films and series. Designed for enthusiasts who value 
+            minimalism, speed, and privacy.
           </p>
         </motion.section>
 
-        {/* Project Status - ARCHIVED */}
-        <motion.section variants={itemVariants} className="mb-16">
-          <div className="glass-panel border-yellow-500/20 rounded-2xl p-10 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700">
-              <Archive className="w-32 h-32 text-yellow-500" />
+        {/* Vision Section */}
+        <motion.section variants={itemVariants} className="mb-24">
+          <div className="surface p-10 rounded-[var(--radius-md)] border-[var(--border-subtle)] relative overflow-hidden group shadow-2xl">
+            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
+              <Layers className="w-48 h-48 text-white" />
             </div>
             <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
-                  <Archive className="w-6 h-6 text-yellow-500" />
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-lg bg-[var(--accent-dim)] flex items-center justify-center border border-[var(--accent)]/20">
+                  <Code className="w-6 h-6 text-[var(--accent)]" />
                 </div>
-                <h2 className="text-2xl font-bold text-white uppercase tracking-wider">
-                  Project Status: Archived
-                </h2>
+                <h2 className="t-label text-sm text-white">Project Vision: v2.0</h2>
               </div>
-              <p className="text-lg text-[var(--color-text-secondary)] leading-relaxed mb-6 font-medium max-w-3xl">
-                Netflyer is no longer actively maintained. This project serves as a
-                portfolio piece demonstrating modern web development capabilities.
-                While the application is fully functional, it will not receive
-                future updates or new features.
+              <p className="t-body text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-3xl">
+                Netflyer v2 is a complete ground-up rebuild focusing on a high-fidelity 
+                cinematic experience. Every interaction has been refined to provide 
+                buttery-smooth performance and a focused, editorial aesthetic that 
+                lets the cinema speak for itself.
               </p>
-              <div className="flex items-center gap-2 text-[var(--color-text-tertiary)] text-xs font-bold uppercase tracking-widest">
+              <div className="flex items-center gap-4 text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">
+                <span>Active Development</span>
+                <span className="opacity-20">|</span>
                 <span>Last Updated: March 2026</span>
               </div>
             </div>
@@ -67,42 +68,42 @@ export default function AboutPage() {
         </motion.section>
 
         {/* Transparency */}
-        <motion.section variants={itemVariants} className="mb-16">
-          <h2 className="heading-3 mb-10 flex items-center gap-4 uppercase tracking-widest">
-            <div className="w-10 h-1 h-1 bg-[var(--color-accent-primary)] rounded-full"></div>
-            How it Works
+        <motion.section variants={itemVariants} className="mb-24">
+          <h2 className="t-label mb-10 flex items-center gap-4">
+            <div className="w-12 h-px bg-[var(--accent)]"></div>
+            Core Principles
           </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="glass-light border-white/5 rounded-xl p-8 hover:border-white/10 transition-all group">
-              <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-[var(--color-accent-primary)]/10 transition-colors">
-                <Server className="w-6 h-6 text-[var(--color-accent-primary)]" />
+          <div className="grid md:grid-cols-2 gap-10">
+            <div className="surface border-[var(--border-subtle)] rounded-[var(--radius-md)] p-10 hover:border-[var(--border-visible)] transition-all group">
+              <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mb-8 group-hover:bg-[var(--accent-dim)] transition-colors">
+                <Server className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-white uppercase tracking-wider">Content Aggregation</h3>
-              <p className="text-[var(--color-text-secondary)] text-base leading-relaxed font-medium">
-                Netflyer does not host any content. It acts as a search engine and
-                interface, aggregating metadata from TMDB (The Movie Database) and
-                embedding streams from third-party providers.
+              <h3 className="t-label text-sm mb-4 text-white">Aggregated Intelligence</h3>
+              <p className="t-body text-[var(--text-secondary)] leading-relaxed">
+                Netflyer does not host any content. It acts as a sophisticated indexing 
+                layer, aggregating metadata from TMDB and facilitating access to 
+                third-party cinematic streams.
               </p>
             </div>
-            <div className="glass-light border-white/5 rounded-xl p-8 hover:border-white/10 transition-all group">
-              <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mb-6 group-hover:bg-[var(--color-accent-primary)]/10 transition-colors">
-                <Github className="w-6 h-6 text-[var(--color-accent-primary)]" />
+            <div className="surface border-[var(--border-subtle)] rounded-[var(--radius-md)] p-10 hover:border-[var(--border-visible)] transition-all group">
+              <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center mb-8 group-hover:bg-[var(--accent-dim)] transition-colors">
+                <Database className="w-6 h-6 text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-white uppercase tracking-wider">Disclaimer</h3>
-              <p className="text-[var(--color-text-secondary)] text-base leading-relaxed font-medium">
-                We do not control or verify the content provided by third-party
-                stream sources. Use at your own risk. This project is for
-                educational purposes only.
+              <h3 className="t-label text-sm mb-4 text-white">Privacy First</h3>
+              <p className="t-body text-[var(--text-secondary)] leading-relaxed">
+                Your cinematic journey is your own. We prioritize local storage and 
+                secure authentication to ensure your watchlist and history remain 
+                private and under your control.
               </p>
             </div>
           </div>
         </motion.section>
 
         {/* Tech Stack */}
-        <motion.section variants={itemVariants} className="mb-20">
-          <h2 className="heading-3 mb-10 flex items-center gap-4 uppercase tracking-widest">
-            <div className="w-10 h-1 h-1 bg-[var(--color-accent-primary)] rounded-full"></div>
-            Technology Stack
+        <motion.section variants={itemVariants} className="mb-24">
+          <h2 className="t-label mb-10 flex items-center gap-4">
+            <div className="w-12 h-px bg-[var(--accent)]"></div>
+            Technological Foundation
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
@@ -117,40 +118,44 @@ export default function AboutPage() {
             ].map((tech) => (
               <div
                 key={tech.name}
-                className="glass-panel border-white/5 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:border-[var(--color-accent-primary)] hover:bg-white/5 transition-all duration-300"
+                className="surface border-[var(--border-subtle)] rounded-[var(--radius-md)] p-8 flex flex-col items-center justify-center text-center hover:border-[var(--accent)] hover:bg-[var(--accent-dim)] transition-all duration-500"
               >
-                <span className="text-3xl mb-3" role="img" aria-label={tech.name}>
+                <span className="text-3xl mb-4" role="img" aria-label={tech.name}>
                   {tech.icon}
                 </span>
-                <span className="font-bold text-xs uppercase tracking-widest text-[var(--color-text-secondary)]">{tech.name}</span>
+                <span className="t-meta text-[10px] font-bold uppercase">{tech.name}</span>
               </div>
             ))}
           </div>
         </motion.section>
 
         {/* Links */}
-        <motion.section variants={itemVariants} className="text-center">
-          <div className="flex flex-wrap justify-center gap-6">
+        <motion.section variants={itemVariants} className="text-left pt-12 border-t border-[var(--border-faint)]">
+          <div className="flex flex-wrap gap-6">
             <a
               href="https://github.com/madsykle/netflyer"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-secondary px-10 py-4"
+              className="btn btn-primary px-12 h-14 text-base"
             >
-              <Github className="w-5 h-5 mr-2" />
-              <span>Source Code</span>
+              <Github className="w-5 h-5 mr-2.5" />
+              <span>Repository</span>
             </a>
             <a
               href="https://github.com/madsykle"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-primary px-10 py-4"
+              className="btn btn-secondary px-12 h-14 text-base"
             >
-              <ExternalLink className="w-5 h-5 mr-2" />
+              <ExternalLink className="w-5 h-5 mr-2.5" />
               <span>More Projects</span>
             </a>
           </div>
         </motion.section>
+      </motion.div>
+    </div>
+  );
+}
       </motion.div>
     </div>
   );

@@ -17,7 +17,8 @@ import {
   Play,
   BookmarkX,
   Grid,
-  List
+  List,
+  Star
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -63,7 +64,6 @@ const WatchlistPage = () => {
       });
 
       const watchlistDetails = (await Promise.all(promises)).filter(item => item !== null) as any[];
-      // sort by recently added
       watchlistDetails.sort((a, b) => {
         if (!a.addedAt || !b.addedAt) return 0;
         return b.addedAt.getTime() - a.addedAt.getTime();
@@ -101,17 +101,13 @@ const WatchlistPage = () => {
         where("type", "==", type)
       );
       const querySnapshot = await getDocs(q);
-
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
       
-      createToast("Removed from watchlist", {
-        type: "success",
-        timeout: 2000,
-      });
+      createToast("Removed from watchlist", { type: "success", timeout: 2000 });
       fetchWatchlistData(userID);
     } catch (error) {
-      console.error("Error removing from watchlist:", error);
+      console.error("Error removing:", error);
       createToast("Failed to remove", { type: "error", timeout: 2000 });
     } finally {
       setRemovingId(null);
@@ -120,52 +116,50 @@ const WatchlistPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--color-bg-primary)] text-white pt-24">
-        <div className="container px-6 py-12">
-          <div className="w-12 h-12 border-4 border-[var(--color-accent-primary)] border-t-transparent rounded-full animate-spin mx-auto"></div>
-        </div>
+      <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)] text-white pt-24 pb-12">
-      <div className="container relative z-10 max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pt-32 pb-12">
+      <div className="container relative z-10">
         
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12 border-b border-white/10 pb-6"
+          className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12 border-b border-[var(--border-faint)] pb-8"
         >
           <div>
-            <h1 className="heading-1 mb-2">My Watchlist</h1>
-            <p className="text-[var(--color-text-secondary)] font-medium">
+            <h1 className="t-title text-5xl mb-1 uppercase tracking-wider">My Watchlist</h1>
+            <p className="t-meta uppercase opacity-50 tracking-widest">
               {watchlistData.length} {watchlistData.length === 1 ? "title" : "titles"} saved
             </p>
           </div>
 
           {watchlistData.length > 0 && (
-            <div className="flex gap-1 p-1 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
+            <div className="flex gap-1 p-1 bg-white/5 rounded-[var(--radius-md)] border border-white/10 backdrop-blur-md">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-all ${
+                className={`p-2 rounded-[var(--radius-sm)] transition-all ${
                   viewMode === "grid"
-                    ? "bg-[var(--color-accent-primary)] text-white shadow-lg"
-                    : "text-[var(--color-text-tertiary)] hover:text-white"
+                    ? "bg-[var(--accent)] text-white shadow-lg"
+                    : "text-[var(--text-muted)] hover:text-white"
                 }`}
               >
-                <Grid className="w-5 h-5" />
+                <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-all ${
+                className={`p-2 rounded-[var(--radius-sm)] transition-all ${
                   viewMode === "list"
-                    ? "bg-[var(--color-accent-primary)] text-white shadow-lg"
-                    : "text-[var(--color-text-tertiary)] hover:text-white"
+                    ? "bg-[var(--accent)] text-white shadow-lg"
+                    : "text-[var(--text-muted)] hover:text-white"
                 }`}
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -173,24 +167,24 @@ const WatchlistPage = () => {
 
         {watchlistLoading ? (
           <div className="flex justify-center py-32">
-            <div className="w-12 h-12 border-4 border-[var(--color-accent-primary)] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : watchlistData.length === 0 ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-24 glass-panel rounded-2xl max-w-2xl mx-auto border-white/5"
+            className="text-center py-24 glass-panel rounded-2xl max-w-xl mx-auto border-[var(--border-faint)]"
           >
-            <BookmarkX className="w-16 h-16 text-[var(--color-text-tertiary)] mx-auto mb-6" />
-            <h2 className="heading-2 mb-3">Your watchlist is empty</h2>
-            <p className="text-[var(--color-text-secondary)] mb-8 max-w-md mx-auto text-lg">
-              Start adding movies and TV shows to your watchlist to keep track of what you want to watch.
+            <BookmarkX className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-6 opacity-20" />
+            <h2 className="t-title text-3xl mb-3">Empty Watchlist</h2>
+            <p className="t-body mb-8 max-w-sm mx-auto text-sm opacity-60">
+              Start building your collection by adding films and series you want to track.
             </p>
             <button
-              className="btn btn-primary px-8 py-4"
+              className="btn btn-primary text-xs px-10"
               onClick={() => router.push("/discover")}
             >
-              Discover Content
+              Explore Discover
             </button>
           </motion.div>
         ) : (
@@ -205,7 +199,7 @@ const WatchlistPage = () => {
                   {watchlistData.map((item: any) => {
                     const isMovie = item.mediaType === "movie";
                     const title = isMovie ? item.title : item.name;
-                    const releaseYear = isMovie 
+                    const year = isMovie 
                       ? item.release_date?.split("-")[0] 
                       : item.first_air_date?.split("-")[0];
 
@@ -219,47 +213,51 @@ const WatchlistPage = () => {
                         whileHover={{ y: -8 }}
                         className="group relative cursor-pointer"
                       >
-                        <div className="relative aspect-poster overflow-hidden bg-[var(--color-bg-tertiary)] rounded-xl border border-[var(--color-border-subtle)] group-hover:border-[var(--color-border-strong)] transition-colors vignette">
+                        <div className="relative aspect-poster overflow-hidden bg-[var(--bg-raised)] rounded-[var(--radius-md)] border border-[var(--border-faint)] group-hover:border-[var(--border-subtle)] transition-colors vignette">
                           <Image
                             src={getImageUrl(item.poster_path, "poster")}
                             alt={title}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-700"
                             onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
-                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
+                            sizes="(max-width: 768px) 50vw, 20vw"
                           />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          
+                          {/* Hover Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <button
+                                className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform"
+                                onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
+                              >
+                                <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                              </button>
+                            </div>
+                            
                             <button
-                              className="w-12 h-12 rounded-full bg-[var(--color-accent-primary)] flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-all duration-300"
-                              onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeFromWatchlist(item.id, item.mediaType);
+                              }}
+                              disabled={removingId === item.id}
+                              className="absolute top-2 right-2 w-8 h-8 rounded-[var(--radius-sm)] bg-black/60 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-red-500 hover:bg-red-500/20 transition-all opacity-0 group-hover:opacity-100"
                             >
-                              <Play className="w-5 h-5 text-white ml-1 fill-current" />
+                              {removingId === item.id ? (
+                                <div className="w-3 h-3 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
                             </button>
                           </div>
-                          
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeFromWatchlist(item.id, item.mediaType);
-                            }}
-                            disabled={removingId === item.id}
-                            className={`absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-red-500 hover:bg-red-500/20 transition-all ${removingId === item.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-                          >
-                            {removingId === item.id ? (
-                              <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </button>
                         </div>
-                        <div className="card-padding">
-                          <h3 className="text-sm font-bold line-clamp-1 group-hover:text-[var(--color-accent-primary)] transition-colors">
+                        <div className="pt-3 px-1 text-left">
+                          <h3 className="text-xs font-bold line-clamp-1 group-hover:text-[var(--accent)] transition-colors">
                             {title}
                           </h3>
-                          <div className="flex items-center gap-2 mt-1 text-xs font-mono text-[var(--color-text-tertiary)]">
-                            <span>{releaseYear}</span>
-                            <span>·</span>
-                            <span>{isMovie ? "Movie" : "TV"}</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="t-meta text-[10px] opacity-50">{year}</span>
+                            <span className="t-meta text-[10px] opacity-20">|</span>
+                            <span className="t-meta text-[10px] opacity-50 uppercase tracking-tighter">{isMovie ? "Film" : "Series"}</span>
                           </div>
                         </div>
                       </motion.div>
@@ -273,7 +271,7 @@ const WatchlistPage = () => {
                   {watchlistData.map((item: any) => {
                     const isMovie = item.mediaType === "movie";
                     const title = isMovie ? item.title : item.name;
-                    const releaseYear = isMovie 
+                    const year = isMovie 
                       ? item.release_date?.split("-")[0] 
                       : item.first_air_date?.split("-")[0];
 
@@ -284,59 +282,57 @@ const WatchlistPage = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
-                        className="flex flex-row gap-6 p-4 rounded-xl glass-panel border border-[var(--color-border-subtle)] hover:border-[var(--color-border-strong)] transition-all group"
+                        className="surface p-4 rounded-[var(--radius-md)] border border-[var(--border-subtle)] hover:bg-white/5 transition-all group"
                       >
-                        <div 
-                          className="w-20 md:w-28 flex-shrink-0 aspect-poster rounded-lg overflow-hidden cursor-pointer"
-                          onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
-                        >
-                          <Image
-                            src={getImageUrl(item.poster_path, "poster")}
-                            alt={title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 80px, 112px"
-                          />
-                        </div>
-                        
-                        <div className="flex-1 flex flex-col justify-center">
-                          <h3 
-                            className="text-lg md:text-xl font-bold mb-2 cursor-pointer hover:text-[var(--color-accent-primary)] transition-colors"
+                        <div className="flex gap-6 items-center">
+                          <div 
+                            className="relative w-16 md:w-20 aspect-poster rounded-[var(--radius-sm)] overflow-hidden cursor-pointer bg-[var(--bg-raised)] border border-[var(--border-faint)]"
                             onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
                           >
-                            {title}
-                          </h3>
-                          <div className="flex items-center gap-3 text-sm text-[var(--color-text-secondary)] mb-2">
-                            <span className="font-mono">{releaseYear}</span>
-                            <span className="px-2 py-0.5 rounded bg-white/10 text-xs font-bold tracking-widest uppercase">
-                              {isMovie ? "Movie" : "TV Series"}
-                            </span>
+                            <Image
+                              src={getImageUrl(item.poster_path, "poster")}
+                              alt={title}
+                              fill
+                              className="object-cover"
+                              sizes="80px"
+                            />
                           </div>
-                          {item.addedAt && (
-                            <p className="text-xs text-[var(--color-text-tertiary)]">
-                              Added: {item.addedAt.toLocaleDateString()}
-                            </p>
-                          )}
-                        </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <h3 
+                              className="text-lg font-bold truncate cursor-pointer hover:text-[var(--accent)] transition-colors"
+                              onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
+                            >
+                              {title}
+                            </h3>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="t-meta">{year}</span>
+                              <span className="meta-chip py-0">{isMovie ? "Film" : "Series"}</span>
+                              {item.vote_average > 0 && (
+                                <span className="rating-chip text-[10px]">★ {item.vote_average.toFixed(1)}</span>
+                              )}
+                            </div>
+                          </div>
 
-                        <div className="flex flex-col justify-center gap-3 pr-2">
-                          <button
-                            onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
-                            className="w-10 h-10 rounded-full bg-[var(--color-accent-primary)] flex items-center justify-center text-white hover:scale-105 transition-transform shadow-lg"
-                          >
-                            <Play className="w-4 h-4 fill-current ml-1" />
-                          </button>
-                          <button
-                            onClick={() => removeFromWatchlist(item.id, item.mediaType)}
-                            disabled={removingId === item.id}
-                            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[var(--color-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                          >
-                            {removingId === item.id ? (
-                              <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
+                              className="btn btn-icon rounded-full"
+                            >
+                              <Play className="w-4 h-4 fill-current ml-0.5" />
+                            </button>
+                            <button
+                              onClick={() => removeFromWatchlist(item.id, item.mediaType)}
+                              disabled={removingId === item.id}
+                              className="btn btn-icon rounded-full hover:text-red-500 hover:bg-red-500/10"
+                            >
+                              {removingId === item.id ? (
+                                <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
                         </div>
                       </motion.div>
                     );
