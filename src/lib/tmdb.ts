@@ -15,9 +15,17 @@ import {
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
 class TMDBService {
   private apiKey: string;
   private baseUrl: string;
+  private cache: Map<string, CacheEntry<any>> = new Map();
+  private pendingRequests: Map<string, Promise<any>> = new Map();
+  private readonly DEFAULT_CACHE_TIME = 1000 * 60 * 60; // 1 hour
 
   constructor() {
     const publicApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
@@ -47,29 +55,59 @@ class TMDBService {
   }
 
   private async fetcher<T>(url: string, revalidate: number = 3600): Promise<T> {
-    try {
-      const response = await fetch(url, {
-        next: { revalidate },
-        headers: {
-          Accept: 'application/json',
-        },
-      });
+    const cacheKey = url;
+    const ttl = revalidate * 1000; // Convert to milliseconds
 
-      if (!response.ok) {
-        throw new Error(`TMDB API error: ${response.status}`);
-      }
-
-      return await response.json() as T;
-    } catch (error) {
-      console.error('TMDB Fetch Error:', error);
-      throw error;
+    // Check memory cache first
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < ttl) {
+      return cached.data as T;
     }
+
+    // Check for pending request to deduplicate
+    const pending = this.pendingRequests.get(cacheKey);
+    if (pending) {
+      return pending as Promise<T>;
+    }
+
+    const request = (async () => {
+      try {
+        const response = await fetch(url, {
+          next: { revalidate },
+          headers: {
+            Accept: 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`TMDB API error: ${response.status}`);
+        }
+
+        const data = await response.json() as T;
+        
+        // Update cache
+        this.cache.set(cacheKey, {
+          data,
+          timestamp: Date.now(),
+        });
+
+        return data;
+      } catch (error) {
+        console.error('TMDB Fetch Error:', error);
+        throw error;
+      } finally {
+        this.pendingRequests.delete(cacheKey);
+      }
+    })();
+
+    this.pendingRequests.set(cacheKey, request);
+    return request;
   }
 
   async getGenres(): Promise<{ movie: { id: number; name: string }[]; tv: { id: number; name: string }[] }> {
     const [movieGenres, tvGenres] = await Promise.all([
-      this.fetcher<{ genres: { id: number; name: string }[] }>(this.buildUrl('/genre/movie/list')),
-      this.fetcher<{ genres: { id: number; name: string }[] }>(this.buildUrl('/genre/tv/list')),
+      this.fetcher<{ genres: { id: number; name: string }[] }>(this.buildUrl('/genre/movie/list'), 86400), // 24h
+      this.fetcher<{ genres: { id: number; name: string }[] }>(this.buildUrl('/genre/tv/list'), 86400), // 24h
     ]);
 
     return {
@@ -80,27 +118,27 @@ class TMDBService {
 
   async getTrending(type: TrendingType = 'all', timeWindow: TimeWindow = 'week', page = 1): Promise<TMDBResponse<Movie | TVShow>> {
     const url = this.buildUrl(`/trending/${type}/${timeWindow}`, { page });
-    return this.fetcher<TMDBResponse<Movie | TVShow>>(url);
+    return this.fetcher<TMDBResponse<Movie | TVShow>>(url, 3600); // 1h
   }
 
   async getTrendingMovies(timeWindow: TimeWindow = 'week', page = 1): Promise<TMDBResponse<Movie>> {
     const url = this.buildUrl(`/trending/movie/${timeWindow}`, { page });
-    return this.fetcher<TMDBResponse<Movie>>(url);
+    return this.fetcher<TMDBResponse<Movie>>(url, 3600); // 1h
   }
 
   async getTrendingTV(timeWindow: TimeWindow = 'week', page = 1): Promise<TMDBResponse<TVShow>> {
     const url = this.buildUrl(`/trending/tv/${timeWindow}`, { page });
-    return this.fetcher<TMDBResponse<TVShow>>(url);
+    return this.fetcher<TMDBResponse<TVShow>>(url, 3600); // 1h
   }
 
   async getAiringToday(page = 1): Promise<TMDBResponse<TVShow>> {
     const url = this.buildUrl('/tv/airing_today', { page, sort_by: 'popularity.desc' });
-    return this.fetcher<TMDBResponse<TVShow>>(url);
+    return this.fetcher<TMDBResponse<TVShow>>(url, 3600); // 1h
   }
 
   async getPopularMovies(page = 1): Promise<TMDBResponse<Movie>> {
     const url = this.buildUrl('/movie/popular', { page });
-    return this.fetcher<TMDBResponse<Movie>>(url);
+    return this.fetcher<TMDBResponse<Movie>>(url, 3600); // 1h
   }
 
   async getAnime(page = 1): Promise<TMDBResponse<TVShow>> {
@@ -109,50 +147,50 @@ class TMDBService {
       with_keywords: '210024', 
       sort_by: 'vote_average.desc' 
     });
-    return this.fetcher<TMDBResponse<TVShow>>(url);
+    return this.fetcher<TMDBResponse<TVShow>>(url, 3600); // 1h
   }
 
   async getMovieDetails(id: number): Promise<MovieDetails> {
     const url = this.buildUrl(`/movie/${id}`, {
       append_to_response: 'credits,videos,recommendations',
     });
-    return this.fetcher<MovieDetails>(url);
+    return this.fetcher<MovieDetails>(url, 43200); // 12h
   }
 
   async getTVDetails(id: number): Promise<TVShowDetails> {
     const url = this.buildUrl(`/tv/${id}`, {
       append_to_response: 'credits,videos,recommendations,external_ids',
     });
-    return this.fetcher<TVShowDetails>(url);
+    return this.fetcher<TVShowDetails>(url, 43200); // 12h
   }
 
   async getPersonDetails(id: number): Promise<PersonDetails> {
     const url = this.buildUrl(`/person/${id}`, {
       append_to_response: 'combined_credits',
     });
-    return this.fetcher<PersonDetails>(url);
+    return this.fetcher<PersonDetails>(url, 43200); // 12h
   }
 
   async getRecommendations(type: ContentType, id: number): Promise<TMDBResponse<Movie | TVShow>> {
     const url = this.buildUrl(`/${type}/${id}/recommendations`);
-    return this.fetcher<TMDBResponse<Movie | TVShow>>(url);
+    return this.fetcher<TMDBResponse<Movie | TVShow>>(url, 21600); // 6h
   }
 
   async getVideos(type: ContentType, id: number): Promise<{ results: any[] }> {
     const url = this.buildUrl(`/${type}/${id}/videos`);
-    return this.fetcher<{ results: any[] }>(url);
+    return this.fetcher<{ results: any[] }>(url, 43200); // 12h
   }
 
   async getSimilar(type: ContentType, id: number): Promise<TMDBResponse<Movie | TVShow>> {
     const url = this.buildUrl(`/${type}/${id}/similar`);
-    return this.fetcher<TMDBResponse<Movie | TVShow>>(url);
+    return this.fetcher<TMDBResponse<Movie | TVShow>>(url, 21600); // 6h
   }
 
   async getSeasonDetails(tvId: number, seasonNumber: number): Promise<Season> {
     const url = this.buildUrl(`/tv/${tvId}/season/${seasonNumber}`, {
       append_to_response: 'credits',
     });
-    return this.fetcher<Season>(url);
+    return this.fetcher<Season>(url, 43200); // 12h
   }
 
   async search(query: string, type: SearchType = 'multi', page = 1): Promise<TMDBResponse<Movie | TVShow>> {
@@ -163,7 +201,7 @@ class TMDBService {
     };
 
     const url = this.buildUrl(`/search/${type}`, params);
-    return this.fetcher<TMDBResponse<Movie | TVShow>>(url);
+    return this.fetcher<TMDBResponse<Movie | TVShow>>(url, 3600); // 1h
   }
 
   async discover(params: {
@@ -197,7 +235,7 @@ class TMDBService {
         baseParams.year = params.year;
       }
       const url = this.buildUrl('/discover/movie', baseParams);
-      return this.fetcher<TMDBResponse<Movie>>(url);
+      return this.fetcher<TMDBResponse<Movie>>(url, 3600); // 1h
     }
 
     if (params.type === 'tv') {
@@ -205,7 +243,7 @@ class TMDBService {
         baseParams.first_air_date_year = params.year;
       }
       const url = this.buildUrl('/discover/tv', baseParams);
-      return this.fetcher<TMDBResponse<TVShow>>(url);
+      return this.fetcher<TMDBResponse<TVShow>>(url, 3600); // 1h
     }
 
     const [moviesUrl, tvUrl] = [
@@ -214,8 +252,8 @@ class TMDBService {
     ];
 
     const [movies, tv] = await Promise.all([
-      this.fetcher<TMDBResponse<Movie>>(moviesUrl),
-      this.fetcher<TMDBResponse<TVShow>>(tvUrl),
+      this.fetcher<TMDBResponse<Movie>>(moviesUrl, 3600),
+      this.fetcher<TMDBResponse<TVShow>>(tvUrl, 3600),
     ]);
 
     const combinedResults = [...(movies.results || []), ...(tv.results || [])];
@@ -230,17 +268,17 @@ class TMDBService {
 
   async getMovieImages(id: number): Promise<{ backdrops: { file_path: string }[] }> {
     const url = this.buildUrl(`/movie/${id}/images`);
-    return this.fetcher(url);
+    return this.fetcher(url, 86400); // 24h
   }
 
   async getPersonCredits(id: number): Promise<{ cast: (Movie | TVShow & { media_type: string })[]; crew: any[] }> {
     const url = this.buildUrl(`/person/${id}/combined_credits`);
-    return this.fetcher(url);
+    return this.fetcher(url, 43200); // 12h
   }
 
   async getContentCredits(type: ContentType, id: number): Promise<any> {
     const url = this.buildUrl(`/${type}/${id}/credits`);
-    return this.fetcher(url);
+    return this.fetcher(url, 43200); // 12h
   }
 
   async getContentDetails(type: ContentType, id: number): Promise<MovieDetails | TVShowDetails> {
