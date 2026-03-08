@@ -75,7 +75,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../components/ToastProvider";
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "mads@netflyer.icu";
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "mads@netflyer.icu").split(",").map(e => e.trim());
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
         setUser(currentUser);
         try {
           const token = await currentUser.getIdTokenResult();
-          if (token.claims.admin === true) {
+          if (token.claims.admin === true || (currentUser.email && ADMIN_EMAILS.includes(currentUser.email))) {
             setIsAdmin(true);
             fetchData();
           } else {
