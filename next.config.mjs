@@ -19,7 +19,7 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), accelerometer=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su"), gyroscope=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su"), fullscreen=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su"), browsing-topics=(), join-ad-interest-group=(), run-ad-auction=(), attribution-reporting=(), compute-pressure=(), private-state-token-issuance=(), private-state-token-redemption=()',
+            value: 'camera=(), microphone=(), geolocation=(), accelerometer=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su"), gyroscope=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su"), fullscreen=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su")',
           },
           {
             key: 'Strict-Transport-Security',
