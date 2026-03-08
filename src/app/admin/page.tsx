@@ -102,11 +102,23 @@ export default function AdminDashboard() {
   const [editType, setEditType] = useState(""); // 'user', 'movie', 'tv', 'review'
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser && currentUser.email === ADMIN_EMAIL) {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
         setUser(currentUser);
-        setIsAdmin(true);
-        fetchData();
+        try {
+          const token = await currentUser.getIdTokenResult();
+          if (token.claims.admin === true) {
+            setIsAdmin(true);
+            fetchData();
+          } else {
+            setIsAdmin(false);
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error("Error verifying admin claim:", error);
+          setIsAdmin(false);
+          setLoading(false);
+        }
       } else {
         setUser(null);
         setIsAdmin(false);

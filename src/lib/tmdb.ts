@@ -39,19 +39,37 @@ class TMDBService {
   }
 
   private buildUrl(path: string, params?: Record<string, string | number>): string {
-    const url = new URL(`${this.baseUrl}${path}`);
-    url.searchParams.append('api_key', this.apiKey);
-    url.searchParams.append('language', 'en-US');
+    const isServer = typeof window === 'undefined';
 
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
-        }
-      });
+    if (isServer) {
+      // Server-side direct request
+      const url = new URL(`${this.baseUrl}${path}`);
+      url.searchParams.append('api_key', this.apiKey);
+      url.searchParams.append('language', 'en-US');
+
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            url.searchParams.append(key, String(value));
+          }
+        });
+      }
+      return url.toString();
+    } else {
+      // Client-side proxy request to hide API key
+      const url = new URL('/api/tmdb', window.location.origin);
+      url.searchParams.append('path', path);
+      url.searchParams.append('language', 'en-US');
+
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            url.searchParams.append(key, String(value));
+          }
+        });
+      }
+      return url.toString();
     }
-
-    return url.toString();
   }
 
   private async fetcher<T>(url: string, revalidate: number = 3600): Promise<T> {

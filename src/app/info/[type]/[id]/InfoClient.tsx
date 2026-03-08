@@ -276,7 +276,6 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
             alt=""
             fill
             priority
-            unoptimized={true}
             className="object-cover object-top opacity-50"
             sizes="100vw"
             onLoad={() => setImageLoaded(p => ({...p, backdrop: true}))}
@@ -756,7 +755,6 @@ const EpisodeCard = ({ episode, index, type, id, selectedSeason, getImageUrl, ro
           src={stillUrl}
           alt={episode.name}
           fill
-          unoptimized={true}
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, 192px"
           onLoad={() => setImageLoaded(true)}
@@ -799,7 +797,6 @@ const SimilarCard = ({ item, type, getImageUrl, router }: any) => {
           src={posterUrl}
           alt={title}
           fill
-          unoptimized={true}
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
           onLoad={() => setImageLoaded(true)}

@@ -31,7 +31,7 @@
   ],
   "dependencies": {
     "@heroui/react": "2.8.4",
-    "bad-words": "^3.0.4",
+    "@upstash/redis": "^1.36.3",
     "firebase": "^10.4.0",
     "framer-motion": "12.23.12",
     "lucide-react": "^0.542.0",

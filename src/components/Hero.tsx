@@ -64,7 +64,6 @@ const HeroSection = ({ movie }: HeroSectionProps) => {
                 imageLoaded ? "opacity-60" : "opacity-0"
               }`}
               onLoad={() => setImageLoaded(true)}
-              unoptimized
               sizes="100vw"
             />
             

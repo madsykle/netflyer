@@ -1,7 +1,7 @@
 'use client';
 
 import { auth, db } from "../../lib/firebase";
-import Filter from "bad-words";
+import { isProfane } from "../../lib/profanity";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -19,8 +19,7 @@ import { tmdbService } from "../../lib/tmdb";
 import Loading from "../../components/Loading";
 
 const checkForBadWords = (text: string) => {
-  const filter = new Filter();
-  return filter.isProfane(text);
+  return isProfane(text);
 };
 
 const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/original";
