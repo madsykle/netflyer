@@ -265,10 +265,11 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
       <div className="relative">
         {/* Backdrop */}
         <div className="relative w-full h-[45vw] min-h-[220px] max-h-[420px] overflow-hidden">
-          <img
+          <Image
             src={backdropUrl}
             alt=""
-            className="w-full h-full object-cover object-top transition-opacity duration-1000"
+            fill
+            className="object-cover object-top transition-opacity duration-1000"
             style={{ opacity: imageLoaded.backdrop ? 0.45 : 0 }}
             onLoad={() => setImageLoaded(p => ({...p, backdrop: true}))}
           />
@@ -285,10 +286,11 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
             <div className="flex-shrink-0 w-32 sm:w-40 md:w-48">
               <div className="relative aspect-[2/3] rounded-[var(--radius-md)] overflow-hidden border border-[var(--border-subtle)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] bg-[var(--bg-raised)]">
                 {!imageLoaded.poster && <div className="absolute inset-0 skeleton" />}
-                <img
+                <Image
                   src={posterUrl}
                   alt={title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                   onLoad={() => setImageLoaded(p => ({...p, poster: true}))}
                 />
               </div>
@@ -592,10 +594,11 @@ const EpisodeCard = ({ episode, index, type, id, selectedSeason, getImageUrl, ro
     >
       <div className="relative aspect-video overflow-hidden bg-[var(--bg-raised)]">
         {!imageLoaded && <div className="absolute inset-0 skeleton" />}
-        <img
+        <Image
           src={stillUrl}
           alt=""
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
           onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

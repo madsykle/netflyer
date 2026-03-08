@@ -34,7 +34,7 @@ export default function AboutPage() {
           </h1>
           <p className="t-body text-xl text-[var(--text-secondary)] max-w-3xl leading-relaxed">
             A premium, open-source cinematic interface for discovering and organizing
-            the world's films and series. Designed for enthusiasts who value 
+            the world&apos;s films and series. Designed for enthusiasts who value 
             minimalism, speed, and privacy.
           </p>
         </motion.section>
@@ -152,10 +152,6 @@ export default function AboutPage() {
             </a>
           </div>
         </motion.section>
-      </motion.div>
-    </div>
-  );
-}
       </motion.div>
     </div>
   );

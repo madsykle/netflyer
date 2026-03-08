@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import React, { useState, useEffect } from "react";
 import { Search, Compass, BookMarked, Info, Settings, LogIn, LogOut, X, Menu } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
 const NAV_ITEMS = [
@@ -64,10 +65,12 @@ export default function Navbar() {
 
           {/* LEFT — Logo */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <img
+            <Image
               src="/logo.png"
               alt=""
-              className="w-7 h-7 object-contain rounded-[4px] transition-all duration-300 group-hover:opacity-80"
+              width={28}
+              height={28}
+              className="object-contain rounded-[4px] transition-all duration-300 group-hover:opacity-80"
             />
             <span
               className="hidden sm:block text-white tracking-[0.18em] text-sm font-bold"
