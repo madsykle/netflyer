@@ -1,7 +1,6 @@
 'use client';
 
 import { auth, db } from "../../lib/firebase";
-import { Input } from "@heroui/react";
 import Filter from "bad-words";
 import {
   createUserWithEmailAndPassword,
@@ -10,10 +9,11 @@ import {
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { UserPlus, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Film, ChevronRight, UserPlus } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useToast } from "../../components/ToastProvider";
 import { tmdbService } from "../../lib/tmdb";
 import Loading from "../../components/Loading";
@@ -23,7 +23,27 @@ const checkForBadWords = (text: string) => {
   return filter.isProfane(text);
 };
 
-const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
+const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/original";
+
+const CURATED_FILMS = [
+  503919, // The Lighthouse
+  531428, // Portrait of a Lady on Fire
+  335984, // Blade Runner 2049
+  120467, // The Grand Budapest Hotel
+  70608,  // Drive
+  1398,   // Stalker
+  490,    // The Seventh Seal
+  13475,  // Mulholland Drive
+  290098, // The Handmaiden
+  329865, // Arrival
+  376867, // Moonlight
+  496243, // Parasite
+  152601, // Her
+  97370,  // Under the Skin
+  373023, // Burning
+  11059,  // Memories of Murder
+  361292, // Suspiria (2018)
+];
 
 const SignUp = () => {
   const { createToast } = useToast();
@@ -33,6 +53,7 @@ const SignUp = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [backdrop, setBackdrop] = useState("");
+  const [movieTitle, setMovieTitle] = useState("");
   const [formLoading, setFormLoading] = useState(false);
   
   const router = useRouter();
@@ -50,15 +71,16 @@ const SignUp = () => {
           }
         });
 
-        // Fetch backdrop
-        const data = await tmdbService.getMovieImages(27205);
-        if (data.backdrops && data.backdrops.length > 0) {
-          setBackdrop(`${BACKDROP_BASE_URL}${data.backdrops[Math.min(9, data.backdrops.length - 1)].file_path}`);
+        const randomId = CURATED_FILMS[Math.floor(Math.random() * CURATED_FILMS.length)];
+        const movie = await tmdbService.getMovieDetails(randomId);
+        
+        if (movie.backdrop_path) {
+          setBackdrop(`${BACKDROP_BASE_URL}${movie.backdrop_path}`);
+          setMovieTitle(movie.title);
         }
 
         if (searchParams?.get("verified") === "true") {
           createToast("Your email has been verified.", {
-            cancel: "Cancel",
             timeout: 3000,
             type: "success",
           });
@@ -79,7 +101,6 @@ const SignUp = () => {
     if (!username || !email || !password) {
       setFormLoading(false);
       return createToast("Please fill in all the fields.", {
-        cancel: "Cancel",
         timeout: 3000,
         type: "error",
       });
@@ -89,14 +110,13 @@ const SignUp = () => {
       setFormLoading(false);
       return createToast(
         "Your username or email contains inappropriate words.",
-        { cancel: "Cancel", timeout: 3000, type: "error" }
+        { timeout: 3000, type: "error" }
       );
     }
 
     if (password.length < 6) {
       setFormLoading(false);
       return createToast("Password must be at least 6 characters.", {
-        cancel: "Cancel",
         timeout: 3000,
         type: "error",
       });
@@ -122,8 +142,7 @@ const SignUp = () => {
         url: `${websiteUrl}/signup?verified=true`,
       });
 
-      createToast("We have sent you an email for verification.", {
-        cancel: "Hide",
+      createToast("Verification email sent", {
         timeout: 3000,
         type: "success",
       });
@@ -140,21 +159,19 @@ const SignUp = () => {
 
   const handleSignUpError = (error: any) => {
     if (error.message.includes("email-already-in-use")) {
-      createToast("The email is already in use.", {
+      createToast("Email already in use", {
         action: {
           text: "Login",
-          callback(toast) {
+          callback(toast: any) {
             router.push("/login");
             toast.destroy();
           },
         },
         timeout: 3000,
-        cancel: "Cancel",
         type: "dark",
       });
     } else {
       createToast(error.message, {
-        cancel: "Cancel",
         timeout: 3000,
         type: "error",
       });
@@ -166,110 +183,176 @@ const SignUp = () => {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-6">
-      {backdrop && (
-        <>
-          <div 
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-40"
-            style={{ backgroundImage: `url(${backdrop})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/80 to-[var(--color-bg-primary)]/30 backdrop-blur-sm" />
-        </>
-      )}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-md"
-      >
-        <div className="glass-panel p-10 rounded-2xl shadow-2xl border border-white/10 space-y-8">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-[var(--color-accent-primary)] to-[#FF003C] rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(229,9,20,0.5)] transform rotate-3">
-              <UserPlus className="text-white h-8 w-8 -rotate-3" />
-            </div>
-            <h1 className="heading-2 text-white uppercase tracking-widest">
-              Create Account
-            </h1>
-            <p className="text-[var(--color-text-secondary)] mt-2 font-medium">
-              Join Netflyer today
-            </p>
-          </div>
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              variant="bordered"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              radius="md"
-              classNames={{
-                input: "text-white text-base",
-                inputWrapper:
-                  "bg-white/5 border-white/10 hover:border-white/30 focus-within:!border-[var(--color-accent-primary)] transition-colors h-14",
-              }}
-              isRequired
+    <div className="relative min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[var(--bg-base)] overflow-hidden">
+      {/* Cinematic Backdrop - Full Screen on Mobile, Left Side on Desktop */}
+      <div className="absolute inset-0 lg:relative lg:block border-r border-[var(--border-faint)] bg-[#050505] z-0">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0"
+        >
+          {backdrop ? (
+            <Image 
+              src={backdrop.replace('/original/', '/w1280/')} 
+              alt="" 
+              fill
+              priority
+              className="object-cover opacity-40 lg:opacity-60"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              quality={90}
             />
-            <Input
-              type="email"
-              variant="bordered"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              radius="md"
-              classNames={{
-                input: "text-white text-base",
-                inputWrapper:
-                  "bg-white/5 border-white/10 hover:border-white/30 focus-within:!border-[var(--color-accent-primary)] transition-colors h-14",
-              }}
-              isRequired
-            />
-            <div className="relative">
-              <Input
-                type={isVisible ? "text" : "password"}
-                variant="bordered"
-                placeholder="Password (min 6 chars)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                radius="md"
-                classNames={{
-                  input: "text-white text-base",
-                  inputWrapper:
-                    "bg-white/5 border-white/10 hover:border-white/30 focus-within:!border-[var(--color-accent-primary)] transition-colors h-14",
-                }}
-                isRequired
-              />
-              <button
-                type="button"
-                onClick={toggleVisibility}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)] hover:text-white transition-colors"
-              >
-                {isVisible ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={formLoading}
-              className="btn btn-primary w-full h-14 text-base mt-2"
-            >
-              {formLoading ? "Creating Account..." : "Create Account"}
-            </button>
-          </form>
+          ) : (
+            <div className="w-full h-full bg-[#050505]" />
+          )}
+          {/* Cinematic Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/80 lg:via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-base)] via-transparent to-transparent" />
+        </motion.div>
 
-          <div className="text-center text-sm font-medium text-[var(--color-text-tertiary)] pt-4 border-t border-white/5">
-            <p>
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="text-[var(--color-accent-primary)] hover:text-white underline-offset-4 hover:underline transition-all font-bold tracking-wide uppercase text-xs ml-1"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
+        {/* Brand Overlay (Desktop) */}
+        <div className="hidden lg:block absolute top-12 left-12 z-20">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 bg-[var(--accent)] rounded-[4px] flex items-center justify-center shadow-[0_0_20px_var(--accent-glow)]">
+              <Film className="text-white w-5 h-5" />
+            </div>
+            <span className="t-hero text-2xl tracking-[0.2em] pt-1">NETFLYER</span>
+          </Link>
         </div>
-      </motion.div>
+
+        {/* Editorial Text (Desktop) */}
+        <div className="hidden lg:block absolute bottom-16 left-12 right-12 z-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
+            <span className="t-label text-[var(--accent)] mb-4 block">Joining Netflyer</span>
+            <h2 className="t-hero text-6xl mb-4 line-clamp-2">{movieTitle}</h2>
+            <p className="t-body max-w-md opacity-60">
+              Create an account to start your journey through the history of cinema. Save your favorites and watch anywhere.
+            </p>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Right Side: SignUp Form */}
+      <div className="relative z-10 flex flex-col justify-center px-8 sm:px-16 lg:px-24 py-12 overflow-y-auto">
+        {/* Mobile Logo */}
+        <div className="lg:hidden absolute top-8 left-8">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-[var(--accent)] rounded-[4px] flex items-center justify-center">
+              <Film className="text-white w-4 h-4" />
+            </div>
+            <span className="t-hero text-lg tracking-[0.15em] pt-1">NETFLYER</span>
+          </Link>
+        </div>
+
+        <div className="w-full max-w-sm mx-auto lg:mx-0">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <header className="mb-10">
+              <h1 className="t-title text-5xl mb-3">Join Us</h1>
+              <p className="t-body text-[var(--text-secondary)]">
+                Start your cinematic experience today.
+              </p>
+            </header>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="t-label block ml-1" htmlFor="username">Username</label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="cinephile_24"
+                  className="w-full px-4 py-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[var(--radius-sm)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:border-[var(--accent)] transition-all"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="t-label block ml-1" htmlFor="email">Email Address</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full px-4 py-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[var(--radius-sm)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:border-[var(--accent)] transition-all"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="t-label block ml-1" htmlFor="password">Password</label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={isVisible ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[var(--radius-sm)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:border-[var(--accent)] transition-all"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleVisibility}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors"
+                  >
+                    {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <p className="t-meta text-[10px] ml-1 opacity-50">MINIMUM 6 CHARACTERS</p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={formLoading}
+                className="btn btn-primary w-full py-4 text-sm uppercase tracking-widest font-bold mt-4"
+              >
+                {formLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creating Account
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Create Account <ChevronRight className="w-4 h-4" />
+                  </span>
+                )}
+              </button>
+            </form>
+
+            <footer className="mt-12 pt-8 border-t border-[var(--border-faint)]">
+              <p className="t-body text-sm">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="text-white font-bold hover:text-[var(--accent)] transition-colors inline-flex items-center gap-1 group"
+                >
+                  Sign in instead
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              </p>
+            </footer>
+          </motion.div>
+        </div>
+
+        {/* Back to Home */}
+        <Link 
+          href="/"
+          className="absolute bottom-8 left-8 lg:left-auto lg:right-12 flex items-center gap-2 t-meta hover:text-white transition-colors group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          Back to cinema
+        </Link>
+      </div>
     </div>
   );
 };

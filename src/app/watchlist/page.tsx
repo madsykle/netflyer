@@ -171,17 +171,30 @@ const WatchlistPage = () => {
           </div>
         ) : watchlistData.length === 0 ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-24 glass-panel rounded-2xl max-w-xl mx-auto border-[var(--border-faint)]"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="text-center py-32 surface border border-[var(--border-subtle)] rounded-[var(--radius-lg)] max-w-lg mx-auto"
           >
-            <BookmarkX className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-6 opacity-20" />
-            <h2 className="t-title text-3xl mb-3">Empty Watchlist</h2>
-            <p className="t-body mb-8 max-w-sm mx-auto text-sm opacity-60">
+            {/* Decorative circle */}
+            <div className="relative w-24 h-24 mx-auto mb-8">
+              <div className="absolute inset-0 bg-[var(--accent)]/10 rounded-full animate-pulse" />
+              <div className="absolute inset-4 bg-[var(--accent)]/20 rounded-full" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <BookmarkX className="w-10 h-10 text-[var(--accent)]" />
+              </div>
+            </div>
+            
+            <h2 
+              className="text-white text-4xl mb-3"
+              style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.02em' }}
+            >
+              Your Watchlist is Empty
+            </h2>
+            <p className="t-body mb-10 max-w-sm mx-auto">
               Start building your collection by adding films and series you want to track.
             </p>
             <button
-              className="btn btn-primary text-xs px-10"
+              className="btn btn-primary px-10 h-12 text-sm"
               onClick={() => router.push("/discover")}
             >
               Explore Discover

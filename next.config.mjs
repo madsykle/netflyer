@@ -15,7 +15,7 @@ const nextConfig = {
   // experimental.workerThreads and experimental.cpus are deprecated
   // Only keep what Next.js 15 actually supports
   experimental: {
-    optimizePackageImports: ['framer-motion', 'lucide-react', '@heroui/react'],
+    optimizePackageImports: ['lucide-react', '@heroui/react'],
   },
   eslint: {
     ignoreDuringBuilds: false,

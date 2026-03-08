@@ -3,13 +3,13 @@
 import { useSettings } from "../../hooks/useSettings";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Image as ImageIcon,
-  Wifi,
   Monitor,
   Check,
   Trash2,
-  Download,
   ArrowLeft,
+  Settings as SettingsIcon,
+  Play,
+  Gauge,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -30,145 +30,177 @@ const Settings = () => {
     }
   };
 
-  const sections = [
-    {
-      id: "appearance",
-      title: "Appearance",
-      icon: Monitor,
-      items: [
-        {
-          id: "imageQuality",
-          label: "Image Quality",
-          description: "Higher quality looks better but uses more data",
-          type: "select",
-          options: [
-            { value: "low", label: "Low" },
-            { value: "medium", label: "Medium" },
-            { value: "high", label: "High" },
-            { value: "auto", label: "Auto" },
-          ],
-        },
-        {
-          id: "reduceMotion",
-          label: "Reduce Motion",
-          description: "Minimize animations throughout the app",
-          type: "toggle",
-        },
-      ],
-    },
-    {
-      id: "playback",
-      title: "Playback",
-      icon: Wifi,
-      items: [
-        {
-          id: "dataSaver",
-          label: "Data Saver",
-          description: "Force low quality images and optimize playback",
-          type: "toggle",
-        },
-      ],
-    },
+  const qualityOptions = [
+    { value: "low", label: "Low", desc: "Save data" },
+    { value: "medium", label: "Medium", desc: "Balanced" },
+    { value: "high", label: "High", desc: "Best quality" },
+    { value: "auto", label: "Auto", desc: "Adaptive" },
   ];
 
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pt-32 pb-20">
-      <div className="container max-w-3xl">
+      {/* Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-[var(--accent)]/5 rounded-full blur-[150px]" />
+      </div>
+
+      <div className="container relative z-10 max-w-3xl">
         
-        <button 
+        <motion.button 
           onClick={() => router.back()} 
-          className="flex items-center gap-2 t-label text-[var(--text-muted)] hover:text-white transition-colors mb-8 group"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center gap-2 t-label text-[var(--text-muted)] hover:text-white transition-colors mb-10 group"
         >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Back</span>
-        </button>
+        </motion.button>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5 }}
         >
-          <h1 className="t-title text-5xl mb-12 uppercase tracking-wider">Settings</h1>
+          <div className="flex items-center gap-4 mb-12">
+            <div className="w-12 h-12 bg-[var(--accent)]/10 rounded-[var(--radius-md)] flex items-center justify-center border border-[var(--accent)]/20">
+              <SettingsIcon className="w-6 h-6 text-[var(--accent)]" />
+            </div>
+            <h1 
+              className="text-white text-5xl"
+              style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.02em' }}
+            >
+              Settings
+            </h1>
+          </div>
 
-          <div className="space-y-12">
-            {sections.map((section) => (
-              <section key={section.id} className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-[var(--border-faint)] pb-4">
-                  <section.icon className="w-4 h-4 text-[var(--accent)]" />
-                  <h2 className="t-label text-sm text-white">{section.title}</h2>
-                </div>
+          <div className="space-y-10">
+            {/* Appearance Section */}
+            <motion.section 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-faint)]">
+                <Monitor className="w-4 h-4 text-[var(--accent)]" />
+                <h2 className="t-label text-sm text-white">Appearance</h2>
+              </div>
 
-                <div className="space-y-4">
-                  {section.items.map((item) => (
-                    <div 
-                      key={item.id} 
-                      className="surface p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                    >
-                      <div>
-                        <h3 className="text-sm font-bold text-white mb-1">{item.label}</h3>
-                        <p className="text-xs text-[var(--text-muted)] leading-relaxed">{item.description}</p>
-                      </div>
-
-                      {item.type === "select" ? (
-                        <div className="flex gap-1 p-1 bg-[var(--bg-raised)] rounded-[var(--radius-sm)] border border-[var(--border-faint)]">
-                          {item.options?.map((opt) => (
-                            <button
-                              key={opt.value}
-                              onClick={() => updateSetting(item.id as any, opt.value)}
-                              className={`px-4 py-1.5 rounded-[var(--radius-sm)] text-[10px] font-bold uppercase tracking-widest transition-all ${
-                                settings[item.id as keyof typeof settings] === opt.value
-                                  ? "bg-white/10 text-white shadow-lg"
-                                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                              }`}
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => updateSetting(item.id as any, !settings[item.id as keyof typeof settings])}
-                          className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
-                            settings[item.id as keyof typeof settings] ? "bg-[var(--accent)]" : "bg-white/10"
-                          }`}
-                        >
-                          <motion.div
-                            animate={{ x: settings[item.id as keyof typeof settings] ? 26 : 4 }}
-                            className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-md"
-                          />
-                        </button>
-                      )}
+              <div className="space-y-6">
+                {/* Image Quality */}
+                <div className="surface p-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                    <div>
+                      <h3 className="text-white font-semibold mb-1">Image Quality</h3>
+                      <p className="text-xs text-[var(--text-muted)]">Higher quality looks better but uses more data</p>
                     </div>
-                  ))}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {qualityOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => updateSetting("imageQuality", opt.value)}
+                        className={`flex-1 py-3 px-4 rounded-[var(--radius-sm)] text-center transition-all border ${
+                          settings.imageQuality === opt.value
+                            ? "bg-[var(--accent)] border-[var(--accent)] text-white"
+                            : "bg-white/5 border-[var(--border-faint)] text-[var(--text-secondary)] hover:border-[var(--border-subtle)]"
+                        }`}
+                      >
+                        <span className="text-xs font-bold uppercase tracking-wider block">{opt.label}</span>
+                        <span className="text-[10px] opacity-50">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </section>
-            ))}
 
-            <section className="pt-12 border-t border-[var(--border-faint)] space-y-6">
-              <div className="flex items-center gap-3">
-                <Trash2 className="w-4 h-4 text-red-500" />
+                {/* Reduce Motion */}
+                <div className="surface p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Reduce Motion</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Minimize animations throughout the app</p>
+                  </div>
+                  <button
+                    onClick={() => updateSetting("reduceMotion", !settings.reduceMotion)}
+                    className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+                      settings.reduceMotion ? "bg-[var(--accent)]" : "bg-white/10"
+                    }`}
+                  >
+                    <motion.div
+                      animate={{ x: settings.reduceMotion ? 28 : 4 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    />
+                  </button>
+                </div>
+              </div>
+            </motion.section>
+
+            {/* Playback Section */}
+            <motion.section 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-faint)]">
+                <Play className="w-4 h-4 text-[var(--accent)]" />
+                <h2 className="t-label text-sm text-white">Playback</h2>
+              </div>
+
+              <div className="surface p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <div>
+                  <h3 className="text-white font-semibold mb-1">Data Saver</h3>
+                  <p className="text-xs text-[var(--text-muted)]">Force low quality images and optimize playback</p>
+                </div>
+                <button
+                  onClick={() => updateSetting("dataSaver", !settings.dataSaver)}
+                  className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+                    settings.dataSaver ? "bg-[var(--accent)]" : "bg-white/10"
+                  }`}
+                >
+                  <motion.div
+                    animate={{ x: settings.dataSaver ? 28 : 4 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                  />
+                </button>
+              </div>
+            </motion.section>
+
+            {/* Advanced Section */}
+            <motion.section 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-faint)]">
+                <Gauge className="w-4 h-4 text-[var(--accent)]" />
                 <h2 className="t-label text-sm text-white">Advanced & Data</h2>
               </div>
 
               <div className="surface p-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-sm font-bold text-white mb-1">Local Storage</h3>
-                    <p className="text-xs text-[var(--text-muted)]">Currently using {getStorageUsage()} MB of device storage</p>
+                    <h3 className="text-white font-semibold mb-1">Local Storage</h3>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Currently using <span className="text-white font-semibold">{getStorageUsage()} MB</span> of device storage
+                    </p>
                   </div>
                   <button
                     onClick={handleClearCache}
-                    className={`btn ${cacheCleared ? "bg-green-500" : "btn-secondary"} text-xs py-2.5 px-6 min-w-[160px]`}
+                    className={`btn ${cacheCleared ? "bg-green-500 border-green-500" : "btn-secondary"} py-2.5 px-6`}
                   >
                     {cacheCleared ? (
-                      <><Check className="w-3.5 h-3.5" /> Cleared</>
+                      <><Check className="w-4 h-4" /> Cleared</>
                     ) : (
-                      <><Trash2 className="w-3.5 h-3.5" /> Clear All Cache</>
+                      <><Trash2 className="w-4 h-4" /> Clear All Cache</>
                     )}
                   </button>
                 </div>
               </div>
-            </section>
+            </motion.section>
           </div>
         </motion.div>
       </div>

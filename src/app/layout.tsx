@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import NavbarWrapper from "../components/NavbarWrapper";
+import FooterWrapper from "../components/FooterWrapper";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "Netflyer | Cinematic Streaming",
-  description: "Netflyer is a free movie streaming platform. Watch your favorite movies, anime and TV shows online for free.",
+  description: "netflyer is a free movie streaming platform. Watch your favorite movies, anime and TV shows online for free.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -19,13 +19,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="bg-[var(--bg-base)] text-[var(--text-primary)] min-h-screen flex flex-col antialiased">
         <Providers>
-          <Navbar />
+          <NavbarWrapper />
           <ErrorBoundary>
             <main className="flex-grow">
               {children}
             </main>
           </ErrorBoundary>
-          <Footer />
+          <FooterWrapper />
         </Providers>
       </body>
     </html>
