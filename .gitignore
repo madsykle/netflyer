@@ -1,34 +1,23 @@
-# Dependencies
-node_modules
-.pnp
-.pnp.js
-yarn.lock
-package-lock.json
-pnpm-lock.yaml
-bun.lock
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Production builds
+# dependencies
+node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
 dist
 dist-ssr
-*.local
 
-# Environment files
-.env
-.env.local
-.env.*.local
-.env.development
-.env.test
-.env.production
-
-# IDE - IDX/Google Cloud
-.idx
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# OS generated files
+# misc
 .DS_Store
 .DS_Store?
 ._*
@@ -36,38 +25,45 @@ dist-ssr
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.pem
 
-# Logs
-logs
-*.log
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Testing
-coverage
-.nyc_output
+# local env files
+.env*.local
+.env
+.env.development
+.env.test
+.env.production
 
-# Temporary files
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE / Editor
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.idx
+
+# AI Workspaces / temporary
+.gemini/
+.opencode/
+.kiro/
+*.bak
+*.orig
 *.tmp
 *.temp
 .cache
-.parcel-cache
-
-# Vite
 .vite
-
-# ESLint
 .eslintcache
-
-# TypeScript
-*.tsbuildinfo
-
-# Misc
-*.bak
-*.orig
-
-AGENTS.md
-design.md
