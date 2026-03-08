@@ -18,10 +18,6 @@ const nextConfig = {
             value: 'strict-origin-when-cross-origin',
           },
           {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), accelerometer=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su"), gyroscope=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su"), fullscreen=(self "https://vidsrc.pk" "https://vidsrc.icu" "https://vidplus.tv" "https://vidlink.pro" "https://embed.su" "https://vidsrc-embed.ru" "https://vidsrc-embed.su" "https://vidsrcme.su" "https://vsrc.su")',
-          },
-          {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
           },
