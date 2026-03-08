@@ -326,7 +326,8 @@ const WatchClient = ({ params }: Props) => {
                     className="w-full h-full border-0"
                     allowFullScreen
                     scrolling="no"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-popups"
                   />
                 </motion.div>
               ) : null}
