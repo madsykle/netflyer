@@ -75,7 +75,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../components/ToastProvider";
 
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "mads@netflyer.icu").split(",").map(e => e.trim());
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "asnesbeer3@gmail.com,mads@netflyer.icu").split(",").map(e => e.trim());
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<FirebaseUser | null>(null);

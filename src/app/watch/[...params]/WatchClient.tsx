@@ -399,36 +399,36 @@ const WatchClient = ({ params }: Props) => {
   return (
     <div className="min-h-screen bg-[#050505] text-[var(--text-primary)] flex flex-col font-['DM_Sans']">
       {/* Cinematic Top Bar */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-black/90 via-black/60 to-transparent pt-6 pb-12 px-6 sm:px-10 flex items-start justify-between pointer-events-none transition-opacity duration-300">
-        <div className="flex items-center gap-6 pointer-events-auto">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-black/90 via-black/60 to-transparent pt-4 pb-10 px-4 sm:px-10 flex items-start justify-between pointer-events-none transition-opacity duration-300">
+        <div className="flex items-center gap-3 sm:gap-6 pointer-events-auto">
           <button
             onClick={() => router.back()}
-            className="w-12 h-12 rounded-[var(--radius-sm)] bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all group backdrop-blur-md"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-[var(--radius-sm)] bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all group backdrop-blur-md"
           >
             <ArrowLeft className="w-5 h-5 text-white group-hover:-translate-x-1 transition-transform" />
           </button>
           
           <div>
-            <div className="flex items-center gap-2 text-[var(--accent)] text-[10px] font-bold uppercase tracking-[0.2em] mb-1.5">
-              {type === "movie" ? <Film className="w-3.5 h-3.5" /> : <Tv className="w-3.5 h-3.5" />}
+            <div className="flex items-center gap-2 text-[var(--accent)] text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
+              {type === "movie" ? <Film className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Tv className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               <span>{type === "movie" ? "Feature Film" : "Television Series"}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-lg" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>
+            <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-lg" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>
               {fullTitle}
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pointer-events-auto">
+        <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
           {/* Provider Selector */}
           <div className="relative">
             <button
               onClick={() => setShowProviderMenu(!showProviderMenu)}
-              className="h-12 px-5 bg-white/5 border border-white/10 hover:border-white/20 rounded-[var(--radius-sm)] flex items-center gap-3 backdrop-blur-md transition-all text-sm font-medium"
+              className="h-10 sm:h-12 px-3 sm:px-5 bg-white/5 border border-white/10 hover:border-white/20 rounded-[var(--radius-sm)] flex items-center gap-2 sm:gap-3 backdrop-blur-md transition-all text-xs sm:text-sm font-medium"
             >
-              <MonitorPlay className="w-4 h-4 text-[var(--text-secondary)]" />
+              <MonitorPlay className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
               <span className="hidden sm:inline text-white">{currentProvider?.label}</span>
-              <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 ${showProviderMenu ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-[var(--text-muted)] transition-transform duration-300 ${showProviderMenu ? "rotate-180" : ""}`} />
             </button>
 
             <AnimatePresence>
@@ -472,15 +472,13 @@ const WatchClient = ({ params }: Props) => {
             </AnimatePresence>
           </div>
 
-          {/* Stream Selector removed (frontend-only mode) */}
-
           <button
             onClick={fetchEmbedUrl}
             disabled={loading}
-            className="w-12 h-12 bg-white/5 border border-white/10 hover:border-white/20 rounded-[var(--radius-sm)] flex items-center justify-center backdrop-blur-md transition-all disabled:opacity-50"
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-white/5 border border-white/10 hover:border-white/20 rounded-[var(--radius-sm)] flex items-center justify-center backdrop-blur-md transition-all disabled:opacity-50"
             title="Reload Player (R)"
           >
-            <RotateCcw className={`w-4 h-4 text-white ${loading ? "animate-spin" : ""}`} />
+            <RotateCcw className={`w-3.5 h-3.5 text-white ${loading ? "animate-spin" : ""}`} />
           </button>
           <button
             onClick={() => setShowShortcuts(true)}
@@ -493,10 +491,10 @@ const WatchClient = ({ params }: Props) => {
       </header>
 
       {/* Main Theater Area */}
-      <main className="flex-1 flex flex-col lg:flex-row w-full h-screen pt-24 pb-6 px-6 sm:px-10 gap-6">
+      <main className="flex-1 flex flex-col lg:flex-row w-full h-auto lg:h-[calc(100vh-2.5rem)] pt-20 lg:pt-24 pb-6 px-4 sm:px-10 gap-4 lg:gap-6 lg:overflow-hidden">
         
         {/* Video Player */}
-        <div className="flex-1 relative bg-black rounded-[var(--radius-md)] overflow-hidden border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col">
+        <div className="w-full aspect-video lg:h-full lg:flex-1 relative bg-black rounded-[var(--radius-md)] overflow-hidden border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col">
           <div className="flex-1 relative w-full h-full">
             <AnimatePresence mode="wait">
               {loading ? (
@@ -549,7 +547,7 @@ const WatchClient = ({ params }: Props) => {
                       sandbox={
                         strictShield
                           ? "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
-                          : "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-popups"
+                          : undefined
                       }
                       loading="eager"
                     />
@@ -568,26 +566,23 @@ const WatchClient = ({ params }: Props) => {
                 >
                   <p className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-[0.2em] mb-1">Up Next</p>
                   <h4 className="text-sm font-bold text-white mb-0.5 truncate">{nextEpisodeInfo.title}</h4>
-                  <p className="text-xs text-[var(--text-muted)] mb-4">Season {nextEpisodeInfo.season} • Episode {nextEpisodeInfo.episode}</p>
-                  <div className="flex items-center gap-3">
+                  <p className="text-xs text-[var(--text-secondary)] mb-4">Starts in {countdown} seconds...</p>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => {
                         router.push(`/watch/tv/${id}/${nextEpisodeInfo.season}/${nextEpisodeInfo.episode}`);
-                        setCountdown(null);
-                        setNextEpisodeInfo(null);
-                        countdownActive.current = false;
                       }}
-                      className="px-4 py-2 bg-[var(--accent)] hover:bg-[#ff1a2a] text-white text-xs font-bold rounded-[var(--radius-sm)] flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
+                      className="btn btn-primary text-xs py-2 px-4 flex-1"
                     >
-                      <Play className="w-3 h-3 fill-current" />
-                      Play Now ({countdown}s)
+                      Play Now
                     </button>
                     <button
                       onClick={() => {
                         setCountdown(null);
                         setNextEpisodeInfo(null);
+                        countdownActive.current = false;
                       }}
-                      className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-[var(--radius-sm)] transition-all cursor-pointer"
+                      className="btn btn-secondary text-xs py-2 px-4 flex-1"
                     >
                       Cancel
                     </button>
@@ -598,7 +593,7 @@ const WatchClient = ({ params }: Props) => {
           </div>
           
           {/* Player Status Bar */}
-          <div className="h-12 bg-[#0a0a0c] border-t border-white/5 flex items-center justify-between px-6 shrink-0">
+          <div className="py-2.5 sm:h-12 bg-[#0a0a0c] border-t border-white/5 flex items-center justify-between px-4 sm:px-6 shrink-0 flex-wrap gap-2.5">
             <div className="flex items-center gap-3">
               <div className={`w-2 h-2 rounded-full ${embedUrl && !loading ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-[var(--accent)] animate-pulse shadow-[0_0_10px_var(--accent-glow)]'}`} />
               <span className="t-meta text-[10px] text-[var(--text-secondary)]">
@@ -607,11 +602,11 @@ const WatchClient = ({ params }: Props) => {
             </div>
 
             {/* Player Toolbar Controls */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 flex-wrap">
               {/* Ad Shield Toggle */}
               <button
                 onClick={toggleStrictShield}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-sm)] border text-[10px] uppercase font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-sm)] border text-[9px] uppercase font-bold transition-all cursor-pointer ${
                   strictShield
                     ? "bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20"
                     : "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
@@ -620,12 +615,12 @@ const WatchClient = ({ params }: Props) => {
               >
                 {strictShield ? (
                   <>
-                    <Shield className="w-3.5 h-3.5" />
+                    <Shield className="w-3 h-3" />
                     <span>Ad Shield: On</span>
                   </>
                 ) : (
                   <>
-                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <ShieldAlert className="w-3 h-3" />
                     <span>Ad Shield: Off</span>
                   </>
                 )}
@@ -635,20 +630,20 @@ const WatchClient = ({ params }: Props) => {
               {type === "tv" && (
                 <button
                   onClick={toggleAutoPlayNext}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-sm)] border text-[10px] uppercase font-bold transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-sm)] border text-[9px] uppercase font-bold transition-all cursor-pointer ${
                     autoPlayNext
                       ? "bg-[var(--accent)]/10 border-[var(--accent)]/30 text-[var(--accent)] hover:bg-[var(--accent)]/20"
                       : "bg-white/5 border-white/10 text-[var(--text-muted)] hover:bg-white/10"
                   }`}
                   title={autoPlayNext ? "Auto-Play Next Episode Enabled" : "Auto-Play Next Episode Disabled"}
                 >
-                  <Zap className={`w-3.5 h-3.5 ${autoPlayNext ? "fill-current" : ""}`} />
+                  <Zap className={`w-3 h-3 ${autoPlayNext ? "fill-current" : ""}`} />
                   <span>Auto-Play: {autoPlayNext ? "On" : "Off"}</span>
                 </button>
               )}
             </div>
 
-            <div className="t-meta text-[10px] text-[var(--text-muted)]">
+            <div className="hidden md:block t-meta text-[10px] text-[var(--text-muted)]">
               HOST: <span className="text-white">{currentProvider?.label.toUpperCase()}</span>
             </div>
           </div>

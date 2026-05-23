@@ -254,7 +254,7 @@ const Discover = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-3">
                     <Select
                       label="Content Type"
@@ -268,8 +268,8 @@ const Discover = () => {
                         label: "t-label text-[10px]",
                         trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
                       }}
                     >
                       {typeOptions.map((option) => (
@@ -294,8 +294,8 @@ const Discover = () => {
                         label: "t-label text-[10px]",
                         trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
                       }}
                     >
                       {(filters.type === "movie" ? genres.movie : filters.type === "tv" ? genres.tv : [...genres.movie, ...genres.tv]).map((genre) => (
@@ -320,8 +320,8 @@ const Discover = () => {
                         label: "t-label text-[10px]",
                         trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
                       }}
                     >
                       {generateYearOptions().slice(0, 50).map((year) => (
@@ -345,8 +345,8 @@ const Discover = () => {
                         label: "t-label text-[10px]",
                         trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
                         value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100",
+                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
+                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
                       }}
                     >
                       {sortOptions.map((option) => (

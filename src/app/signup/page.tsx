@@ -182,7 +182,7 @@ const SignUp = () => {
   }
 
   return (
-    <div className="relative min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[var(--bg-base)] overflow-hidden">
+    <div className="relative min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[var(--bg-base)] overflow-y-auto lg:overflow-hidden">
       {/* Cinematic Backdrop - Full Screen on Mobile, Left Side on Desktop */}
       <div className="absolute inset-0 lg:relative lg:block border-r border-[var(--border-faint)] bg-[#050505] z-0">
         <motion.div

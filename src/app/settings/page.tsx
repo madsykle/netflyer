@@ -11,13 +11,53 @@ import {
   Play,
   Gauge,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+import { tmdbService } from "../../lib/tmdb";
+import Image from "next/image";
+
+const CURATED_FILMS = [
+  503919, // The Lighthouse
+  531428, // Portrait of a Lady on Fire
+  335984, // Blade Runner 2049
+  120467, // The Grand Budapest Hotel
+  70608,  // Drive
+  1398,   // Stalker
+  490,    // The Seventh Seal
+  13475,  // Mulholland Drive
+  290098, // The Handmaiden
+  329865, // Arrival
+  376867, // Moonlight
+  496243, // Parasite
+  152601, // Her
+  97370,  // Under the Skin
+  373023, // Burning
+  11059,  // Memories of Murder
+  361292, // Suspiria (2018)
+];
 
 const Settings = () => {
   const { settings, updateSetting, clearCache, getStorageUsage } = useSettings();
   const router = useRouter();
   const [cacheCleared, setCacheCleared] = useState(false);
+  const [backdropUrl, setBackdropUrl] = useState("");
+
+  useEffect(() => {
+    const fetchBackdrop = async () => {
+      try {
+        const randomId = CURATED_FILMS[Math.floor(Math.random() * CURATED_FILMS.length)];
+        const movie = await tmdbService.getMovieDetails(randomId);
+        if (movie.backdrop_path) {
+          setBackdropUrl(`https://image.tmdb.org/t/p/original${movie.backdrop_path}`);
+        }
+      } catch (error) {
+        console.error("Error fetching settings backdrop:", error);
+        setBackdropUrl("https://image.tmdb.org/t/p/original/s3TGo9h36S9DYpv7r0kvUrMwtZ4.jpg");
+      }
+    };
+    fetchBackdrop();
+  }, []);
 
   const handleClearCache = () => {
     if (confirm("This will reset your local settings and clear search history. Continue?")) {
@@ -38,10 +78,20 @@ const Settings = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pt-32 pb-20">
-      {/* Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-[var(--accent)]/5 rounded-full blur-[150px]" />
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pt-32 pb-20 relative overflow-hidden">
+      {/* High Quality Cinematic Blurred Backdrop */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-[#050508]">
+        {backdropUrl && (
+          <Image 
+            src={backdropUrl.replace('/original/', '/w1280/')} 
+            alt="" 
+            fill
+            priority
+            className="object-cover opacity-15 blur-lg scale-105 transition-opacity duration-1000 animate-kenburns"
+            sizes="100vw"
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/80 to-[var(--bg-base)]/60 z-10" />
       </div>
 
       <div className="container relative z-10 max-w-3xl">
@@ -88,7 +138,7 @@ const Settings = () => {
 
               <div className="space-y-6">
                 {/* Image Quality */}
-                <div className="surface p-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
+                <div className="glass-premium p-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                     <div>
                       <h3 className="text-white font-semibold mb-1">Image Quality</h3>
@@ -96,12 +146,12 @@ const Settings = () => {
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {qualityOptions.map((opt) => (
                       <button
                         key={opt.value}
                         onClick={() => updateSetting("imageQuality", opt.value)}
-                        className={`flex-1 py-3 px-4 rounded-[var(--radius-sm)] text-center transition-all border ${
+                        className={`py-3 px-4 rounded-[var(--radius-sm)] text-center transition-all border ${
                           settings.imageQuality === opt.value
                             ? "bg-[var(--accent)] border-[var(--accent)] text-white"
                             : "bg-white/5 border-[var(--border-faint)] text-[var(--text-secondary)] hover:border-[var(--border-subtle)]"
@@ -115,7 +165,7 @@ const Settings = () => {
                 </div>
 
                 {/* Reduce Motion */}
-                <div className="surface p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <div className="glass-premium p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
                   <div>
                     <h3 className="text-white font-semibold mb-1">Reduce Motion</h3>
                     <p className="text-xs text-[var(--text-muted)]">Minimize animations throughout the app</p>
@@ -148,7 +198,7 @@ const Settings = () => {
                 <h2 className="t-label text-sm text-white">Playback</h2>
               </div>
 
-              <div className="surface p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+              <div className="glass-premium p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1">Data Saver</h3>
                   <p className="text-xs text-[var(--text-muted)]">Force low quality images and optimize playback</p>
@@ -180,7 +230,7 @@ const Settings = () => {
                 <h2 className="t-label text-sm text-white">Advanced & Data</h2>
               </div>
 
-              <div className="surface p-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
+              <div className="glass-premium p-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <h3 className="text-white font-semibold mb-1">Local Storage</h3>

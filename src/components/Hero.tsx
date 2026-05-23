@@ -177,17 +177,17 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
               {movie.overview}
             </p>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <button
                 onClick={handlePlay}
-                className="btn btn-primary min-w-[140px]"
+                className="btn btn-primary w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
               >
                 <FaPlay className="text-[10px]" />
                 Play Now
               </button>
               <button
                 onClick={handleInfo}
-                className="btn btn-secondary min-w-[140px]"
+                className="btn btn-secondary w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
               >
                 More Info
               </button>

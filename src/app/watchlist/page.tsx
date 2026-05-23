@@ -295,11 +295,11 @@ const WatchlistPage = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
-                        className="surface p-4 rounded-[var(--radius-md)] border border-[var(--border-subtle)] hover:bg-white/5 transition-all group"
+                        className="surface p-3 sm:p-4 rounded-[var(--radius-md)] border border-[var(--border-subtle)] hover:bg-white/5 transition-all group"
                       >
-                        <div className="flex gap-6 items-center">
+                        <div className="flex gap-4 sm:gap-6 items-center">
                           <div 
-                            className="relative w-16 md:w-20 aspect-poster rounded-[var(--radius-sm)] overflow-hidden cursor-pointer bg-[var(--bg-raised)] border border-[var(--border-faint)]"
+                            className="relative w-14 sm:w-20 aspect-poster rounded-[var(--radius-sm)] overflow-hidden cursor-pointer bg-[var(--bg-raised)] border border-[var(--border-faint)] flex-shrink-0"
                             onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
                           >
                             <Image
@@ -307,42 +307,44 @@ const WatchlistPage = () => {
                               alt={title}
                               fill
                               className="object-cover"
-                              sizes="80px"
+                              sizes="(max-width: 640px) 56px, 80px"
                             />
                           </div>
                           
                           <div className="flex-1 min-w-0">
                             <h3 
-                              className="text-lg font-bold truncate cursor-pointer hover:text-[var(--accent)] transition-colors"
+                              className="text-base sm:text-lg font-bold truncate cursor-pointer hover:text-[var(--accent)] transition-colors text-white"
                               onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
                             >
                               {title}
                             </h3>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="t-meta">{year}</span>
-                              <span className="meta-chip py-0">{isMovie ? "Film" : "Series"}</span>
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+                              <span className="t-meta text-[10px] sm:text-xs">{year}</span>
+                              <span className="meta-chip py-0 text-[9px] sm:text-[10px]">{isMovie ? "Film" : "Series"}</span>
                               {item.vote_average > 0 && (
-                                <span className="rating-chip text-[10px]">★ {item.vote_average.toFixed(1)}</span>
+                                <span className="rating-chip text-[9px] sm:text-[10px]">★ {item.vote_average.toFixed(1)}</span>
                               )}
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                             <button
                               onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
-                              className="btn btn-icon rounded-full"
+                              className="btn btn-icon rounded-full w-9 h-9 sm:w-10 sm:h-10"
+                              aria-label="Play"
                             >
-                              <Play className="w-4 h-4 fill-current ml-0.5" />
+                              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
                             </button>
                             <button
                               onClick={() => removeFromWatchlist(item.id, item.mediaType)}
                               disabled={removingId === item.id}
-                              className="btn btn-icon rounded-full hover:text-red-500 hover:bg-red-500/10"
+                              className="btn btn-icon rounded-full w-9 h-9 sm:w-10 sm:h-10 hover:text-red-500 hover:bg-red-500/10"
+                              aria-label="Remove"
                             >
                               {removingId === item.id ? (
-                                <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
                               ) : (
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                               )}
                             </button>
                           </div>

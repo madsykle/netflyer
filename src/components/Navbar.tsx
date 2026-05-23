@@ -38,6 +38,17 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   // close menu on route change
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
@@ -175,7 +186,7 @@ export default function Navbar() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -16, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.16,1,0.3,1] }}
-              className="fixed top-14 inset-x-0 z-[95] glass-strong border-b border-[var(--border-subtle)] md:hidden"
+              className="fixed top-14 inset-x-0 z-[95] glass-strong border-b border-[var(--border-subtle)] md:hidden max-h-[calc(100svh-3.5rem)] overflow-y-auto"
             >
               <div className="container py-4 flex flex-col gap-1">
                 {NAV_ITEMS.map(({ path, label, icon: Icon }, i) => (
