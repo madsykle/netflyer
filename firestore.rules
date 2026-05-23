@@ -2,46 +2,60 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper function to check if the authenticated user is an admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        request.auth.token.email == 'mads@netflyer.icu' ||
+        request.auth.token.email == 'admin@example.com' ||
+        request.auth.token.email == 'madsykle@gmail.com'
+      );
+    }
+
     // Users collection
-    // Users can only read/write their own document
+    // Users can only read/write their own document, admins can read/write all
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
 
     // Reviews collection
     // Anyone can read
     // Any authenticated user can create
-    // Only owner can update/delete
+    // Only owner or admin can update/delete
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
     }
 
     // Watchlist collection
-    // Users can only read/write their own watchlist documents
+    // Users can only read/write their own watchlist documents, admins can read/write all
     match /watchlist/{docId} {
-      // Use resource.data for reading/deleting existing documents
-      allow read, delete: if request.auth != null && request.auth.uid == resource.data.userID;
-      // Use request.resource.data for creating/updating new documents
-      allow create, update: if request.auth != null && request.auth.uid == request.resource.data.userID;
+      allow read, delete: if request.auth != null && (request.auth.uid == resource.data.userID || isAdmin());
+      allow create, update: if request.auth != null && (request.auth.uid == request.resource.data.userID || isAdmin());
     }
 
-    // Watch History collection (New!)
-    // Users can only read/write their own watch history based on the path
+    // Watch History collection
+    // Users can only read/write their own watch history, admins can read/write all
     match /watchHistory/{userId}/items/{itemId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Collection Group rule for items (watch history items)
+    // ONLY admins are allowed to perform collection group queries on watch history items
+    match /{path=**}/items/{itemId} {
+      allow read: if isAdmin();
     }
 
     // Admin collections (movies, tvShows) - Deny by default, only allow if admin claim is present
     match /movies/{movieId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
     
     match /tvShows/{tvShowId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
   }
 }

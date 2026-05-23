@@ -115,7 +115,7 @@ const SearchPage = () => {
               placeholder="Title, actor, genre..."
               autoComplete="off"
               suppressHydrationWarning
-              className="w-full pl-12 pr-12 py-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[var(--radius-md)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-lg focus:outline-none focus:border-[var(--accent)] transition-all shadow-2xl"
+              className="w-full pl-12 pr-12 py-4 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[var(--radius-md)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-lg focus:outline-none focus:shadow-[0_0_15px_rgba(229,9,20,0.15)] transition-all duration-300"
             />
             {query && (
               <button
@@ -165,11 +165,15 @@ const SearchPage = () => {
           </div>
 
           {/* Quick Filters */}
-          <div className="flex flex-wrap gap-2 mt-6">
+          <div className="flex flex-wrap gap-2.5 mt-6">
             {['All', 'Movies', 'TV', 'Anime'].map((f, i) => (
               <button 
                 key={f} 
-                className={`chip-base ${i === 0 ? 'chip-primary' : 'chip-secondary'} !text-[10px] !py-2 !px-6`}
+                className={`relative rounded-full text-[10px] font-semibold tracking-widest uppercase transition-all duration-300 px-5 py-2.5 whitespace-nowrap cursor-pointer select-none border ${
+                  i === 0 
+                    ? "bg-[var(--accent)] border-[var(--accent)] text-white shadow-[0_0_12px_var(--accent-glow)] scale-[1.03]" 
+                    : "bg-white/[0.02] border-white/[0.05] text-[var(--text-secondary)] hover:text-white hover:bg-white/[0.06] hover:border-white/[0.08]"
+                }`}
               >
                 {f}
               </button>

@@ -8,6 +8,14 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 export const metadata: Metadata = {
   title: "Netflyer | Cinematic Streaming",
   description: "netflyer is a free movie streaming platform. Watch your favorite movies, anime and TV shows online for free.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Netflyer",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

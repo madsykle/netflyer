@@ -2,6 +2,7 @@
 
 import { useSettings } from "../../../../hooks/useSettings";
 import { auth, db } from "../../../../lib/firebase";
+import { filterText } from "../../../../lib/profanity";
 import {
   Select,
   SelectItem,
@@ -197,13 +198,17 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
 
   const handleAddReview = async () => {
     if (!user || newReview.trim() === "") return;
+    const trimmedReview = newReview.trim().slice(0, 1000);
+    const filteredReview = filterText(trimmedReview);
+    const validatedRating = Math.min(5, Math.max(1, Math.floor(reviewRating)));
+
     await addDoc(collection(db, "reviews"), {
       userId: user.uid,
       userName: userName || user.displayName || "User",
       itemId: id,
       type: type,
-      text: newReview,
-      rating: reviewRating,
+      text: filteredReview,
+      rating: validatedRating,
       likes: [],
       likeCount: 0,
       createdAt: serverTimestamp(),
@@ -323,22 +328,22 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
 
               {/* Meta row */}
               <div className="flex items-center gap-4 flex-wrap mb-10">
-                <span className="t-meta text-white/90 bg-white/10 px-3 py-1.5 rounded-[var(--radius-sm)] border border-white/5 shadow-inner">
+                <span className="t-meta text-white/90 bg-white/[0.04] border border-white/[0.08] px-3.5 py-1.5 rounded-[4px] shadow-sm backdrop-blur-md font-bold tracking-widest text-xs">
                   {new Date(releaseDate).getFullYear() || "N/A"}
                 </span>
                 {runtime && (
-                  <span className="t-meta text-white/90 bg-white/10 px-3 py-1.5 rounded-[var(--radius-sm)] border border-white/5 shadow-inner">
+                  <span className="t-meta text-white/90 bg-white/[0.04] border border-white/[0.08] px-3.5 py-1.5 rounded-[4px] shadow-sm backdrop-blur-md font-bold tracking-widest text-xs">
                     {runtime}
                   </span>
                 )}
                 {details.vote_average > 0 && (
-                  <span className="rating-chip bg-white/10 px-3 py-1.5 rounded-[var(--radius-sm)] border border-white/5 shadow-inner">
+                  <span className="text-xs font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3.5 py-1.5 rounded-[4px] shadow-sm backdrop-blur-md flex items-center gap-1.5 tracking-wider">
                     ★ {details.vote_average.toFixed(1)}
                   </span>
                 )}
                 <div className="flex gap-2 ml-2">
                   {details.genres?.slice(0, 3).map((g: any) => (
-                    <span key={g.id} className="genre-chip">{g.name}</span>
+                    <span key={g.id} className="genre-chip !rounded-[4px] !px-3 !py-1.5 !text-xs !bg-[var(--accent-dim)] !border-[rgba(229,9,20,0.25)]">{g.name}</span>
                   ))}
                 </div>
               </div>
@@ -347,32 +352,32 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
               <div className="flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => router.push(type === 'tv' ? `/watch/tv/${id}/1/1` : `/watch/movie/${id}`)}
-                  className="btn btn-primary h-14 px-8 md:px-12 text-sm uppercase tracking-widest font-bold shadow-[0_0_20px_var(--accent-glow)] hover:scale-105"
+                  className="btn btn-primary h-14 px-8 md:px-12 text-xs uppercase tracking-widest font-extrabold shadow-[0_0_20px_rgba(229,9,20,0.3)] hover:scale-105 transition-all duration-300"
                 >
-                  <Play className="w-5 h-5 fill-current" />
+                  <Play className="w-4 h-4 fill-current mr-0.5" />
                   Play Now
                 </button>
 
                 <button
                   onClick={handleWatchlistToggle}
                   disabled={watchlistLoading}
-                  className="btn btn-secondary h-14 px-6 md:px-8 text-sm uppercase tracking-widest font-bold hover:scale-105 min-w-[160px]"
+                  className="btn bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 h-14 px-6 md:px-8 text-xs uppercase tracking-widest font-extrabold text-white hover:scale-105 transition-all duration-300 min-w-[160px]"
                 >
                   {watchlistLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : watchlist ? (
-                    <><Check className="w-5 h-5 text-green-500" /> Saved</>
+                    <><Check className="w-4 h-4 text-green-500" /> Saved</>
                   ) : (
-                    <><Plus className="w-5 h-5" /> Watchlist</>
+                    <><Plus className="w-4 h-4" /> Watchlist</>
                   )}
                 </button>
 
                 {trailerKey && (
                   <button 
                     onClick={() => setShowTrailer(true)}
-                    className="btn btn-ghost h-14 px-6 text-sm uppercase tracking-widest font-bold border border-transparent hover:border-white/20 transition-all hover:bg-white/5"
+                    className="btn btn-ghost h-14 px-6 text-xs uppercase tracking-widest font-extrabold border border-transparent hover:border-white/10 transition-all hover:bg-white/[0.04]"
                   >
-                    <Film className="w-5 h-5 mr-2" />
+                    <Film className="w-4 h-4 mr-2" />
                     Trailer
                   </button>
                 )}
@@ -435,7 +440,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                           key={person.id}
                           className="group"
                         >
-                          <div className="relative aspect-square mb-3 rounded-[var(--radius-md)] overflow-hidden bg-[var(--bg-raised)] border border-[var(--border-faint)] group-hover:border-[var(--accent)] transition-colors shadow-lg">
+                          <div className="relative aspect-square mb-3 rounded-[var(--radius-md)] overflow-hidden bg-[var(--bg-raised)] border border-[var(--border-faint)] group-hover:border-[var(--accent)] group-hover:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-300 shadow-lg">
                             <Image
                               src={person.profile_path ? getImageUrl(person.profile_path, "profile") : "/placeholder-avatar.svg"}
                               alt={person.name}

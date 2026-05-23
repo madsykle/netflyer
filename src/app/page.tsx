@@ -4,7 +4,7 @@ import { tmdbService } from "../lib/tmdb";
 import { Movie, TVShow, TMDBResponse } from "../types/tmdb";
 
 export default async function Home() {
-  let heroMovie = null;
+  let heroMoviesList: (Movie | TVShow)[] = [];
   let trendingMovies: TMDBResponse<Movie> = { page: 1, results: [], total_pages: 0, total_results: 0 };
   let trendingTV: TMDBResponse<TVShow> = { page: 1, results: [], total_pages: 0, total_results: 0 };
   let anime: TMDBResponse<TVShow> = { page: 1, results: [], total_pages: 0, total_results: 0 };
@@ -41,8 +41,7 @@ export default async function Home() {
         const dateB = new Date((b as Movie).release_date || (b as TVShow).first_air_date || 0);
         return dateB.getTime() - dateA.getTime();
       });
-      const randomIndex = Math.floor(Math.random() * Math.min(heroMovies.length, 10));
-      heroMovie = heroMovies[randomIndex];
+      heroMoviesList = heroMovies.slice(0, 5);
     }
   } catch (error) {
     console.error('Failed to fetch data:', error);
@@ -51,7 +50,7 @@ export default async function Home() {
   return (
     <div>
       <main className="pb-16">
-        <HeroSection movie={heroMovie} />
+        <HeroSection movies={heroMoviesList} />
         <HomeClient 
           trendingMovies={trendingMovies}
           trendingTV={trendingTV}

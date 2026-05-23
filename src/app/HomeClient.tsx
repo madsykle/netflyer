@@ -92,11 +92,11 @@ export default function HomeClient({
           <button 
             key={genre}
             onClick={() => setActiveGenre(genre)}
-            className={`chip-base ${
+            className={`relative rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-300 ease-[var(--ease-out-expo)] px-6 py-2 h-10 whitespace-nowrap cursor-pointer select-none border ${
               activeGenre === genre 
-                ? "chip-primary" 
-                : "chip-secondary"
-            } !text-xs !py-2.5 !px-7 whitespace-nowrap h-10`}
+                ? "bg-[var(--accent)] border-[var(--accent)] text-white shadow-[0_0_15px_var(--accent-glow)] scale-[1.03]" 
+                : "bg-white/[0.03] border-white/[0.05] text-[var(--text-secondary)] hover:text-white hover:bg-white/[0.08] hover:border-white/[0.1] active:scale-[0.97]"
+            }`}
           >
             {genre}
           </button>

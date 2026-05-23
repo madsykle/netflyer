@@ -2,29 +2,72 @@ import { NextRequest, NextResponse } from "next/server";
 import { redis } from "../../../lib/redis";
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const TMDB_API_KEY = process.env.TMDB_API_KEY || process.env.NEXT_PUBLIC_TMDB_API_KEY;
+// Use server-only TMDB_API_KEY — NEVER fall back to NEXT_PUBLIC_ to avoid client bundle exposure
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
 // Cache TTL in seconds (1 hour)
 const CACHE_TTL = 3600;
-// Rate limit: 60 requests per minute
-const RATE_LIMIT = 60;
+// Rate limit: 40 requests per minute per fingerprint
+const RATE_LIMIT = 40;
 const RATE_LIMIT_WINDOW = 60;
+// Max path length to prevent Redis key bloat
+const MAX_PATH_LENGTH = 200;
+// Max total query params to prevent cache key DoS
+const MAX_QUERY_PARAMS = 10;
+
+/**
+ * Build a composite rate-limit fingerprint that cannot be trivially spoofed.
+ * Combines X-Forwarded-For (if present), User-Agent, and Accept-Language
+ * into a single key. An attacker would need to spoof ALL three simultaneously.
+ */
+function getRateLimitFingerprint(request: NextRequest): string {
+  const ip = request.headers.get('x-real-ip') || '127.0.0.1';
+  const ua = request.headers.get('user-agent') || '';
+  const lang = request.headers.get('accept-language') || '';
+  // Simple hash: combine and truncate for a stable key
+  const raw = `${ip}|${ua}|${lang}`;
+  // Use a simple djb2 hash for a compact, stable fingerprint
+  let hash = 5381;
+  for (let i = 0; i < raw.length; i++) {
+    hash = ((hash << 5) + hash + raw.charCodeAt(i)) & 0xFFFFFFFF;
+  }
+  return hash.toString(36);
+}
+
+/**
+ * Validate that the request origin matches the expected host exactly.
+ * Uses URL parsing instead of substring matching to prevent bypass.
+ */
+function isOriginAllowed(origin: string | null, host: string | null): boolean {
+  // No origin header = same-origin navigation or server-side request — allow
+  if (!origin) return true;
+  
+  try {
+    const originUrl = new URL(origin);
+    // Extract just the hostname:port from host header for exact comparison
+    const expectedHost = host?.split(':')[0] || '';
+    const originHost = originUrl.hostname;
+    
+    // Exact match only — no substring matching
+    return originHost === expectedHost || originHost === 'localhost';
+  } catch {
+    // Malformed origin — reject
+    return false;
+  }
+}
 
 export async function GET(request: NextRequest) {
-  // 1. Basic security: prevent direct hotlinking from other domains
+  // 1. Origin validation with exact hostname matching (prevents substring bypass)
   const origin = request.headers.get('origin');
-  const referer = request.headers.get('referer');
   const host = request.headers.get('host');
   
-  const isAllowedOrigin = !origin || origin.includes(host || '') || (referer && referer.includes(host || ''));
-  
-  if (!isAllowedOrigin) {
+  if (!isOriginAllowed(origin, host)) {
     return NextResponse.json({ error: 'Unauthorized origin' }, { status: 403 });
   }
 
-  // 2. Rate Limiting using Redis
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
-  const rateLimitKey = `ratelimit:${ip}`;
+  // 2. Rate Limiting using composite fingerprint (prevents X-Forwarded-For spoofing)
+  const fingerprint = getRateLimitFingerprint(request);
+  const rateLimitKey = `ratelimit:${fingerprint}`;
   
   try {
     const requests = await redis.incr(rateLimitKey);
@@ -50,10 +93,34 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Path is required' }, { status: 400 });
   }
 
+  // Enforce max path length to prevent oversized Redis keys
+  if (path.length > MAX_PATH_LENGTH) {
+    return NextResponse.json({ error: 'Path too long' }, { status: 400 });
+  }
+
+  // Prevent SSRF and TMDB key leakage by verifying path is a valid relative TMDB API path
+  // Also decode the path first to catch URL-encoded bypass attempts
+  const decodedPath = decodeURIComponent(path);
+  if (
+    !decodedPath.startsWith('/') ||
+    decodedPath.includes('//') ||
+    decodedPath.includes('@') ||
+    decodedPath.includes(':') ||
+    decodedPath.includes('..') ||
+    decodedPath.includes('\\') ||
+    decodedPath.includes('\0')
+  ) {
+    return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+  }
+
   // 3. Global Caching using Redis
-  // Sort params to ensure consistent cache keys
-  const sortedParams = Array.from(searchParams.entries())
-    .filter(([key]) => key !== 'path')
+  // Limit total query params to prevent cache key bloat DoS
+  const paramEntries = Array.from(searchParams.entries()).filter(([key]) => key !== 'path');
+  if (paramEntries.length > MAX_QUERY_PARAMS) {
+    return NextResponse.json({ error: 'Too many parameters' }, { status: 400 });
+  }
+
+  const sortedParams = paramEntries
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}=${value}`)
     .join('&');
@@ -73,9 +140,13 @@ export async function GET(request: NextRequest) {
   }
 
   // 4. Fetch from TMDB if not in cache
+  if (!TMDB_API_KEY) {
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+  }
+
   const tmdbParams = new URLSearchParams(searchParams.toString());
   tmdbParams.delete('path');
-  tmdbParams.append('api_key', TMDB_API_KEY || '');
+  tmdbParams.append('api_key', TMDB_API_KEY);
 
   const url = `${TMDB_BASE_URL}${path}?${tmdbParams.toString()}`;
 

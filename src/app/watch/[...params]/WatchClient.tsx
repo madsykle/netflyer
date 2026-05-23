@@ -11,14 +11,17 @@ import {
   Check,
   ChevronDown,
   MonitorPlay,
-  ServerCrash
+  ServerCrash,
+  Shield,
+  ShieldAlert,
+  Zap
 } from "lucide-react";
 import React, { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { providers, getEmbedUrl, Provider } from "../../../lib/embed";
+import { providers, getEmbedUrl, decodeBase64Url, Provider, StreamInfo } from "../../../lib/embed";
 import { tmdbService } from "../../../lib/tmdb";
-import { ContentType, MovieDetails, TVShowDetails, Season, Episode } from "../../../types/tmdb";
+import { ContentType, MovieDetails, TVShowDetails, Season } from "../../../types/tmdb";
 import { auth, db } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
@@ -33,23 +36,117 @@ const WatchClient = ({ params }: Props) => {
   const resolvedParams = use(params);
   const { params: routeParams } = resolvedParams;
   
-  const type = routeParams[0] as ContentType;
-  const id = routeParams[1];
-  const currentSeason = routeParams[2] ? parseInt(routeParams[2]) : 1;
-  const currentEpisode = routeParams[3] ? parseInt(routeParams[3]) : 1;
+  const rawType = routeParams[0];
+  const rawId = routeParams[1];
+  const rawSeason = routeParams[2];
+  const rawEpisode = routeParams[3];
+
+  // Validate route parameters to prevent injection into embed URLs
+  const isValidType = rawType === 'movie' || rawType === 'tv';
+  const isValidId = /^\d{1,10}$/.test(rawId || '');
+  const parsedSeason = rawSeason ? parseInt(rawSeason) : 1;
+  const parsedEpisode = rawEpisode ? parseInt(rawEpisode) : 1;
+  const isValidSeason = !rawSeason || (Number.isInteger(parsedSeason) && parsedSeason > 0 && parsedSeason <= 100);
+  const isValidEpisode = !rawEpisode || (Number.isInteger(parsedEpisode) && parsedEpisode > 0 && parsedEpisode <= 2000);
+  const isValidParams = isValidType && isValidId && isValidSeason && isValidEpisode;
+
+  const type = (isValidType ? rawType : 'movie') as ContentType;
+  const id = isValidId ? rawId : '0';
+  const currentSeason = isValidSeason ? parsedSeason : 1;
+  const currentEpisode = isValidEpisode ? parsedEpisode : 1;
 
   const router = useRouter();
 
   const [provider, setProvider] = useState<Provider>(providers[0].key as Provider);
   const [embedUrl, setEmbedUrl] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(isValidParams ? "" : "Invalid content URL. Please check the link and try again.");
   const [showProviderMenu, setShowProviderMenu] = useState(false);
   const [details, setDetails] = useState<MovieDetails | TVShowDetails | null>(null);
   const [seasonData, setSeasonData] = useState<Season | null>(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showAdNotice, setShowAdNotice] = useState(false);
   const [showSeasonMenu, setShowSeasonMenu] = useState(false);
+  const [streams, setStreams] = useState<StreamInfo[]>([]);
+  const [selectedStream, setSelectedStream] = useState<StreamInfo | null>(null);
+  const [showStreamMenu, setShowStreamMenu] = useState(false);
+
+  const [strictShield, setStrictShield] = useState(true);
+  const [autoPlayNext, setAutoPlayNext] = useState(true);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [nextEpisodeInfo, setNextEpisodeInfo] = useState<{ season: number; episode: number; title: string } | null>(null);
+  const countdownActive = React.useRef(false);
+
+  useEffect(() => {
+    const savedShield = localStorage.getItem("netflyer_strict_shield");
+    if (savedShield !== null) {
+      setStrictShield(savedShield === "true");
+    }
+    const savedAutoPlay = localStorage.getItem("netflyer_autoplay_next");
+    if (savedAutoPlay !== null) {
+      setAutoPlayNext(savedAutoPlay === "true");
+    }
+  }, []);
+
+  const toggleStrictShield = () => {
+    const nextVal = !strictShield;
+    setStrictShield(nextVal);
+    localStorage.setItem("netflyer_strict_shield", String(nextVal));
+  };
+
+  const toggleAutoPlayNext = () => {
+    const nextVal = !autoPlayNext;
+    setAutoPlayNext(nextVal);
+    localStorage.setItem("netflyer_autoplay_next", String(nextVal));
+  };
+
+  const getNextEpisodeInfo = useCallback(() => {
+    if (type !== "tv" || !details || !seasonData) return null;
+    const currentEpisodeIndex = seasonData.episodes?.findIndex(ep => ep.episode_number === currentEpisode) ?? -1;
+    if (currentEpisodeIndex !== -1 && currentEpisodeIndex < (seasonData.episodes?.length ?? 0) - 1) {
+      const nextEp = seasonData.episodes![currentEpisodeIndex + 1];
+      return {
+        season: currentSeason,
+        episode: nextEp.episode_number,
+        title: nextEp.name
+      };
+    }
+    if ('seasons' in details) {
+      const nextSeasonNumber = currentSeason + 1;
+      const nextSeasonExists = details.seasons?.some(s => s.season_number === nextSeasonNumber && s.episode_count > 0);
+      if (nextSeasonExists) {
+        return {
+          season: nextSeasonNumber,
+          episode: 1,
+          title: `Season ${nextSeasonNumber} Episode 1`
+        };
+      }
+    }
+    return null;
+  }, [type, details, seasonData, currentSeason, currentEpisode]);
+
+  useEffect(() => {
+    countdownActive.current = false;
+    setCountdown(null);
+    setNextEpisodeInfo(null);
+  }, [id, currentSeason, currentEpisode]);
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown === 0) {
+      if (nextEpisodeInfo) {
+        router.push(`/watch/tv/${id}/${nextEpisodeInfo.season}/${nextEpisodeInfo.episode}`);
+      }
+      setCountdown(null);
+      setNextEpisodeInfo(null);
+      countdownActive.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      setCountdown(prev => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [countdown, nextEpisodeInfo, id, router]);
 
   // Show ad notice once per session
   useEffect(() => {
@@ -76,11 +173,33 @@ const WatchClient = ({ params }: Props) => {
   const fetchEmbedUrl = useCallback(async () => {
     setLoading(true);
     setError("");
+    setStreams([]);
+    setSelectedStream(null);
+    
     try {
-      const url = getEmbedUrl(provider, type, parseInt(id), currentSeason, currentEpisode);
+      let url = getEmbedUrl(provider, type, parseInt(id), currentSeason, currentEpisode);
       if (url) {
+        if (provider === 'vidking') {
+          const storageKey = type === "tv"
+            ? `netflyer_progress_${id}_s${currentSeason}_e${currentEpisode}`
+            : `netflyer_progress_${id}`;
+          try {
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed && typeof parsed === 'object') {
+                const currentTime = Number(parsed.currentTime);
+                const duration = Number(parsed.duration);
+                if (Number.isFinite(currentTime) && currentTime > 10 && (!Number.isFinite(duration) || currentTime < duration - 30)) {
+                  url += `&progress=${Math.floor(currentTime)}`;
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Error reading saved progress:", e);
+          }
+        }
         setEmbedUrl(url);
-        // Artificial delay for smoother transition
         setTimeout(() => setLoading(false), 800);
       } else {
         throw new Error("No video source available");
@@ -141,6 +260,105 @@ const WatchClient = ({ params }: Props) => {
     return () => clearInterval(interval);
   }, [id, type, currentSeason, currentEpisode]);
 
+  // Listen to iframe player events (e.g. from VidKing)
+  useEffect(() => {
+    const handlePlayerMessage = async (event: MessageEvent) => {
+      // Prevent event spoofing by verifying origin against trusted provider domains
+      const ALLOWED_MESSAGE_ORIGINS = [
+        'https://www.vidking.net',
+        'https://vidking.net',
+        'https://vidsrc.pk',
+        'https://vidlink.pro',
+        'https://vidsrc-embed.ru',
+        'https://vidsrc-embed.su',
+        'https://vsrc.su',
+        'https://vixsrc.to',
+        'https://vixsrc.io',
+      ];
+      if (!ALLOWED_MESSAGE_ORIGINS.includes(event.origin) && event.origin !== window.location.origin) {
+        return;
+      }
+
+      let parsed;
+      try {
+        parsed = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+      } catch (e) {
+        return; // Ignore non-JSON messages
+      }
+
+      if (parsed && parsed.type === "PLAYER_EVENT") {
+        const payload = parsed.data;
+        if (!payload || !payload.id) return;
+
+        // Ensure the event belongs to the current media we are watching
+        if (payload.id.toString() !== id.toString()) return;
+
+        const mediaType = payload.mediaType === "tv" || payload.mediaType === "movie" ? payload.mediaType : type;
+        const currentTime = Number(payload.currentTime);
+        const duration = Number(payload.duration);
+        const progress = Number(payload.progress);
+
+        if (!Number.isFinite(currentTime) || !Number.isFinite(duration)) return;
+
+        const season = payload.season ? parseInt(payload.season) : (currentSeason || null);
+        const episode = payload.episode ? parseInt(payload.episode) : (currentEpisode || null);
+
+        // Save to localStorage
+        const storageKey = mediaType === "tv"
+          ? `netflyer_progress_${id}_s${season}_e${episode}`
+          : `netflyer_progress_${id}`;
+
+        const calculatedProgress = Number.isFinite(progress) ? progress : (currentTime / (duration || 1));
+
+        localStorage.setItem(storageKey, JSON.stringify({
+          currentTime,
+          duration,
+          progress: calculatedProgress,
+          updatedAt: Date.now()
+        }));
+
+        // Trigger auto-play countdown if conditions are met
+        if (
+          autoPlayNext &&
+          mediaType === "tv" &&
+          (calculatedProgress > 0.95 || currentTime > duration - 15) &&
+          !countdownActive.current
+        ) {
+          const nextEp = getNextEpisodeInfo();
+          if (nextEp) {
+            countdownActive.current = true;
+            setNextEpisodeInfo(nextEp);
+            setCountdown(10);
+          }
+        }
+
+        // If user is logged in, also update watch history in Firestore
+        if (auth.currentUser) {
+          try {
+            const docRef = doc(db, `watchHistory/${auth.currentUser.uid}/items`, id);
+            await setDoc(docRef, {
+              contentId: id,
+              type: mediaType,
+              season,
+              episode,
+              progress: calculatedProgress,
+              currentTime,
+              duration,
+              updatedAt: serverTimestamp(),
+            }, { merge: true });
+          } catch (err) {
+            console.error("Error saving progress to Firestore:", err);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("message", handlePlayerMessage);
+    return () => {
+      window.removeEventListener("message", handlePlayerMessage);
+    };
+  }, [id, type, currentSeason, currentEpisode, autoPlayNext, getNextEpisodeInfo]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -171,11 +389,12 @@ const WatchClient = ({ params }: Props) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [router, fetchEmbedUrl]);
+  }, [fetchEmbedUrl]);
 
   const currentProvider = providers.find((p) => p.key === provider);
   const title = details ? ('title' in details ? details.title : details.name) : "Loading...";
   const fullTitle = type === "tv" ? `${title} - S${currentSeason} E${currentEpisode}` : title;
+  const posterUrl = details?.backdrop_path ? `https://image.tmdb.org/t/p/original${details.backdrop_path}` : undefined;
 
   return (
     <div className="min-h-screen bg-[#050505] text-[var(--text-primary)] flex flex-col font-['DM_Sans']">
@@ -219,7 +438,7 @@ const WatchClient = ({ params }: Props) => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute right-0 top-full mt-2 w-64 bg-[#0a0a0c] border border-[var(--border-subtle)] rounded-[var(--radius-md)] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-50"
+                  className="absolute right-0 top-full mt-2 w-64 glass-premium rounded-[var(--radius-md)] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-50"
                 >
                   <div className="px-4 py-3 border-b border-[var(--border-faint)] bg-black/20">
                     <span className="t-label text-[10px] opacity-70">Server Selection</span>
@@ -252,6 +471,8 @@ const WatchClient = ({ params }: Props) => {
               )}
             </AnimatePresence>
           </div>
+
+          {/* Stream Selector removed (frontend-only mode) */}
 
           <button
             onClick={fetchEmbedUrl}
@@ -319,18 +540,60 @@ const WatchClient = ({ params }: Props) => {
                   transition={{ duration: 1 }}
                   className="absolute inset-0 w-full h-full"
                 >
-                  {/* Removed the strict sandbox to prevent the 'allow-popups' console error crashes and allow third-party players to function as intended. User is advised to use an adblocker if desired. */}
-                  <iframe
-                    src={embedUrl}
-                    title="Video Player"
-                    className="w-full h-full border-0"
-                    scrolling="no"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                    sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-popups"
-                    loading="eager"
-                  />
+                    <iframe
+                      src={embedUrl}
+                      title="Video Player"
+                      className="w-full h-full border-0"
+                      scrolling="no"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      sandbox={
+                        strictShield
+                          ? "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+                          : "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-popups"
+                      }
+                      loading="eager"
+                    />
                 </motion.div>
               ) : null}
+            </AnimatePresence>
+
+            {/* Auto-Play Countdown Overlay */}
+            <AnimatePresence>
+              {countdown !== null && nextEpisodeInfo && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="absolute bottom-6 right-6 z-30 max-w-sm bg-[#0a0a0c]/95 border border-white/10 rounded-[var(--radius-md)] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-md"
+                >
+                  <p className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-[0.2em] mb-1">Up Next</p>
+                  <h4 className="text-sm font-bold text-white mb-0.5 truncate">{nextEpisodeInfo.title}</h4>
+                  <p className="text-xs text-[var(--text-muted)] mb-4">Season {nextEpisodeInfo.season} • Episode {nextEpisodeInfo.episode}</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        router.push(`/watch/tv/${id}/${nextEpisodeInfo.season}/${nextEpisodeInfo.episode}`);
+                        setCountdown(null);
+                        setNextEpisodeInfo(null);
+                        countdownActive.current = false;
+                      }}
+                      className="px-4 py-2 bg-[var(--accent)] hover:bg-[#ff1a2a] text-white text-xs font-bold rounded-[var(--radius-sm)] flex items-center gap-1.5 transition-all cursor-pointer shadow-lg"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                      Play Now ({countdown}s)
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCountdown(null);
+                        setNextEpisodeInfo(null);
+                      }}
+                      className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-[var(--radius-sm)] transition-all cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
           
@@ -342,6 +605,49 @@ const WatchClient = ({ params }: Props) => {
                 {loading ? "BUFFERING" : error ? "OFFLINE" : "LIVE"}
               </span>
             </div>
+
+            {/* Player Toolbar Controls */}
+            <div className="flex items-center gap-4">
+              {/* Ad Shield Toggle */}
+              <button
+                onClick={toggleStrictShield}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-sm)] border text-[10px] uppercase font-bold transition-all cursor-pointer ${
+                  strictShield
+                    ? "bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
+                }`}
+                title={strictShield ? "Strict Ad Shield Active (Blocks Popups)" : "Ad Shield Warning (Popups Allowed)"}
+              >
+                {strictShield ? (
+                  <>
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Ad Shield: On</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <span>Ad Shield: Off</span>
+                  </>
+                )}
+              </button>
+
+              {/* Auto Play Toggle */}
+              {type === "tv" && (
+                <button
+                  onClick={toggleAutoPlayNext}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-sm)] border text-[10px] uppercase font-bold transition-all cursor-pointer ${
+                    autoPlayNext
+                      ? "bg-[var(--accent)]/10 border-[var(--accent)]/30 text-[var(--accent)] hover:bg-[var(--accent)]/20"
+                      : "bg-white/5 border-white/10 text-[var(--text-muted)] hover:bg-white/10"
+                  }`}
+                  title={autoPlayNext ? "Auto-Play Next Episode Enabled" : "Auto-Play Next Episode Disabled"}
+                >
+                  <Zap className={`w-3.5 h-3.5 ${autoPlayNext ? "fill-current" : ""}`} />
+                  <span>Auto-Play: {autoPlayNext ? "On" : "Off"}</span>
+                </button>
+              )}
+            </div>
+
             <div className="t-meta text-[10px] text-[var(--text-muted)]">
               HOST: <span className="text-white">{currentProvider?.label.toUpperCase()}</span>
             </div>
@@ -372,7 +678,7 @@ const WatchClient = ({ params }: Props) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 5, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-full mt-2 w-36 bg-[#161619] border border-[var(--border-subtle)] rounded-[var(--radius-sm)] shadow-2xl z-50 p-1"
+                        className="absolute right-0 top-full mt-2 w-36 glass-premium rounded-[var(--radius-sm)] shadow-2xl z-50 p-1"
                       >
                         <div className="max-h-[40vh] overflow-y-auto custom-scrollbar">
                           {details.seasons?.filter(s => s.season_number > 0).map(s => (

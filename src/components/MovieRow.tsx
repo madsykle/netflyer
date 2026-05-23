@@ -117,6 +117,8 @@ const RowCard = ({ item }: { item: Movie | TVShow }) => {
   const { getImageUrl, prefersReducedMotion } = useSettings();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
 
   const isMovie = 'title' in item;
   const title = isMovie ? (item as Movie).title : (item as TVShow).name;
@@ -128,6 +130,42 @@ const RowCard = ({ item }: { item: Movie | TVShow }) => {
     router.push(`/info/${type}/${item.id}`);
   };
 
+  useEffect(() => {
+    try {
+      const id = item.id.toString();
+      if (isMovie) {
+        const saved = localStorage.getItem(`netflyer_progress_${id}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.progress && parsed.progress > 0.02 && parsed.progress < 0.95) {
+            setProgress(parsed.progress);
+          }
+        }
+      } else {
+        let maxUpdatedAt = 0;
+        let latestProgress = null;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(`netflyer_progress_${id}_s`)) {
+            const saved = localStorage.getItem(key);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed.updatedAt > maxUpdatedAt) {
+                maxUpdatedAt = parsed.updatedAt;
+                latestProgress = parsed.progress;
+              }
+            }
+          }
+        }
+        if (latestProgress !== null && latestProgress > 0.02 && latestProgress < 0.95) {
+          setProgress(latestProgress);
+        }
+      }
+    } catch (e) {
+      console.error("Error reading progress for card", e);
+    }
+  }, [item.id, isMovie]);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -138,27 +176,29 @@ const RowCard = ({ item }: { item: Movie | TVShow }) => {
         transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
       }}
       whileTap={{ scale: 0.97 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       className="flex-shrink-0 cursor-pointer"
     >
       <div className="relative group/card">
         {/* Image container */}
-        <div className="relative w-40 h-[240px] md:w-48 md:h-[288px] overflow-hidden bg-[var(--bg-raised)] rounded-[var(--radius-md)] border border-[var(--border-faint)] group-hover/card:border-[var(--border-subtle)] transition-colors">
+        <div className="relative w-40 h-[240px] md:w-48 md:h-[288px] overflow-hidden bg-[var(--bg-raised)] rounded-[var(--radius-md)] border border-[var(--border-faint)] group-hover/card:border-[rgba(229,9,20,0.35)] group-hover/card:shadow-[0_0_20px_rgba(229,9,20,0.22)] transition-all duration-300">
           {!imageLoaded && !imageError && (
             <div className="absolute inset-0 skeleton" />
           )}
           
           {imageError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-              <span className="t-meta opacity-40 mb-2">IMAGE ERROR</span>
-              <p className="t-meta line-clamp-2">{title}</p>
+              <span className="t-meta opacity-40 mb-2 font-bold tracking-widest text-[9px]">IMAGE ERROR</span>
+              <p className="t-meta line-clamp-2 text-xs font-semibold">{title}</p>
             </div>
           ) : (
             <Image
               src={posterUrl}
               alt={title}
               fill
-              className={`object-cover transition-all duration-700 ${
+              className={`object-cover transition-all duration-700 ease-[var(--ease-out-expo)] ${
                 imageLoaded ? "opacity-100 group-hover/card:scale-105" : "opacity-0"
               }`}
               loading="lazy"
@@ -168,28 +208,55 @@ const RowCard = ({ item }: { item: Movie | TVShow }) => {
             />
           )}
 
-          {/* Cinematic overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+          {/* Progress Bar Overlay */}
+          {progress !== null && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40 z-10">
+              <div 
+                className="h-full bg-[var(--accent)] shadow-[0_0_8px_var(--accent)]" 
+                style={{ width: `${progress * 100}%` }} 
+              />
+            </div>
+          )}
+
+          {/* Cinematic overlay on hover using Framer Motion */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.25 }}
+            className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10"
+          >
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-2xl transform scale-75 group-hover/card:scale-100 transition-transform duration-300">
+              <motion.div 
+                animate={{ scale: isHovered ? 1 : 0.8 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="w-11 h-11 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-[0_0_15px_var(--accent-glow)] hover:bg-[#ff1a2a] transition-all"
+              >
                 <Play className="w-4 h-4 text-white fill-current ml-0.5" />
-              </div>
+              </motion.div>
             </div>
             
-            <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="text-white text-sm font-bold line-clamp-2 leading-tight mb-1 drop-shadow-md">
+            <motion.div 
+              animate={{ y: isHovered ? 0 : 10, opacity: isHovered ? 1 : 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 25 }}
+              className="absolute bottom-0 left-0 right-0 p-3.5"
+            >
+              <p className="text-white text-sm font-bold line-clamp-2 leading-tight mb-2 drop-shadow-md tracking-wide">
                 {title}
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 {releaseDate && (
-                  <span className="t-meta text-white/80">{new Date(releaseDate).getFullYear()}</span>
+                  <span className="text-[10px] font-extrabold bg-white/10 text-white/90 px-1.5 py-0.5 rounded border border-white/10 tracking-widest">
+                    {new Date(releaseDate).getFullYear()}
+                  </span>
                 )}
                 {item.vote_average > 0 && (
-                  <span className="rating-chip text-[10px]">★ {item.vote_average.toFixed(1)}</span>
+                  <span className="text-[10px] font-extrabold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20 tracking-wider">
+                    ★ {item.vote_average.toFixed(1)}
+                  </span>
                 )}
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </motion.div>

@@ -173,7 +173,7 @@ const WatchlistPage = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="text-center py-32 surface border border-[var(--border-subtle)] rounded-[var(--radius-lg)] max-w-lg mx-auto"
+            className="text-center py-32 glass-premium rounded-[var(--radius-lg)] max-w-lg mx-auto"
           >
             {/* Decorative circle */}
             <div className="relative w-24 h-24 mx-auto mb-8">

@@ -28,12 +28,11 @@ class TMDBService {
   private readonly DEFAULT_CACHE_TIME = 1000 * 60 * 60; // 1 hour
 
   constructor() {
-    const publicApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
     const serverApiKey = process.env.TMDB_API_KEY;
-    this.apiKey = serverApiKey || publicApiKey || '';
+    this.apiKey = serverApiKey || '';
     
-    if (!this.apiKey) {
-      console.warn('TMDB_API_KEY is not set. API calls will fail.');
+    if (typeof window === 'undefined' && !this.apiKey) {
+      console.warn('TMDB_API_KEY is not set. Server-side API calls will fail.');
     }
     this.baseUrl = TMDB_BASE_URL;
   }

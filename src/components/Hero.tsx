@@ -3,23 +3,40 @@
 import { useSettings } from "../hooks/useSettings";
 import { HeroSkeleton } from "./Skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaPlay } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Movie, TVShow } from "../types/tmdb";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface HeroSectionProps {
-  movie: (Movie | TVShow) | null;
+  movies?: (Movie | TVShow)[] | null;
 }
 
-const HeroSection = ({ movie }: HeroSectionProps) => {
+const HeroSection = ({ movies }: HeroSectionProps) => {
+  const [activeIndex, setActiveIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const { getImageUrl } = useSettings();
   const router = useRouter();
 
-  if (!movie) return <HeroSkeleton />;
+  // Reset image loaded state on slide change to trigger nice transitions
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [activeIndex]);
 
+  // Automatic slideshow cycle
+  useEffect(() => {
+    if (!movies || movies.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % movies.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [movies]);
+
+  if (!movies || movies.length === 0) return <HeroSkeleton />;
+
+  const movie = movies[activeIndex];
   const isTV = 'first_air_date' in movie;
   const title = (movie as any).title || (movie as any).name;
   const backdropUrl = getImageUrl(movie.backdrop_path, "backdrop");
@@ -42,17 +59,27 @@ const HeroSection = ({ movie }: HeroSectionProps) => {
     router.push(path);
   };
 
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveIndex((prev) => (prev - 1 + movies.length) % movies.length);
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveIndex((prev) => (prev + 1) % movies.length);
+  };
+
   return (
-    <div className="relative w-full h-[70vh] md:h-[85vh] lg:h-[90vh] overflow-hidden">
+    <div className="relative w-full h-[70vh] md:h-[85vh] lg:h-[90vh] overflow-hidden group">
       {/* Backdrop with layered cinematic fades */}
       <div className="absolute inset-0 z-0">
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           <motion.div
             key={movie.id}
-            initial={{ opacity: 0, scale: 1.1 }}
+            initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 2, ease: "easeOut" }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
             className="relative w-full h-full"
           >
             <Image
@@ -60,7 +87,7 @@ const HeroSection = ({ movie }: HeroSectionProps) => {
               alt={title}
               fill
               priority
-              className={`object-cover transition-opacity duration-[2000ms] ${
+              className={`object-cover transition-opacity duration-1000 ${
                 imageLoaded ? "opacity-60" : "opacity-0"
               }`}
               onLoad={() => setImageLoaded(true)}
@@ -76,54 +103,97 @@ const HeroSection = ({ movie }: HeroSectionProps) => {
         </AnimatePresence>
       </div>
 
+      {/* Navigation Arrows */}
+      {movies.length > 1 && (
+        <>
+          <button
+            onClick={handlePrev}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all duration-300 pointer-events-auto"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
+          <button
+            onClick={handleNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all duration-300 pointer-events-auto"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
+        </>
+      )}
+
+      {/* Dot Indicators */}
+      {movies.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+          {movies.map((_, index) => (
+            <button
+              key={index}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveIndex(index);
+              }}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activeIndex === index ? "bg-[var(--accent)] w-6" : "bg-white/30 hover:bg-white/50 w-1.5"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Content */}
       <div className="container relative z-20 h-full flex flex-col justify-end pb-12 md:pb-24">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-3xl text-left"
-        >
-          {/* Meta Info */}
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            {releaseYear && <span className="t-meta">{releaseYear}</span>}
-            <span className="t-meta text-[var(--border-visible)]">|</span>
-            {movie.vote_average > 0 && (
-              <span className="rating-chip">
-                <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                {movie.vote_average.toFixed(1)}
-              </span>
-            )}
-            <span className="t-meta text-[var(--border-visible)]">|</span>
-            <span className="meta-chip">{isTV ? "Series" : "Film"}</span>
-          </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={movie.id}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-3xl text-left"
+          >
+            {/* Meta Info */}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              {releaseYear && <span className="t-meta">{releaseYear}</span>}
+              <span className="t-meta text-[var(--border-visible)]">|</span>
+              {movie.vote_average > 0 && (
+                <span className="rating-chip">
+                  <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  {movie.vote_average.toFixed(1)}
+                </span>
+              )}
+              <span className="t-meta text-[var(--border-visible)]">|</span>
+              <span className="meta-chip">{isTV ? "Series" : "Film"}</span>
+            </div>
 
-          <h1 className="t-hero mb-6 drop-shadow-[0_2px_30px_rgba(0,0,0,0.8)]">
-            {title}
-          </h1>
+            <h1 className="t-hero mb-6 drop-shadow-[0_2px_30px_rgba(0,0,0,0.8)]">
+              {title}
+            </h1>
 
-          <p className="t-body text-base md:text-lg mb-8 line-clamp-2 md:line-clamp-3 max-w-2xl drop-shadow-md opacity-90 leading-relaxed">
-            {movie.overview}
-          </p>
+            <p className="t-body text-base md:text-lg mb-8 line-clamp-2 md:line-clamp-3 max-w-2xl drop-shadow-md opacity-90 leading-relaxed">
+              {movie.overview}
+            </p>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={handlePlay}
-              className="btn btn-primary min-w-[140px]"
-            >
-              <FaPlay className="text-[10px]" />
-              Play Now
-            </button>
-            <button
-              onClick={handleInfo}
-              className="btn btn-secondary min-w-[140px]"
-            >
-              More Info
-            </button>
-          </div>
-        </motion.div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={handlePlay}
+                className="btn btn-primary min-w-[140px]"
+              >
+                <FaPlay className="text-[10px]" />
+                Play Now
+              </button>
+              <button
+                onClick={handleInfo}
+                className="btn btn-secondary min-w-[140px]"
+              >
+                More Info
+              </button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

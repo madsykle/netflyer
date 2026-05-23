@@ -5,26 +5,26 @@
   --aspect-poster: 2 / 3;
   --aspect-video: 16 / 9;
 
-  /* Backgrounds — layered, never pure black */
-  --bg-base:        #080809;
-  --bg-surface:     #0f0f11;
-  --bg-raised:      #161619;
-  --bg-overlay:     #1e1e22;
+  /* Backgrounds — richer, deeper cinematic slate-navy */
+  --bg-base:        #050508;
+  --bg-surface:     #0c0c10;
+  --bg-raised:      #121217;
+  --bg-overlay:     #191920;
 
   /* Text */
-  --text-primary:   #f2f2f4;
-  --text-secondary: #8a8a96;
-  --text-muted:     #4a4a54;
+  --text-primary:   #f7f7fa;
+  --text-secondary: #9494a5;
+  --text-muted:     #525262;
 
-  /* Accent — use sparingly */
-  --accent:         #e5091a;
-  --accent-dim:     rgba(229, 9, 26, 0.18);
-  --accent-glow:    rgba(229, 9, 26, 0.35);
+  /* Accent — luxurious cinematic ruby red */
+  --accent:         #e50914;
+  --accent-dim:     rgba(229, 9, 20, 0.12);
+  --accent-glow:    rgba(229, 9, 20, 0.3);
 
   /* Borders */
-  --border-faint:   rgba(255,255,255,0.05);
-  --border-subtle:  rgba(255,255,255,0.09);
-  --border-visible: rgba(255,255,255,0.15);
+  --border-faint:   rgba(255,255,255,0.035);
+  --border-subtle:  rgba(255,255,255,0.07);
+  --border-visible: rgba(255,255,255,0.12);
 
   /* Radii — restrained */
   --radius-sm:  4px;
@@ -217,20 +217,29 @@ body { min-height: 100svh; }
 }
 
 /* ================================
-   CARDS
+   CARDS & HOVERS
    ================================ */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--border-faint);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: border-color 250ms var(--ease-out-expo),
-              transform 250ms var(--ease-out-expo),
-              box-shadow 250ms var(--ease-out-expo);
+  transition: border-color 300ms var(--ease-out-expo),
+              transform 300ms var(--ease-out-expo),
+              box-shadow 300ms var(--ease-out-expo);
 }
 .card:hover {
-  border-color: var(--border-subtle);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  border-color: var(--border-visible);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 15px var(--accent-dim);
+}
+
+/* Premium Card Glow */
+.glow-hover {
+  transition: all 400ms var(--ease-out-expo);
+}
+.glow-hover:hover {
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 4px var(--accent);
+  border-color: rgba(229, 9, 20, 0.4) !important;
 }
 
 /* ================================
@@ -252,7 +261,7 @@ body { min-height: 100svh; }
 }
 
 /* ================================
-   UTILITIES
+   UTILITIES & ANIMATIONS
    ================================ */
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -261,6 +270,24 @@ body { min-height: 100svh; }
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0,0,0,0); white-space: nowrap; border-width: 0;
+}
+
+/* Ken Burns dynamic zoom effect */
+@keyframes kenburns {
+  0% { transform: scale(1.02) translate(0, 0); }
+  50% { transform: scale(1.1) translate(-1%, -0.5%); }
+  100% { transform: scale(1.02) translate(0, 0); }
+}
+.animate-kenburns {
+  animation: kenburns 25s ease-in-out infinite;
+}
+
+/* Glass panel background */
+.glass-premium {
+  background: rgba(12, 12, 16, 0.7);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--border-subtle);
 }
 
 /* Tab underline nav pattern */
