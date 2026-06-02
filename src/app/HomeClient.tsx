@@ -85,7 +85,7 @@ export default function HomeClient({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-20">
+    <div className="max-w-7xl mx-auto px-4 mt-6 md:-mt-12 relative z-20">
       {/* Genre Tags */}
       <div className="flex overflow-x-auto scrollbar-hide gap-3.5 mb-10 py-4 -mx-4 px-4">
         {genres.map(genre => (

@@ -42,6 +42,11 @@ const Settings = () => {
   const router = useRouter();
   const [cacheCleared, setCacheCleared] = useState(false);
   const [backdropUrl, setBackdropUrl] = useState("");
+  const [storageUsage, setStorageUsage] = useState("0.00");
+
+  useEffect(() => {
+    setStorageUsage(getStorageUsage());
+  }, [getStorageUsage]);
 
   useEffect(() => {
     const fetchBackdrop = async () => {
@@ -183,6 +188,46 @@ const Settings = () => {
                     />
                   </button>
                 </div>
+
+                {/* Compact Mode */}
+                <div className="glass-premium p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Compact Mode</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Reduce layout padding and sizes for denser presentation</p>
+                  </div>
+                  <button
+                    onClick={() => updateSetting("compactMode", !settings.compactMode)}
+                    className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+                      settings.compactMode ? "bg-[var(--accent)]" : "bg-white/10"
+                    }`}
+                  >
+                    <motion.div
+                      animate={{ x: settings.compactMode ? 28 : 4 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    />
+                  </button>
+                </div>
+
+                {/* Row Navigation Arrows */}
+                <div className="glass-premium p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Row Navigation Arrows</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Show side scroll arrows on movie and cast rows</p>
+                  </div>
+                  <button
+                    onClick={() => updateSetting("showScrollIndicators", !settings.showScrollIndicators)}
+                    className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+                      settings.showScrollIndicators ? "bg-[var(--accent)]" : "bg-white/10"
+                    }`}
+                  >
+                    <motion.div
+                      animate={{ x: settings.showScrollIndicators ? 28 : 4 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    />
+                  </button>
+                </div>
               </div>
             </motion.section>
 
@@ -195,26 +240,83 @@ const Settings = () => {
             >
               <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-faint)]">
                 <Play className="w-4 h-4 text-[var(--accent)]" />
-                <h2 className="t-label text-sm text-white">Playback</h2>
+                <h2 className="t-label text-sm text-white">Playback & Trailers</h2>
               </div>
 
-              <div className="glass-premium p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
-                <div>
-                  <h3 className="text-white font-semibold mb-1">Data Saver</h3>
-                  <p className="text-xs text-[var(--text-muted)]">Force low quality images and optimize playback</p>
+              <div className="space-y-6">
+                {/* Data Saver */}
+                <div className="glass-premium p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Data Saver</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Force low quality images and optimize playback</p>
+                  </div>
+                  <button
+                    onClick={() => updateSetting("dataSaver", !settings.dataSaver)}
+                    className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+                      settings.dataSaver ? "bg-[var(--accent)]" : "bg-white/10"
+                    }`}
+                  >
+                    <motion.div
+                      animate={{ x: settings.dataSaver ? 28 : 4 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    />
+                  </button>
                 </div>
-                <button
-                  onClick={() => updateSetting("dataSaver", !settings.dataSaver)}
-                  className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
-                    settings.dataSaver ? "bg-[var(--accent)]" : "bg-white/10"
-                  }`}
-                >
-                  <motion.div
-                    animate={{ x: settings.dataSaver ? 28 : 4 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
-                  />
-                </button>
+
+                {/* Autoplay Trailers */}
+                <div className="glass-premium p-5 rounded-[var(--radius-md)] border border-[var(--border-subtle)] flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">Autoplay Trailers</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Automatically play trailers on info pages when available</p>
+                  </div>
+                  <button
+                    onClick={() => updateSetting("autoplayTrailers", !settings.autoplayTrailers)}
+                    disabled={settings.dataSaver}
+                    className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
+                      settings.dataSaver ? "opacity-50 cursor-not-allowed bg-white/5" : settings.autoplayTrailers ? "bg-[var(--accent)]" : "bg-white/10"
+                    }`}
+                  >
+                    <motion.div
+                      animate={{ x: settings.dataSaver ? 4 : settings.autoplayTrailers ? 28 : 4 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    />
+                  </button>
+                </div>
+
+                {/* Default Video Quality */}
+                <div className="glass-premium p-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                    <div>
+                      <h3 className="text-white font-semibold mb-1">Default Stream Quality</h3>
+                      <p className="text-xs text-[var(--text-muted)]">Pre-select preferred stream quality (if supported by provider)</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                    {[
+                      { value: "360p", label: "360p", desc: "Low" },
+                      { value: "480p", label: "480p", desc: "SD" },
+                      { value: "720p", label: "720p", desc: "HD" },
+                      { value: "1080p", label: "1080p", desc: "FHD" },
+                      { value: "auto", label: "Auto", desc: "Adaptive" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => updateSetting("defaultVideoQuality", opt.value)}
+                        className={`py-3 px-3 rounded-[var(--radius-sm)] text-center transition-all border ${
+                          settings.defaultVideoQuality === opt.value
+                            ? "bg-[var(--accent)] border-[var(--accent)] text-white"
+                            : "bg-white/5 border-[var(--border-faint)] text-[var(--text-secondary)] hover:border-[var(--border-subtle)]"
+                        }`}
+                      >
+                        <span className="text-xs font-bold uppercase tracking-wider block">{opt.label}</span>
+                        <span className="text-[10px] opacity-50">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </motion.section>
 
@@ -235,7 +337,7 @@ const Settings = () => {
                   <div>
                     <h3 className="text-white font-semibold mb-1">Local Storage</h3>
                     <p className="text-xs text-[var(--text-muted)]">
-                      Currently using <span className="text-white font-semibold">{getStorageUsage()} MB</span> of device storage
+                      Currently using <span className="text-white font-semibold">{storageUsage} MB</span> of device storage
                     </p>
                   </div>
                   <button

@@ -8,6 +8,9 @@ import React, {
   useContext,
   ReactNode,
 } from "react";
+import { auth, db } from "../lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 interface Settings {
   imageQuality: "low" | "medium" | "high" | "auto";
@@ -72,19 +75,79 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettingsState] = useState<Settings>(defaultSettings);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load settings from localStorage on mount
+  // Sync settings helper
+  const syncWithFirestore = useCallback(async (updatedSettings: Settings) => {
+    try {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        await setDoc(userDocRef, { settings: updatedSettings }, { merge: true });
+      }
+    } catch (err) {
+      console.error("Failed to sync settings with Firestore:", err);
+    }
+  }, []);
+
+  // Load settings from localStorage and Firestore on mount / auth change
   useEffect(() => {
+    let unsubscribeAuth: () => void;
+
     const loadSettings = () => {
+      // 1. First load from localStorage to get initial UI state fast
       try {
         const savedSettings = localStorage.getItem(SETTINGS_KEY);
         if (savedSettings) {
           const parsed = JSON.parse(savedSettings);
-          setSettingsState({ ...defaultSettings, ...parsed });
+          setSettingsState((prev) => ({ ...prev, ...parsed }));
         }
       } catch (e) {
-        console.error("Failed to parse settings:", e);
+        console.error("Failed to parse local settings:", e);
       }
       setIsLoaded(true);
+
+      // 2. Set up Firebase Auth listener to sync settings with DB
+      try {
+        unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            try {
+              const userDocRef = doc(db, "users", user.uid);
+              const userDocSnap = await getDoc(userDocRef);
+              if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                if (userData.settings) {
+                  // Merge DB settings into state and save to local storage
+                  setSettingsState((prev) => {
+                    const merged = { ...prev, ...userData.settings };
+                    localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
+                    return merged;
+                  });
+                } else {
+                  // DB is empty, push current settings to DB
+                  setSettingsState((current) => {
+                    setDoc(userDocRef, { settings: current }, { merge: true });
+                    return current;
+                  });
+                }
+              }
+            } catch (err) {
+              console.error("Error fetching user settings from Firestore:", err);
+            }
+          } else {
+            // When logged out, reset to local storage values
+            try {
+              const saved = localStorage.getItem(SETTINGS_KEY);
+              if (saved) {
+                setSettingsState({ ...defaultSettings, ...JSON.parse(saved) });
+              } else {
+                setSettingsState(defaultSettings);
+              }
+            } catch (e) {
+              setSettingsState(defaultSettings);
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Firebase auth/firestore not available in SettingsProvider:", err);
+      }
     };
 
     loadSettings();
@@ -92,36 +155,58 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     // Listen for storage changes from other tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === SETTINGS_KEY) {
-        loadSettings();
+        try {
+          const parsed = JSON.parse(e.newValue || "{}");
+          setSettingsState((prev) => ({ ...prev, ...parsed }));
+        } catch (e) {
+          console.error("Failed to parse storage settings event:", e);
+        }
       }
     };
 
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      if (unsubscribeAuth) unsubscribeAuth();
+    };
   }, []);
 
-  // Save settings to localStorage
+  // HTML tag side-effect for Compact Mode
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      if (settings.compactMode) {
+        root.classList.add("compact-mode");
+      } else {
+        root.classList.remove("compact-mode");
+      }
+    }
+  }, [settings.compactMode]);
+
+  // Save settings to localStorage and Firestore
   const setSettings = useCallback(
     (newSettings: Partial<Settings>) => {
-      setSettingsState(prev => {
+      setSettingsState((prev) => {
         const updatedSettings = { ...prev, ...newSettings };
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(updatedSettings));
+        syncWithFirestore(updatedSettings);
         return updatedSettings;
       });
     },
-    []
+    [syncWithFirestore]
   );
 
   // Update a single setting
   const updateSetting = useCallback(
     (key: keyof Settings, value: boolean | string) => {
-      setSettingsState(prev => {
+      setSettingsState((prev) => {
         const updatedSettings = { ...prev, [key]: value };
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(updatedSettings));
+        syncWithFirestore(updatedSettings);
         return updatedSettings;
       });
     },
-    []
+    [syncWithFirestore]
   );
 
   // Get image URL with appropriate quality
@@ -170,9 +255,10 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const prefersReducedMotion = useCallback(() => {
     return (
       settings.reduceMotion ||
+      settings.dataSaver || // Data saver automatically reduces animations
       (typeof window !== 'undefined' && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
     );
-  }, [settings.reduceMotion]);
+  }, [settings.reduceMotion, settings.dataSaver]);
 
   // Get animation props based on reduced motion preference
   const getAnimationProps = useCallback(
@@ -190,12 +276,21 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     [prefersReducedMotion]
   );
 
-  // Clear all cached data
+  // Clear all cached data (LocalStorage + Service Worker Cache)
   const clearCache = useCallback(() => {
     const currentSettings = localStorage.getItem(SETTINGS_KEY);
     localStorage.clear();
     if (currentSettings) {
       localStorage.setItem(SETTINGS_KEY, currentSettings);
+    }
+
+    // Delete Service Worker Caches
+    if (typeof window !== "undefined" && "caches" in window) {
+      caches.keys().then((keys) => {
+        keys.forEach((key) => {
+          caches.delete(key);
+        });
+      });
     }
     return true;
   }, []);

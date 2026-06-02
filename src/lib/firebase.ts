@@ -22,14 +22,16 @@ const firebaseConfig = {
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Initialize Firestore with persistence (v10+ pattern), checking if already initialized
+// Initialize Firestore with persistence (v10+ pattern) on client, or standard on server
 const db = getApps().length > 0
   ? getFirestore(app)
-  : initializeFirestore(app, {
-      localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager()
+  : typeof window !== 'undefined'
+    ? initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
       })
-    });
+    : getFirestore(app);
 
 // Analytics is client-side only
 const analytics = typeof window !== 'undefined' ? isSupported().then(yes => yes ? getAnalytics(app) : null) : null;

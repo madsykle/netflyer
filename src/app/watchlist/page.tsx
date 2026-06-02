@@ -26,6 +26,7 @@ import Image from "next/image";
 import { useToast } from "../../components/ToastProvider";
 import { tmdbService } from "../../lib/tmdb";
 import { Movie, TVShow } from "../../types/tmdb";
+import { isReleased } from "../../lib/release";
 
 const WatchlistPage = () => {
   const [watchlistData, setWatchlistData] = useState<(Movie | TVShow)[]>([]);
@@ -236,16 +237,27 @@ const WatchlistPage = () => {
                             sizes="(max-width: 768px) 50vw, 20vw"
                           />
                           
-                          {/* Hover Overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <button
-                                className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform"
-                                onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
-                              >
-                                <Play className="w-4 h-4 text-white fill-current ml-0.5" />
-                              </button>
-                            </div>
+                           {/* Hover Overlay */}
+                           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                             <div className="absolute inset-0 flex items-center justify-center">
+                               {isReleased(isMovie ? item.release_date : item.first_air_date, item.status) ? (
+                                 <button
+                                   className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform cursor-pointer hover:bg-[#ff1a2a]"
+                                   onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
+                                   aria-label="Play Now"
+                                 >
+                                   <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                                 </button>
+                               ) : (
+                                 <button
+                                   className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform cursor-pointer hover:bg-white/20 text-white/70"
+                                   onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
+                                   aria-label="Not Yet Released - Info"
+                                 >
+                                   <Calendar className="w-4 h-4" />
+                                 </button>
+                               )}
+                             </div>
                             
                             <button
                               onClick={(e) => {
@@ -328,13 +340,23 @@ const WatchlistPage = () => {
                           </div>
 
                           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                            <button
-                              onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
-                              className="btn btn-icon rounded-full w-9 h-9 sm:w-10 sm:h-10"
-                              aria-label="Play"
-                            >
-                              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
-                            </button>
+                            {isReleased(isMovie ? item.release_date : item.first_air_date, item.status) ? (
+                              <button
+                                onClick={() => router.push(`/watch/${item.mediaType}/${item.id}${!isMovie ? '/1/1' : ''}`)}
+                                className="btn btn-icon rounded-full w-9 h-9 sm:w-10 sm:h-10 cursor-pointer"
+                                aria-label="Play"
+                              >
+                                <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
+                                className="btn btn-icon rounded-full w-9 h-9 sm:w-10 sm:h-10 text-white/50 border border-white/10 hover:text-white hover:bg-white/5 cursor-pointer"
+                                aria-label="Not Yet Released - Info"
+                              >
+                                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              </button>
+                            )}
                             <button
                               onClick={() => removeFromWatchlist(item.id, item.mediaType)}
                               disabled={removingId === item.id}

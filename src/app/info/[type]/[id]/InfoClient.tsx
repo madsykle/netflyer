@@ -30,8 +30,10 @@ import {
   X,
   Check,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  Calendar
 } from "lucide-react";
+import { isReleased, formatReleaseDate } from "../../../../lib/release";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -82,8 +84,10 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
     poster: false,
   });
   
+  const [autoPlayActive, setAutoPlayActive] = useState(false);
+
   const router = useRouter();
-  const { getImageUrl } = useSettings();
+  const { getImageUrl, settings } = useSettings();
   const { createToast } = useToast();
 
   useEffect(() => {
@@ -99,11 +103,20 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
     fetchVideos();
   }, [type, id]);
 
+  useEffect(() => {
+    if (!settings.autoplayTrailers || settings.dataSaver || !trailerKey) return;
+    const timer = setTimeout(() => {
+      setAutoPlayActive(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [trailerKey, settings.autoplayTrailers, settings.dataSaver]);
+
   const isTV = type === "tv";
   const title = (details as MovieDetails).title || (details as TVShowDetails).name;
   const releaseDate = isTV 
     ? (details as TVShowDetails).first_air_date
     : (details as MovieDetails).release_date;
+  const released = isReleased(releaseDate, details.status);
   const runtime = (details as MovieDetails).runtime 
     ? `${Math.floor((details as MovieDetails).runtime / 60)}h ${(details as MovieDetails).runtime % 60}m`
     : (details as TVShowDetails).episode_run_time?.[0]
@@ -276,16 +289,27 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
       <div className="relative w-full h-[70vh] md:h-[80vh] min-h-[500px] flex items-end">
         {/* Backdrop */}
         <div className="absolute inset-0 overflow-hidden bg-[#050505]">
-          <Image
-            src={backdropUrl}
-            alt=""
-            fill
-            priority
-            className="object-cover object-top opacity-50"
-            sizes="100vw"
-            onLoad={() => setImageLoaded(p => ({...p, backdrop: true}))}
-            style={{ opacity: imageLoaded.backdrop ? 0.6 : 0, transition: 'opacity 1.5s ease-in-out' }}
-          />
+          {autoPlayActive && trailerKey ? (
+            <div className="absolute inset-0 w-full h-full pointer-events-none scale-105 opacity-55 transition-opacity duration-1000">
+              <iframe
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerKey}&rel=0&modestbranding=1&showinfo=0`}
+                title="Trailer Preview"
+                className="w-full h-full border-0 object-cover"
+                allow="autoplay; encrypted-media"
+              />
+            </div>
+          ) : (
+            <Image
+              src={backdropUrl}
+              alt=""
+              fill
+              priority
+              className="object-cover object-top opacity-50"
+              sizes="100vw"
+              onLoad={() => setImageLoaded(p => ({...p, backdrop: true}))}
+              style={{ opacity: imageLoaded.backdrop ? 0.6 : 0, transition: 'opacity 1.5s ease-in-out' }}
+            />
+          )}
           {/* Gradients to blend into background */}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-base)] via-[var(--bg-base)]/40 to-transparent" />
@@ -341,6 +365,11 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                     ★ {details.vote_average.toFixed(1)}
                   </span>
                 )}
+                {settings.dataSaver && (
+                  <span className="text-xs font-extrabold bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3.5 py-1.5 rounded-[4px] shadow-sm backdrop-blur-md flex items-center gap-1.5 tracking-wider uppercase">
+                    Data Saver Active
+                  </span>
+                )}
                 <div className="flex gap-2 ml-2">
                   {details.genres?.slice(0, 3).map((g: any) => (
                     <span key={g.id} className="genre-chip !rounded-[4px] !px-3 !py-1.5 !text-xs !bg-[var(--accent-dim)] !border-[rgba(229,9,20,0.25)]">{g.name}</span>
@@ -350,13 +379,30 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
 
               {/* Actions */}
               <div className="flex flex-wrap items-center gap-4">
-                <button
-                  onClick={() => router.push(type === 'tv' ? `/watch/tv/${id}/1/1` : `/watch/movie/${id}`)}
-                  className="btn btn-primary h-14 px-8 md:px-12 text-xs uppercase tracking-widest font-extrabold shadow-[0_0_20px_rgba(229,9,20,0.3)] hover:scale-105 transition-all duration-300"
-                >
-                  <Play className="w-4 h-4 fill-current mr-0.5" />
-                  Play Now
-                </button>
+                {released ? (
+                  <button
+                    onClick={() => router.push(type === 'tv' ? `/watch/tv/${id}/1/1` : `/watch/movie/${id}`)}
+                    className="btn btn-primary h-14 px-8 md:px-12 text-xs uppercase tracking-widest font-extrabold shadow-[0_0_20px_rgba(229,9,20,0.3)] hover:scale-105 transition-all duration-300"
+                  >
+                    <Play className="w-4 h-4 fill-current mr-0.5" />
+                    Play Now
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      disabled
+                      className="btn bg-white/5 border border-white/10 text-white/40 cursor-not-allowed h-14 px-8 md:px-12 text-xs uppercase tracking-widest font-extrabold flex items-center gap-2"
+                    >
+                      <Calendar className="w-4 h-4 text-white/40" />
+                      Not Yet Released
+                    </button>
+                    {releaseDate && (
+                      <span className="text-[10px] text-[var(--text-secondary)] font-semibold tracking-wider text-center md:text-left">
+                        Expected: {formatReleaseDate(releaseDate)}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <button
                   onClick={handleWatchlistToggle}
@@ -745,14 +791,25 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
 const EpisodeCard = ({ episode, index, type, id, selectedSeason, getImageUrl, router }: any) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const stillUrl = episode.still_path ? getImageUrl(episode.still_path, "still") : "/not-found.png";
+  
+  const hasAired = !episode.air_date || (new Date(episode.air_date) <= new Date());
+
+  const handleCardClick = () => {
+    if (!hasAired) return;
+    router.push(`/watch/${type}/${id}/${selectedSeason}/${episode.episode_number}`);
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="surface rounded-[var(--radius-md)] overflow-hidden border-[var(--border-faint)] hover:border-[var(--accent)] cursor-pointer group transition-all shadow-lg hover:shadow-2xl flex flex-col sm:flex-row h-auto sm:h-32"
-      onClick={() => router.push(`/watch/${type}/${id}/${selectedSeason}/${episode.episode_number}`)}
+      className={`surface rounded-[var(--radius-md)] overflow-hidden border-[var(--border-faint)] shadow-lg flex flex-col sm:flex-row h-auto sm:h-32 transition-all ${
+        hasAired 
+          ? "hover:border-[var(--accent)] hover:shadow-2xl cursor-pointer group" 
+          : "opacity-50 cursor-not-allowed"
+      }`}
+      onClick={handleCardClick}
     >
       <div className="relative w-full sm:w-48 h-40 sm:h-full bg-[var(--bg-raised)] flex-shrink-0">
         {!imageLoaded && <div className="absolute inset-0 skeleton" />}
@@ -760,22 +817,32 @@ const EpisodeCard = ({ episode, index, type, id, selectedSeason, getImageUrl, ro
           src={stillUrl}
           alt={episode.name}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          className={`object-cover transition-transform duration-700 ${hasAired ? "group-hover:scale-105" : ""}`}
           sizes="(max-width: 640px) 100vw, 192px"
           onLoad={() => setImageLoaded(true)}
         />
-        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-          <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-[var(--accent)]/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform scale-75 group-hover:scale-100 backdrop-blur-sm shadow-[0_0_20px_var(--accent-glow)]">
-             <Play className="w-5 h-5 text-white fill-current ml-1" />
+        {hasAired ? (
+          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+            <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-[var(--accent)]/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform scale-75 group-hover:scale-100 backdrop-blur-sm shadow-[0_0_20px_var(--accent-glow)]">
+               <Play className="w-5 h-5 text-white fill-current ml-1" />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-white/5 border border-white/10 flex items-center justify-center text-white/50 backdrop-blur-sm">
+               <Calendar className="w-5 h-5" />
+            </div>
+          </div>
+        )}
       </div>
       <div className="p-5 flex-1 flex flex-col justify-center min-w-0 bg-[var(--bg-surface)]">
         <div className="flex items-center justify-between mb-2">
           <span className="t-label text-[var(--accent)]">E{episode.episode_number}</span>
-          <span className="t-meta text-[10px] opacity-50 bg-white/5 px-2 py-0.5 rounded">{episode.air_date?.split("-")[0] || "TBA"}</span>
+          <span className="t-meta text-[10px] opacity-50 bg-white/5 px-2 py-0.5 rounded">
+            {episode.air_date ? new Date(episode.air_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : "TBA"}
+          </span>
         </div>
-        <h3 className="font-bold text-white text-sm md:text-base line-clamp-1 mb-1.5 group-hover:text-[var(--accent)] transition-colors">
+        <h3 className={`font-bold text-white text-sm md:text-base line-clamp-1 mb-1.5 transition-colors ${hasAired ? "group-hover:text-[var(--accent)]" : ""}`}>
           {episode.name}
         </h3>
         <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">

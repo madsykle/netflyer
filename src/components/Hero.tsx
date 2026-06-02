@@ -8,7 +8,8 @@ import { FaPlay } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Movie, TVShow } from "../types/tmdb";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { isReleased } from "../lib/release";
 
 interface HeroSectionProps {
   movies?: (Movie | TVShow)[] | null;
@@ -41,11 +42,20 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
   const title = (movie as any).title || (movie as any).name;
   const backdropUrl = getImageUrl(movie.backdrop_path, "backdrop");
   
-  const releaseYear = isTV 
-    ? (movie as TVShow).first_air_date?.split("-")[0] 
-    : (movie as Movie).release_date?.split("-")[0];
+  const releaseDateStr = isTV 
+    ? (movie as TVShow).first_air_date 
+    : (movie as Movie).release_date;
+    
+  const released = isReleased(releaseDateStr);
+  
+  const releaseYear = releaseDateStr?.split("-")[0];
 
   const handlePlay = () => {
+    if (!released) {
+      const path = isTV ? `/info/tv/${movie.id}` : `/info/movie/${movie.id}`;
+      router.push(path);
+      return;
+    }
     const path = isTV 
       ? `/watch/tv/${movie.id}/1/1` 
       : `/watch/movie/${movie.id}`;
@@ -123,25 +133,6 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
         </>
       )}
 
-      {/* Dot Indicators */}
-      {movies.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
-          {movies.map((_, index) => (
-            <button
-              key={index}
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveIndex(index);
-              }}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                activeIndex === index ? "bg-[var(--accent)] w-6" : "bg-white/30 hover:bg-white/50 w-1.5"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
-
       {/* Content */}
       <div className="container relative z-20 h-full flex flex-col justify-end pb-12 md:pb-24">
         <AnimatePresence mode="wait">
@@ -178,13 +169,23 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={handlePlay}
-                className="btn btn-primary w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
-              >
-                <FaPlay className="text-[10px]" />
-                Play Now
-              </button>
+              {released ? (
+                <button
+                  onClick={handlePlay}
+                  className="btn btn-primary w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+                >
+                  <FaPlay className="text-[10px]" />
+                  Play Now
+                </button>
+              ) : (
+                <button
+                  onClick={handleInfo}
+                  className="btn bg-white/5 border border-white/10 text-white/40 hover:text-white/60 hover:bg-white/8 w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors duration-200"
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  Coming Soon
+                </button>
+              )}
               <button
                 onClick={handleInfo}
                 className="btn btn-secondary w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
@@ -194,6 +195,27 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
             </div>
           </motion.div>
         </AnimatePresence>
+
+        {/* Slide Indicator Dots - positioned under text for layout isolation */}
+        {movies.length > 1 && (
+          <div className="flex items-center gap-2 mt-8 z-30 select-none">
+            {movies.map((_, index) => (
+              <button
+                key={index}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveIndex(index);
+                }}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  activeIndex === index 
+                    ? "bg-[var(--accent)] w-6 shadow-[0_0_8px_var(--accent)]" 
+                    : "bg-white/30 hover:bg-white/50 w-1.5"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

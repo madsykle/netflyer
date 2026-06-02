@@ -6,14 +6,13 @@ import {
   RotateCcw,
   ArrowLeft,
   AlertCircle,
+  AlertTriangle,
   Tv,
   Film,
   Check,
   ChevronDown,
   MonitorPlay,
   ServerCrash,
-  Shield,
-  ShieldAlert,
   Zap
 } from "lucide-react";
 import React, { useState, useEffect, use, useCallback } from "react";
@@ -21,6 +20,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { providers, getEmbedUrl, decodeBase64Url, Provider, StreamInfo } from "../../../lib/embed";
 import { tmdbService } from "../../../lib/tmdb";
+import { isReleased } from "../../../lib/release";
 import { ContentType, MovieDetails, TVShowDetails, Season } from "../../../types/tmdb";
 import { auth, db } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -71,28 +71,21 @@ const WatchClient = ({ params }: Props) => {
   const [selectedStream, setSelectedStream] = useState<StreamInfo | null>(null);
   const [showStreamMenu, setShowStreamMenu] = useState(false);
 
-  const [strictShield, setStrictShield] = useState(true);
   const [autoPlayNext, setAutoPlayNext] = useState(true);
+  const [isSecure, setIsSecure] = useState(true);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [nextEpisodeInfo, setNextEpisodeInfo] = useState<{ season: number; episode: number; title: string } | null>(null);
   const countdownActive = React.useRef(false);
 
   useEffect(() => {
-    const savedShield = localStorage.getItem("netflyer_strict_shield");
-    if (savedShield !== null) {
-      setStrictShield(savedShield === "true");
-    }
     const savedAutoPlay = localStorage.getItem("netflyer_autoplay_next");
     if (savedAutoPlay !== null) {
       setAutoPlayNext(savedAutoPlay === "true");
     }
+    if (typeof window !== "undefined") {
+      setIsSecure(window.isSecureContext);
+    }
   }, []);
-
-  const toggleStrictShield = () => {
-    const nextVal = !strictShield;
-    setStrictShield(nextVal);
-    localStorage.setItem("netflyer_strict_shield", String(nextVal));
-  };
 
   const toggleAutoPlayNext = () => {
     const nextVal = !autoPlayNext;
@@ -177,6 +170,28 @@ const WatchClient = ({ params }: Props) => {
     setSelectedStream(null);
     
     try {
+      let currentDetails = details;
+      if (!currentDetails) {
+        try {
+          currentDetails = await tmdbService.getContentDetails(type, parseInt(id));
+          setDetails(currentDetails);
+        } catch (e) {
+          console.error("Failed to load details for release check", e);
+        }
+      }
+
+      if (currentDetails) {
+        const releaseDate = type === "tv" 
+          ? (currentDetails as TVShowDetails).first_air_date 
+          : (currentDetails as MovieDetails).release_date;
+        
+        if (!isReleased(releaseDate, currentDetails.status)) {
+          setError("unreleased");
+          setLoading(false);
+          return;
+        }
+      }
+
       let url = getEmbedUrl(provider, type, parseInt(id), currentSeason, currentEpisode);
       if (url) {
         if (provider === 'vidking') {
@@ -209,7 +224,7 @@ const WatchClient = ({ params }: Props) => {
       setError("Video source unavailable. Try another provider.");
       setLoading(false);
     }
-  }, [provider, type, id, currentSeason, currentEpisode]);
+  }, [provider, type, id, currentSeason, currentEpisode, details]);
 
   // Fetch title info and episodes if TV
   useEffect(() => {
@@ -217,6 +232,15 @@ const WatchClient = ({ params }: Props) => {
       try {
         const data = await tmdbService.getContentDetails(type, parseInt(id));
         setDetails(data);
+
+        const releaseDate = type === "tv" 
+          ? (data as TVShowDetails).first_air_date 
+          : (data as MovieDetails).release_date;
+        if (!isReleased(releaseDate, data.status)) {
+          setError("unreleased");
+          setLoading(false);
+          return;
+        }
 
         if (type === "tv") {
           const sData = await tmdbService.getSeasonDetails(parseInt(id), currentSeason);
@@ -321,6 +345,8 @@ const WatchClient = ({ params }: Props) => {
         if (
           autoPlayNext &&
           mediaType === "tv" &&
+          duration > 60 &&
+          currentTime > 60 &&
           (calculatedProgress > 0.95 || currentTime > duration - 15) &&
           !countdownActive.current
         ) {
@@ -518,17 +544,43 @@ const WatchClient = ({ params }: Props) => {
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 flex flex-col items-center justify-center bg-[#050505] p-8 z-10 text-center"
                 >
-                  <div className="w-20 h-20 rounded-full bg-[var(--accent)]/10 flex items-center justify-center mb-6 border border-[var(--accent)]/20">
-                    <ServerCrash className="w-8 h-8 text-[var(--accent)]" />
-                  </div>
-                  <h3 className="t-title text-3xl mb-3">Transmission Failed</h3>
-                  <p className="t-body text-[var(--text-secondary)] max-w-md mb-8">
-                    {error}. Some adblockers or strict browser settings might block the stream. Try disabling them or select a different server.
-                  </p>
-                  <button onClick={fetchEmbedUrl} className="btn btn-secondary h-12 px-8 uppercase tracking-widest text-xs font-bold">
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Retry Connection
-                  </button>
+                  {error === "unreleased" ? (
+                    <>
+                      <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mb-6 border border-amber-500/20">
+                        <AlertTriangle className="w-8 h-8 text-amber-500" />
+                      </div>
+                      <h3 className="t-title text-3xl mb-3">Title Not Released</h3>
+                      <p className="t-body text-[var(--text-secondary)] max-w-md mb-8 leading-relaxed">
+                        This title cannot be played because it has not been officially released in theaters or on streaming platforms yet.
+                        {details && (
+                          <span className="block text-xs font-bold text-[var(--accent)] uppercase tracking-widest mt-4">
+                            Expected Release: {new Date('release_date' in details ? details.release_date : details.first_air_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </span>
+                        )}
+                      </p>
+                      <button 
+                        onClick={() => router.push(type === 'tv' ? `/info/tv/${id}` : `/info/movie/${id}`)} 
+                        className="btn btn-secondary h-12 px-8 uppercase tracking-widest text-xs font-bold"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        View Info Page
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-20 h-20 rounded-full bg-[var(--accent)]/10 flex items-center justify-center mb-6 border border-[var(--accent)]/20">
+                        <ServerCrash className="w-8 h-8 text-[var(--accent)]" />
+                      </div>
+                      <h3 className="t-title text-3xl mb-3">Transmission Failed</h3>
+                      <p className="t-body text-[var(--text-secondary)] max-w-md mb-8">
+                        {error}. Some adblockers or strict browser settings might block the stream. Try disabling them or select a different server.
+                      </p>
+                      <button onClick={fetchEmbedUrl} className="btn btn-secondary h-12 px-8 uppercase tracking-widest text-xs font-bold">
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Retry Connection
+                      </button>
+                    </>
+                  )}
                 </motion.div>
               ) : embedUrl ? (
                 <motion.div
@@ -544,16 +596,29 @@ const WatchClient = ({ params }: Props) => {
                       className="w-full h-full border-0"
                       scrolling="no"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                      sandbox={
-                        strictShield
-                          ? "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
-                          : undefined
-                      }
                       loading="eager"
                     />
                 </motion.div>
               ) : null}
             </AnimatePresence>
+
+            {/* Non-secure Context Alert */}
+            {!isSecure && (
+              <div className="absolute top-4 left-4 right-4 bg-amber-500/10 border border-amber-500/20 backdrop-blur-md px-4 py-2.5 rounded-[var(--radius-sm)] flex items-center justify-between gap-3 z-30 text-[11px] text-amber-400 font-medium">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>
+                    Non-Secure Context: This player requires <strong className="text-white">HTTPS</strong> or <strong className="text-white">localhost</strong> to decrypt streams.
+                  </span>
+                </div>
+                <button 
+                  onClick={() => setIsSecure(true)} 
+                  className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 border border-amber-500/30 hover:border-amber-500/50 text-amber-400 rounded cursor-pointer transition-all shrink-0"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
 
             {/* Auto-Play Countdown Overlay */}
             <AnimatePresence>
@@ -603,28 +668,6 @@ const WatchClient = ({ params }: Props) => {
 
             {/* Player Toolbar Controls */}
             <div className="flex items-center gap-3 flex-wrap">
-              {/* Ad Shield Toggle */}
-              <button
-                onClick={toggleStrictShield}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-sm)] border text-[9px] uppercase font-bold transition-all cursor-pointer ${
-                  strictShield
-                    ? "bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20"
-                    : "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
-                }`}
-                title={strictShield ? "Strict Ad Shield Active (Blocks Popups)" : "Ad Shield Warning (Popups Allowed)"}
-              >
-                {strictShield ? (
-                  <>
-                    <Shield className="w-3 h-3" />
-                    <span>Ad Shield: On</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldAlert className="w-3 h-3" />
-                    <span>Ad Shield: Off</span>
-                  </>
-                )}
-              </button>
 
               {/* Auto Play Toggle */}
               {type === "tv" && (

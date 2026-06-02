@@ -20,7 +20,8 @@ const Row = ({ items, title, loading }: RowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
-  const { prefersReducedMotion } = useSettings();
+  const { prefersReducedMotion, settings } = useSettings();
+  const showScrollIndicators = settings.showScrollIndicators !== false;
 
   const checkScroll = useCallback(() => {
     if (scrollRef.current) {
@@ -67,7 +68,7 @@ const Row = ({ items, title, loading }: RowProps) => {
         <div className="relative">
           {/* Arrows */}
           <AnimatePresence>
-            {showLeftArrow && (
+            {showScrollIndicators && showLeftArrow && (
               <motion.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -82,7 +83,7 @@ const Row = ({ items, title, loading }: RowProps) => {
           </AnimatePresence>
 
           <AnimatePresence>
-            {showRightArrow && (
+            {showScrollIndicators && showRightArrow && (
               <motion.button
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
