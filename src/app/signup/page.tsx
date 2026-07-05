@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ArrowLeft, Film, ChevronRight, UserPlus } from "lucide-react";
+import { Eye, EyeSlash, ArrowLeft, FilmStrip, CaretRight, UserPlus } from "@phosphor-icons/react";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -213,7 +213,7 @@ const SignUp = () => {
         <div className="hidden lg:block absolute top-12 left-12 z-20">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-[var(--accent)] rounded-[4px] flex items-center justify-center shadow-[0_0_20px_var(--accent-glow)]">
-              <Film className="text-white w-5 h-5" />
+              <FilmStrip className="text-white w-5 h-5" weight="fill" />
             </div>
             <span className="t-hero text-2xl tracking-[0.2em] pt-1">NETFLYER</span>
           </Link>
@@ -241,7 +241,7 @@ const SignUp = () => {
         <div className="lg:hidden absolute top-8 left-8">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-[var(--accent)] rounded-[4px] flex items-center justify-center">
-              <Film className="text-white w-4 h-4" />
+              <FilmStrip className="text-white w-4 h-4" weight="fill" />
             </div>
             <span className="t-hero text-lg tracking-[0.15em] pt-1">NETFLYER</span>
           </Link>
@@ -269,7 +269,7 @@ const SignUp = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="cinephile_24"
-                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
                   required
                 />
               </div>
@@ -282,7 +282,7 @@ const SignUp = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
                   required
                 />
               </div>
@@ -296,7 +296,7 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
                     required
                   />
                   <button
@@ -304,7 +304,7 @@ const SignUp = () => {
                     onClick={toggleVisibility}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors"
                   >
-                    {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {isVisible ? <EyeSlash size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
                 <p className="t-meta text-[10px] ml-1 opacity-50">MINIMUM 6 CHARACTERS</p>
@@ -322,7 +322,7 @@ const SignUp = () => {
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Create Account <ChevronRight className="w-4 h-4" />
+                    Create Account <CaretRight className="w-4 h-4" weight="bold" />
                   </span>
                 )}
               </button>
@@ -336,7 +336,7 @@ const SignUp = () => {
                   className="text-white font-bold hover:text-[var(--accent)] transition-colors inline-flex items-center gap-1 group"
                 >
                   Sign in instead
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  <CaretRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" weight="bold" />
                 </Link>
               </p>
             </footer>
@@ -348,7 +348,7 @@ const SignUp = () => {
           href="/"
           className="absolute bottom-8 left-8 lg:left-auto lg:right-12 flex items-center gap-2 t-meta hover:text-white transition-colors group"
         >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" weight="bold" />
           Back to cinema
         </Link>
       </div>

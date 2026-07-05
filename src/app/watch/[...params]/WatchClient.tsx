@@ -3,18 +3,18 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
-  RotateCcw,
+  ArrowUUpLeft,
   ArrowLeft,
-  AlertCircle,
-  AlertTriangle,
-  Tv,
-  Film,
+  Warning,
+  WarningCircle,
+  Television,
+  FilmStrip,
   Check,
-  ChevronDown,
+  CaretDown,
   MonitorPlay,
-  ServerCrash,
-  Zap
-} from "lucide-react";
+  HardDrives,
+  Lightning
+} from "@phosphor-icons/react";
 import React, { useState, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -436,10 +436,10 @@ const WatchClient = ({ params }: Props) => {
           
           <div>
             <div className="flex items-center gap-2 text-[var(--accent)] text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
-              {type === "movie" ? <Film className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Tv className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+              {type === "movie" ? <FilmStrip className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Television className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               <span>{type === "movie" ? "Feature Film" : "Television Series"}</span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-lg" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>
+            <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-lg" style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.05em' }}>
               {fullTitle}
             </h1>
           </div>
@@ -454,7 +454,7 @@ const WatchClient = ({ params }: Props) => {
             >
               <MonitorPlay className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
               <span className="hidden sm:inline text-white">{currentProvider?.label}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-[var(--text-muted)] transition-transform duration-300 ${showProviderMenu ? "rotate-180" : ""}`} />
+               <CaretDown className={`w-3.5 h-3.5 text-[var(--text-muted)] transition-transform duration-300 ${showProviderMenu ? "rotate-180" : ""}`} weight="bold" />
             </button>
 
             <AnimatePresence>
@@ -504,7 +504,7 @@ const WatchClient = ({ params }: Props) => {
             className="w-10 h-10 sm:w-12 sm:h-12 bg-white/5 border border-white/10 hover:border-white/20 rounded-[var(--radius-sm)] flex items-center justify-center backdrop-blur-md transition-all disabled:opacity-50"
             title="Reload Player (R)"
           >
-            <RotateCcw className={`w-3.5 h-3.5 text-white ${loading ? "animate-spin" : ""}`} />
+             <ArrowUUpLeft className={`w-3.5 h-3.5 text-white ${loading ? "animate-spin" : ""}`} />
           </button>
           <button
             onClick={() => setShowShortcuts(true)}
@@ -547,7 +547,7 @@ const WatchClient = ({ params }: Props) => {
                   {error === "unreleased" ? (
                     <>
                       <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mb-6 border border-amber-500/20">
-                        <AlertTriangle className="w-8 h-8 text-amber-500" />
+                         <Warning className="w-8 h-8 text-amber-500" weight="fill" />
                       </div>
                       <h3 className="t-title text-3xl mb-3">Title Not Released</h3>
                       <p className="t-body text-[var(--text-secondary)] max-w-md mb-8 leading-relaxed">
@@ -569,14 +569,14 @@ const WatchClient = ({ params }: Props) => {
                   ) : (
                     <>
                       <div className="w-20 h-20 rounded-full bg-[var(--accent)]/10 flex items-center justify-center mb-6 border border-[var(--accent)]/20">
-                        <ServerCrash className="w-8 h-8 text-[var(--accent)]" />
+                         <HardDrives className="w-8 h-8 text-[var(--accent)]" weight="fill" />
                       </div>
                       <h3 className="t-title text-3xl mb-3">Transmission Failed</h3>
                       <p className="t-body text-[var(--text-secondary)] max-w-md mb-8">
                         {error}. Some adblockers or strict browser settings might block the stream. Try disabling them or select a different server.
                       </p>
                       <button onClick={fetchEmbedUrl} className="btn btn-secondary h-12 px-8 uppercase tracking-widest text-xs font-bold">
-                        <RotateCcw className="w-4 h-4 mr-2" />
+                         <ArrowUUpLeft className="w-4 h-4 mr-2" />
                         Retry Connection
                       </button>
                     </>
@@ -606,7 +606,7 @@ const WatchClient = ({ params }: Props) => {
             {!isSecure && (
               <div className="absolute top-4 left-4 right-4 bg-amber-500/10 border border-amber-500/20 backdrop-blur-md px-4 py-2.5 rounded-[var(--radius-sm)] flex items-center justify-between gap-3 z-30 text-[11px] text-amber-400 font-medium">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                   <Warning className="w-4 h-4 text-amber-500 shrink-0" weight="fill" />
                   <span>
                     Non-Secure Context: This player requires <strong className="text-white">HTTPS</strong> or <strong className="text-white">localhost</strong> to decrypt streams.
                   </span>
@@ -680,7 +680,7 @@ const WatchClient = ({ params }: Props) => {
                   }`}
                   title={autoPlayNext ? "Auto-Play Next Episode Enabled" : "Auto-Play Next Episode Disabled"}
                 >
-                  <Zap className={`w-3 h-3 ${autoPlayNext ? "fill-current" : ""}`} />
+                   <Lightning className={`w-3 h-3 ${autoPlayNext ? "fill-current" : ""}`} weight="fill" />
                   <span>Auto-Play: {autoPlayNext ? "On" : "Off"}</span>
                 </button>
               )}
@@ -706,7 +706,7 @@ const WatchClient = ({ params }: Props) => {
                     className="flex items-center gap-2 bg-white/5 border border-white/10 hover:border-white/20 rounded-[var(--radius-sm)] px-3 py-1.5 text-[10px] uppercase font-bold text-white transition-all group"
                   >
                     <span>S{currentSeason}</span>
-                    <ChevronDown className={`w-3 h-3 text-[var(--text-muted)] transition-transform duration-300 ${showSeasonMenu ? "rotate-180" : ""}`} />
+                     <CaretDown className={`w-3 h-3 text-[var(--text-muted)] transition-transform duration-300 ${showSeasonMenu ? "rotate-180" : ""}`} weight="bold" />
                   </button>
 
                   <AnimatePresence>
@@ -851,7 +851,7 @@ const WatchClient = ({ params }: Props) => {
               
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 rounded-full bg-[var(--accent)]/10 flex items-center justify-center mb-6 border border-[var(--accent)]/20">
-                  <AlertCircle className="w-8 h-8 text-[var(--accent)]" />
+                   <WarningCircle className="w-8 h-8 text-[var(--accent)]" weight="fill" />
                 </div>
                 
                 <h3 className="t-title text-3xl mb-4">Stream Notice</h3>

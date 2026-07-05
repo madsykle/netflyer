@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowLeft, Film, Search } from "lucide-react";
+import { ArrowLeft, FilmStrip, MagnifyingGlass } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { tmdbService } from "../lib/tmdb";
 
@@ -74,7 +74,7 @@ export default function NotFoundClient() {
               Return to Cinema
             </Link>
             <Link href="/search" className="btn btn-secondary h-14 px-10 text-sm uppercase tracking-widest font-bold w-full sm:w-auto">
-              <Search className="w-4 h-4" />
+              <MagnifyingGlass className="w-4 h-4" />
               Search Library
             </Link>
           </div>
@@ -84,7 +84,7 @@ export default function NotFoundClient() {
       {/* Brand Watermark */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 opacity-20">
         <div className="flex items-center gap-2">
-          <Film className="w-4 h-4" />
+          <FilmStrip className="w-4 h-4" />
           <span className="t-hero text-xl tracking-[0.2em] pt-1">NETFLYER</span>
         </div>
       </div>

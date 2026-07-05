@@ -2,10 +2,9 @@
 
 import { useSettings } from "../hooks/useSettings";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { CaretLeft, CaretRight, Play, Star } from "@phosphor-icons/react";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { Movie, TVShow } from "../types/tmdb";
 import { MovieRowSkeleton } from "./Skeleton";
@@ -20,7 +19,7 @@ const Row = ({ items, title, loading }: RowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
-  const { prefersReducedMotion, settings } = useSettings();
+  const { settings } = useSettings();
   const showScrollIndicators = settings.showScrollIndicators !== false;
 
   const checkScroll = useCallback(() => {
@@ -60,7 +59,7 @@ const Row = ({ items, title, loading }: RowProps) => {
               )}
             </div>
             <button className="t-label text-[var(--accent)] hover:opacity-75 transition-opacity text-[10px]">
-              See all →
+              See all
             </button>
           </div>
         )}
@@ -77,7 +76,7 @@ const Row = ({ items, title, loading }: RowProps) => {
                 className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-white shadow-2xl transition-all hover:bg-[var(--accent)] hover:border-[var(--accent)] group/btn"
                 aria-label="Scroll left"
               >
-                <ChevronLeft className="w-6 h-6 transition-transform group-hover/btn:-translate-x-0.5" />
+                <CaretLeft weight="bold" className="w-5 h-5 transition-transform group-hover/btn:-translate-x-0.5" />
               </motion.button>
             )}
           </AnimatePresence>
@@ -92,7 +91,7 @@ const Row = ({ items, title, loading }: RowProps) => {
                 className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-white shadow-2xl transition-all hover:bg-[var(--accent)] hover:border-[var(--accent)] group/btn"
                 aria-label="Scroll right"
               >
-                <ChevronRight className="w-6 h-6 transition-transform group-hover/btn:translate-x-0.5" />
+                <CaretRight weight="bold" className="w-5 h-5 transition-transform group-hover/btn:translate-x-0.5" />
               </motion.button>
             )}
           </AnimatePresence>
@@ -182,13 +181,13 @@ const RowCard = ({ item }: { item: Movie | TVShow }) => {
       onClick={onClick}
       className="flex-shrink-0 cursor-pointer"
     >
-      <div className="relative group/card">
+      <div className="relative group/card spotlight-card">
         {/* Image container */}
-        <div className="relative w-40 h-[240px] md:w-48 md:h-[288px] overflow-hidden bg-[var(--bg-raised)] rounded-[var(--radius-md)] border border-[var(--border-faint)] group-hover/card:border-[rgba(229,9,20,0.35)] group-hover/card:shadow-[0_0_20px_rgba(229,9,20,0.22)] transition-all duration-300">
+        <div className="relative w-40 h-[240px] md:w-48 md:h-[288px] overflow-hidden bg-[var(--bg-raised)] rounded-[var(--radius-md)]">
           {!imageLoaded && !imageError && (
             <div className="absolute inset-0 skeleton" />
           )}
-          
+
           {imageError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
               <span className="t-meta opacity-40 mb-2 font-bold tracking-widest text-[9px]">IMAGE ERROR</span>
@@ -212,31 +211,31 @@ const RowCard = ({ item }: { item: Movie | TVShow }) => {
           {/* Progress Bar Overlay */}
           {progress !== null && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40 z-10">
-              <div 
-                className="h-full bg-[var(--accent)] shadow-[0_0_8px_var(--accent)]" 
-                style={{ width: `${progress * 100}%` }} 
+              <div
+                className="h-full bg-[var(--accent)] shadow-[0_0_8px_var(--accent)]"
+                style={{ width: `${progress * 100}%` }}
               />
             </div>
           )}
 
-          {/* Cinematic overlay on hover using Framer Motion */}
-          <motion.div 
+          {/* Cinematic overlay on hover */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered ? 1 : 0 }}
             transition={{ duration: 0.25 }}
             className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10"
           >
             <div className="absolute inset-0 flex items-center justify-center">
-              <motion.div 
+              <motion.div
                 animate={{ scale: isHovered ? 1 : 0.8 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="w-11 h-11 rounded-full bg-[var(--accent)] flex items-center justify-center shadow-[0_0_15px_var(--accent-glow)] hover:bg-[#ff1a2a] transition-all"
               >
-                <Play className="w-4 h-4 text-white fill-current ml-0.5" />
+                <Play weight="fill" className="w-4 h-4 text-white ml-0.5" />
               </motion.div>
             </div>
-            
-            <motion.div 
+
+            <motion.div
               animate={{ y: isHovered ? 0 : 10, opacity: isHovered ? 1 : 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 25 }}
               className="absolute bottom-0 left-0 right-0 p-3.5"
@@ -246,13 +245,14 @@ const RowCard = ({ item }: { item: Movie | TVShow }) => {
               </p>
               <div className="flex items-center gap-1.5">
                 {releaseDate && (
-                  <span className="text-[10px] font-extrabold bg-white/10 text-white/90 px-1.5 py-0.5 rounded border border-white/10 tracking-widest">
+                  <span className="t-meta text-[10px] font-extrabold bg-white/10 text-white/90 px-1.5 py-0.5 rounded border border-white/10 tracking-widest">
                     {new Date(releaseDate).getFullYear()}
                   </span>
                 )}
                 {item.vote_average > 0 && (
-                  <span className="text-[10px] font-extrabold bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/20 tracking-wider">
-                    ★ {item.vote_average.toFixed(1)}
+                  <span className="rating-chip text-[10px]">
+                    <Star weight="fill" className="w-3 h-3" />
+                    {item.vote_average.toFixed(1)}
                   </span>
                 )}
               </div>

@@ -12,14 +12,14 @@ import {
 } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Trash2,
-  Calendar,
+  Trash,
+  CalendarBlank,
   Play,
-  BookmarkX,
-  Grid,
+  BookmarkSimple,
+  SquaresFour,
   List,
   Star
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -150,7 +150,7 @@ const WatchlistPage = () => {
                     : "text-[var(--text-muted)] hover:text-white"
                 }`}
               >
-                <Grid className="w-4 h-4" />
+                <SquaresFour className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
@@ -181,13 +181,13 @@ const WatchlistPage = () => {
               <div className="absolute inset-0 bg-[var(--accent)]/10 rounded-full animate-pulse" />
               <div className="absolute inset-4 bg-[var(--accent)]/20 rounded-full" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <BookmarkX className="w-10 h-10 text-[var(--accent)]" />
+                <BookmarkSimple className="w-10 h-10 text-[var(--accent)]" />
               </div>
             </div>
             
             <h2 
               className="text-white text-4xl mb-3"
-              style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.02em' }}
+              style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.02em' }}
             >
               Your Watchlist is Empty
             </h2>
@@ -254,7 +254,7 @@ const WatchlistPage = () => {
                                    onClick={() => router.push(`/info/${item.mediaType}/${item.id}`)}
                                    aria-label="Not Yet Released - Info"
                                  >
-                                   <Calendar className="w-4 h-4" />
+                                   <CalendarBlank className="w-4 h-4" />
                                  </button>
                                )}
                              </div>
@@ -270,7 +270,7 @@ const WatchlistPage = () => {
                               {removingId === item.id ? (
                                 <div className="w-3 h-3 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
                               ) : (
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash className="w-3.5 h-3.5" />
                               )}
                             </button>
                           </div>
@@ -354,7 +354,7 @@ const WatchlistPage = () => {
                                 className="btn btn-icon rounded-full w-9 h-9 sm:w-10 sm:h-10 text-white/50 border border-white/10 hover:text-white hover:bg-white/5 cursor-pointer"
                                 aria-label="Not Yet Released - Info"
                               >
-                                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    <CalendarBlank className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                               </button>
                             )}
                             <button
@@ -366,7 +366,7 @@ const WatchlistPage = () => {
                               {removingId === item.id ? (
                                 <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
                               ) : (
-                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    <Trash className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                               )}
                             </button>
                           </div>

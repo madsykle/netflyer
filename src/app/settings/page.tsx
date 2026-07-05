@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Monitor,
   Check,
-  Trash2,
+  Trash,
   ArrowLeft,
-  Settings as SettingsIcon,
+  Gear,
   Play,
   Gauge,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -107,7 +107,7 @@ const Settings = () => {
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-2 t-label text-[var(--text-muted)] hover:text-white transition-colors mb-10 group"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" weight="bold" />
           <span>Back</span>
         </motion.button>
 
@@ -118,11 +118,11 @@ const Settings = () => {
         >
           <div className="flex items-center gap-4 mb-12">
             <div className="w-12 h-12 bg-[var(--accent)]/10 rounded-[var(--radius-md)] flex items-center justify-center border border-[var(--accent)]/20">
-              <SettingsIcon className="w-6 h-6 text-[var(--accent)]" />
+              <Gear className="w-6 h-6 text-[var(--accent)]" weight="fill" />
             </div>
             <h1 
               className="text-white text-5xl"
-              style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.02em' }}
+              style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.02em' }}
             >
               Settings
             </h1>
@@ -345,9 +345,9 @@ const Settings = () => {
                     className={`btn ${cacheCleared ? "bg-green-500 border-green-500" : "btn-secondary"} py-2.5 px-6`}
                   >
                     {cacheCleared ? (
-                      <><Check className="w-4 h-4" /> Cleared</>
+                      <><Check className="w-4 h-4" weight="bold" /> Cleared</>
                     ) : (
-                      <><Trash2 className="w-4 h-4" /> Clear All Cache</>
+                      <><Trash className="w-4 h-4" weight="bold" /> Clear All Cache</>
                     )}
                   </button>
                 </div>

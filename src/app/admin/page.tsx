@@ -48,29 +48,29 @@ import {
 } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  BadgePercent,
+  Tag,
   List,
   User,
   Star,
   Eye,
-  Trash2,
-  Edit3,
-  Search,
-  Film,
-  Tv,
-  MessageSquare,
+  Trash,
+  PencilSimple,
+  MagnifyingGlass,
+  FilmStrip,
+  Television,
+  Chats,
   Heart,
-  Calendar,
-  TrendingUp,
-  Settings,
-  LogOut,
+  CalendarBlank,
+  TrendUp,
+  Gear,
+  SignOut,
   Shield,
   Database,
   Activity,
-  ExternalLink,
-  ChevronLeft,
-  BellRing
-} from "lucide-react";
+  ArrowSquareOut,
+  CaretLeft,
+  Bell
+} from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../components/ToastProvider";
@@ -251,7 +251,7 @@ export default function AdminDashboard() {
               className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all"
               aria-label="Sign out"
             >
-              <LogOut className="w-5 h-5" />
+                <SignOut className="w-5 h-5" weight="bold" />
             </button>
           </div>
         </div>
@@ -265,7 +265,7 @@ export default function AdminDashboard() {
             onClick={() => createToast("Global notice broadcasted to all users", { type: "success" })}
             className="btn btn-primary px-6 py-3 text-sm flex items-center gap-2"
           >
-            <BellRing className="w-4 h-4" />
+             <Bell className="w-4 h-4" weight="fill" />
             Broadcast Notice
           </button>
         </div>
@@ -285,13 +285,13 @@ export default function AdminDashboard() {
             trend="+3%"
           />
           <StatCard
-            icon={<Film className="w-6 h-6 text-purple-400" />}
+             icon={<FilmStrip className="w-6 h-6 text-purple-400" />}
             label="Media Library"
             value={stats.totalMovies + stats.totalTv}
             trend="+5%"
           />
           <StatCard
-            icon={<MessageSquare className="w-6 h-6 text-green-400" />}
+             icon={<Chats className="w-6 h-6 text-green-400" />}
             label="Reviews"
             value={stats.totalReviews}
             trend="+8%"
@@ -339,7 +339,7 @@ export default function AdminDashboard() {
               key="movies"
               title={
                 <div className="flex items-center gap-2">
-                  <Film className="w-4 h-4" />
+                    <FilmStrip className="w-4 h-4" />
                   <span>Movies</span>
                 </div>
               }
@@ -356,7 +356,7 @@ export default function AdminDashboard() {
               key="tv"
               title={
                 <div className="flex items-center gap-2">
-                  <Tv className="w-4 h-4" />
+                    <Television className="w-4 h-4" />
                   <span>TV Shows</span>
                 </div>
               }
@@ -453,7 +453,7 @@ function UserManagement({ users, onDelete }: any) {
         <div className="flex gap-3 w-full md:w-auto">
           <Input
             placeholder="Search directory..."
-            startContent={<Search className="w-4 h-4 text-[var(--color-text-tertiary)]" />}
+             startContent={<MagnifyingGlass className="w-4 h-4 text-[var(--color-text-tertiary)]" />}
             className="flex-1 md:w-64"
             variant="bordered"
             classNames={{ inputWrapper: "border-white/10 bg-white/5 h-12" }}
@@ -520,13 +520,13 @@ function UserManagement({ users, onDelete }: any) {
                 <TableCell>
                   <div className="flex items-center justify-center gap-2">
                     <button className="p-2 text-[var(--color-text-tertiary)] hover:text-white transition-all">
-                      <Edit3 className="w-4 h-4" />
+                       <PencilSimple className="w-4 h-4" />
                     </button>
                     <button
                       className="p-2 text-[var(--color-text-tertiary)] hover:text-red-500 transition-all"
                       onClick={() => onDelete(user.id)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                       <Trash className="w-4 h-4" />
                     </button>
                   </div>
                 </TableCell>
@@ -547,7 +547,7 @@ function ContentManagement({ title, items, onDelete }: any) {
         <div className="flex gap-3 w-full md:w-auto">
           <Input
             placeholder="Filter library..."
-            startContent={<Search className="w-4 h-4 text-[var(--color-text-tertiary)]" />}
+             startContent={<MagnifyingGlass className="w-4 h-4 text-[var(--color-text-tertiary)]" />}
             className="flex-1 md:w-64"
             variant="bordered"
             classNames={{ inputWrapper: "border-white/10 bg-white/5 h-12" }}
@@ -590,7 +590,7 @@ function ContentManagement({ title, items, onDelete }: any) {
                 className="p-2 text-[var(--color-text-tertiary)] hover:text-red-500 transition-all"
                 onClick={() => onDelete(item.id)}
               >
-                <Trash2 className="w-4 h-4" />
+                 <Trash className="w-4 h-4" />
               </button>
             </div>
           </div>

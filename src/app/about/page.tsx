@@ -1,6 +1,6 @@
 'use client';
 
-import { Github, Code, Server, Database, Layers, Archive, ExternalLink, Zap, Eye, Heart, GitFork, Star, AlertCircle, Calendar } from "lucide-react";
+import { GithubLogo, Code, Server, Database, Stack, Archive, ArrowSquareOut, Lightning, Eye, Heart, GitFork, Star, Warning, CalendarBlank } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import React, { useState, useEffect } from "react";
 
@@ -76,7 +76,7 @@ export default function AboutPage() {
 
   const principles = [
     {
-      icon: Zap,
+      icon: Lightning,
       title: "Performance Obsessed",
       description: "Every millisecond counts. We leverage Next.js 15 with App Router, optimized image loading, and intelligent caching for near-instant navigation."
     },
@@ -158,7 +158,7 @@ export default function AboutPage() {
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-10">
                   <div className="w-14 h-14 rounded-[var(--radius-md)] bg-[var(--accent-dim)] flex items-center justify-center border border-[var(--accent)]/20">
-                    <Layers className="w-7 h-7 text-[var(--accent)]" />
+                    <Stack className="w-7 h-7 text-[var(--accent)]" />
                   </div>
                   <div>
                     <span className="t-label text-[var(--accent)] block mb-1">Version 2.0</span>
@@ -177,7 +177,7 @@ export default function AboutPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10 pt-8 border-t border-[var(--border-subtle)]">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500/20" />
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500/20" weight="fill" />
                     </div>
                     <div>
                       <span className="block text-xl font-semibold text-white tracking-wide">
@@ -201,7 +201,7 @@ export default function AboutPage() {
 
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
-                      <AlertCircle className="w-4 h-4 text-red-400" />
+                      <Warning className="w-4 h-4 text-red-400" weight="fill" />
                     </div>
                     <div>
                       <span className="block text-xl font-semibold text-white tracking-wide">
@@ -213,7 +213,7 @@ export default function AboutPage() {
 
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
-                      <Calendar className="w-4 h-4 text-green-400" />
+                      <CalendarBlank className="w-4 h-4 text-green-400" weight="fill" />
                     </div>
                     <div>
                       <span className="block text-sm font-bold text-white tracking-wide truncate max-w-[120px] pt-1">
@@ -306,7 +306,7 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="btn btn-primary px-10 h-14 text-base"
             >
-              <Github className="w-5 h-5 mr-2.5" />
+              <GithubLogo className="w-5 h-5 mr-2.5" weight="fill" />
               <span>View Source</span>
             </a>
             <a
@@ -315,7 +315,7 @@ export default function AboutPage() {
               rel="noopener noreferrer"
               className="btn btn-secondary px-10 h-14 text-base"
             >
-              <ExternalLink className="w-5 h-5 mr-2.5" />
+              <ArrowSquareOut className="w-5 h-5 mr-2.5" weight="bold" />
               <span>More Projects</span>
             </a>
           </div>

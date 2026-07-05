@@ -4,11 +4,10 @@ import { useSettings } from "../hooks/useSettings";
 import { HeroSkeleton } from "./Skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useState, useEffect } from "react";
-import { FaPlay } from "react-icons/fa";
+import { Play, Info, Calendar } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Movie, TVShow } from "../types/tmdb";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { isReleased } from "../lib/release";
 
 interface HeroSectionProps {
@@ -21,12 +20,10 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
   const { getImageUrl } = useSettings();
   const router = useRouter();
 
-  // Reset image loaded state on slide change to trigger nice transitions
   useEffect(() => {
     setImageLoaded(false);
   }, [activeIndex]);
 
-  // Automatic slideshow cycle
   useEffect(() => {
     if (!movies || movies.length <= 1) return;
     const interval = setInterval(() => {
@@ -41,13 +38,12 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
   const isTV = 'first_air_date' in movie;
   const title = (movie as any).title || (movie as any).name;
   const backdropUrl = getImageUrl(movie.backdrop_path, "backdrop");
-  
-  const releaseDateStr = isTV 
-    ? (movie as TVShow).first_air_date 
+
+  const releaseDateStr = isTV
+    ? (movie as TVShow).first_air_date
     : (movie as Movie).release_date;
-    
+
   const released = isReleased(releaseDateStr);
-  
   const releaseYear = releaseDateStr?.split("-")[0];
 
   const handlePlay = () => {
@@ -56,32 +52,22 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
       router.push(path);
       return;
     }
-    const path = isTV 
-      ? `/watch/tv/${movie.id}/1/1` 
+    const path = isTV
+      ? `/watch/tv/${movie.id}/1/1`
       : `/watch/movie/${movie.id}`;
     router.push(path);
   };
 
   const handleInfo = () => {
-    const path = isTV 
-      ? `/info/tv/${movie.id}` 
+    const path = isTV
+      ? `/info/tv/${movie.id}`
       : `/info/movie/${movie.id}`;
     router.push(path);
   };
 
-  const handlePrev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveIndex((prev) => (prev - 1 + movies.length) % movies.length);
-  };
-
-  const handleNext = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveIndex((prev) => (prev + 1) % movies.length);
-  };
-
   return (
     <div className="relative w-full h-[70vh] md:h-[85vh] lg:h-[90vh] overflow-hidden group">
-      {/* Backdrop with layered cinematic fades */}
+      {/* Backdrop with Ken Burns */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence mode="popLayout">
           <motion.div
@@ -97,57 +83,44 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
               alt={title}
               fill
               priority
-              className={`object-cover transition-opacity duration-1000 ${
-                imageLoaded ? "opacity-60" : "opacity-0"
+              className={`object-cover transition-opacity duration-1000 animate-kenburns ${
+                imageLoaded ? "opacity-50" : "opacity-0"
               }`}
               onLoad={() => setImageLoaded(true)}
               sizes="100vw"
             />
-            
-            {/* Multi-layered cinematic gradient */}
-            {/* Bottom fade — heavy */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/40 to-transparent z-10" />
-            {/* Left fade — moderate for text legibility */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-base)]/60 via-transparent to-transparent z-10" />
+
+            {/* Cinematic gradient layers */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/50 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-base)]/80 via-[var(--bg-base)]/30 to-transparent z-10" />
+            {/* Right side fade for asymmetric feel */}
+            <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[var(--bg-base)]/60 z-10" />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Navigation Arrows */}
-      {movies.length > 1 && (
-        <>
-          <button
-            onClick={handlePrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all duration-300 pointer-events-auto"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
-          <button
-            onClick={handleNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--accent)] hover:border-[var(--accent)] transition-all duration-300 pointer-events-auto"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
-        </>
-      )}
-
-      {/* Content */}
+      {/* Content - Asymmetric 60/40 split, left-aligned */}
       <div className="container relative z-20 h-full flex flex-col justify-end pb-12 md:pb-24">
         <AnimatePresence mode="wait">
           <motion.div
             key={movie.id}
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
+            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-3xl text-left"
+            className="max-w-[60%] text-left"
           >
             {/* Meta Info */}
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
-              {releaseYear && <span className="t-meta">{releaseYear}</span>}
-              <span className="t-meta text-[var(--border-visible)]">|</span>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="flex items-center gap-3 mb-4 flex-wrap"
+            >
+              {releaseYear && (
+                <span className="t-meta text-[var(--text-muted)]">{releaseYear}</span>
+              )}
+              <span className="w-1 h-1 rounded-full bg-[var(--text-muted)]" />
               {movie.vote_average > 0 && (
                 <span className="rating-chip">
                   <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
@@ -156,25 +129,43 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                   {movie.vote_average.toFixed(1)}
                 </span>
               )}
-              <span className="t-meta text-[var(--border-visible)]">|</span>
+              <span className="w-1 h-1 rounded-full bg-[var(--text-muted)]" />
               <span className="meta-chip">{isTV ? "Series" : "Film"}</span>
-            </div>
+            </motion.div>
 
-            <h1 className="t-hero mb-6 drop-shadow-[0_2px_30px_rgba(0,0,0,0.8)]">
+            {/* Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="t-hero mb-5 drop-shadow-[0_2px_30px_rgba(0,0,0,0.8)]"
+            >
               {title}
-            </h1>
+            </motion.h1>
 
-            <p className="t-body text-base md:text-lg mb-8 line-clamp-2 md:line-clamp-3 max-w-2xl drop-shadow-md opacity-90 leading-relaxed">
+            {/* Overview */}
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="t-body text-base md:text-lg mb-8 line-clamp-2 md:line-clamp-3 max-w-2xl drop-shadow-md opacity-80 leading-relaxed"
+            >
               {movie.overview}
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto"
+            >
               {released ? (
                 <button
                   onClick={handlePlay}
                   className="btn btn-primary w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
                 >
-                  <FaPlay className="text-[10px]" />
+                  <Play weight="fill" className="text-[10px]" />
                   Play Now
                 </button>
               ) : (
@@ -182,7 +173,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                   onClick={handleInfo}
                   className="btn bg-white/5 border border-white/10 text-white/40 hover:text-white/60 hover:bg-white/8 w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors duration-200"
                 >
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar weight="bold" className="w-3.5 h-3.5" />
                   Coming Soon
                 </button>
               )}
@@ -190,29 +181,32 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                 onClick={handleInfo}
                 className="btn btn-secondary w-full sm:w-auto sm:min-w-[140px] py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
               >
+                <Info weight="bold" className="w-3.5 h-3.5" />
                 More Info
               </button>
-            </div>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
 
-        {/* Slide Indicator Dots - positioned under text for layout isolation */}
+        {/* Custom accent line indicators */}
         {movies.length > 1 && (
-          <div className="flex items-center gap-2 mt-8 z-30 select-none">
+          <div className="flex items-center gap-2 mt-10 z-30 select-none">
             {movies.map((_, index) => (
               <button
                 key={index}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveIndex(index);
-                }}
-                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  activeIndex === index 
-                    ? "bg-[var(--accent)] w-6 shadow-[0_0_8px_var(--accent)]" 
-                    : "bg-white/30 hover:bg-white/50 w-1.5"
-                }`}
+                onClick={() => setActiveIndex(index)}
+                className="relative h-[3px] rounded-full overflow-hidden transition-all duration-500 cursor-pointer bg-white/10"
+                style={{ width: activeIndex === index ? '48px' : '16px' }}
                 aria-label={`Go to slide ${index + 1}`}
-              />
+              >
+                {activeIndex === index && (
+                  <motion.div
+                    layoutId="hero-indicator"
+                    className="absolute inset-0 bg-[var(--accent)] rounded-full shadow-[0_0_8px_var(--accent)]"
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  />
+                )}
+              </button>
             ))}
           </div>
         )}

@@ -3,13 +3,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
-  Calendar,
+  CalendarBlank,
   MapPin,
   Star,
-  Film,
-  Tv,
-  ChevronRight,
-} from "lucide-react";
+  FilmStrip,
+  Television,
+  CaretRight,
+} from "@phosphor-icons/react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -110,7 +110,7 @@ const ActorClient = ({ actor, credits }: ActorClientProps) => {
             >
               <h1 
                 className="text-white font-bold leading-tight mb-6"
-                style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 'clamp(3rem, 8vw, 5rem)', letterSpacing: '0.02em' }}
+                style={{ fontFamily: "'Clash Display', sans-serif", fontSize: 'clamp(3rem, 8vw, 5rem)', letterSpacing: '0.02em' }}
               >
                 {actor.name}
               </h1>
