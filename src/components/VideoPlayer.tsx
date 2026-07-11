@@ -5,16 +5,16 @@ import Hls from 'hls.js';
 import { 
   Play, 
   Pause, 
-  Volume2, 
-  VolumeX, 
-  Maximize, 
-  Minimize,
-  Settings, 
-  RotateCcw,
-  RotateCw,
-  Loader2,
-  Volume1
-} from 'lucide-react';
+  SpeakerHigh, 
+  SpeakerSlash, 
+  ArrowsOut, 
+  ArrowsIn,
+  Gear, 
+  ArrowUUpLeft,
+  ArrowUUpRight,
+  Spinner,
+  SpeakerSimpleHigh
+} from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface VideoPlayerProps {
@@ -280,7 +280,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             exit={{ opacity: 0 }}
             className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px] pointer-events-none z-10"
           >
-            <Loader2 className="w-12 h-12 text-[var(--accent)] animate-spin" />
+             <Spinner className="w-12 h-12 text-[var(--accent)] animate-spin" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -332,16 +332,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                   <div className="flex items-center gap-2">
                     <button onClick={() => skip(-10)} className="text-white/80 hover:text-white transition-colors">
-                      <RotateCcw className="w-5 h-5" />
+                       <ArrowUUpLeft className="w-5 h-5" />
                     </button>
                     <button onClick={() => skip(10)} className="text-white/80 hover:text-white transition-colors">
-                      <RotateCw className="w-5 h-5" />
+                       <ArrowUUpRight className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="flex items-center gap-3 group/volume">
                     <button onClick={toggleMute} className="text-white hover:text-[var(--accent)] transition-colors">
-                      {muted || volume === 0 ? <VolumeX className="w-6 h-6" /> : volume < 0.5 ? <Volume1 className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+                       {muted || volume === 0 ? <SpeakerSlash className="w-6 h-6" /> : volume < 0.5 ? <SpeakerSimpleHigh className="w-6 h-6" /> : <SpeakerHigh className="w-6 h-6" />}
                     </button>
                     <div className="w-0 group-hover/volume:w-24 transition-all duration-300 overflow-hidden flex items-center">
                       <input
@@ -367,7 +367,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                       onClick={() => setShowStreamSettings(!showSettings)}
                       className="text-white hover:text-[var(--accent)] transition-colors"
                     >
-                      <Settings className="w-5 h-5" />
+                       <Gear className="w-5 h-5" />
                     </button>
                     
                     <AnimatePresence>
@@ -400,7 +400,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   </div>
 
                   <button onClick={toggleFullscreen} className="text-white hover:text-[var(--accent)] transition-colors">
-                    {isFullscreen ? <Minimize className="w-6 h-6" /> : <Maximize className="w-6 h-6" />}
+                     {isFullscreen ? <ArrowsIn className="w-6 h-6" /> : <ArrowsOut className="w-6 h-6" />}
                   </button>
                 </div>
               </div>

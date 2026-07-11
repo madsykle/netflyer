@@ -1,8 +1,7 @@
 'use client';
 
 import { useSettings } from "../hooks/useSettings";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -36,17 +35,17 @@ const CastRow = React.memo(({ items, title }: CastRowProps) => {
     setIsMounted(true);
     if (typeof window !== 'undefined') {
       setIsMobile(window.matchMedia("(max-width: 768px)").matches);
-      
+
       const mediaQuery = window.matchMedia("(max-width: 768px)");
       const handleChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
       mediaQuery.addEventListener("change", handleChange);
-      
+
       checkScroll();
       const row = rowRef.current;
       if (row) {
         row.addEventListener("scroll", checkScroll);
       }
-      
+
       return () => {
         mediaQuery.removeEventListener("change", handleChange);
         if (row) {
@@ -54,7 +53,7 @@ const CastRow = React.memo(({ items, title }: CastRowProps) => {
         }
       };
     }
-  }, [items, checkScroll]);
+  }, [checkScroll]);
 
   const scroll = (direction: "left" | "right") => {
     if (rowRef.current) {
@@ -71,63 +70,48 @@ const CastRow = React.memo(({ items, title }: CastRowProps) => {
   const showRightArrow = isMounted && showScrollIndicators && canScrollRight && (isHovering || isMobile);
 
   return (
-    <motion.div
-      className="my-10 relative group"
+    <div
+      className="my-10 relative group animate-slide-up"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
       {title && (
-        <motion.h2
-          className="heading-3 text-white mb-6 ml-2"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          {title}
-        </motion.h2>
+        <div className="container">
+          <h2
+            className="t-label text-[var(--text-primary)] mb-6 ml-1 animate-fade-in"
+            style={{ animationDelay: '0.1s' }}
+          >
+            {title}
+          </h2>
+        </div>
       )}
 
       <div className="relative">
         {/* Left scroll button */}
-        <AnimatePresence>
-          {showLeftArrow && (
-              <motion.button
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => scroll("left")}
-                className="absolute left-0 top-0 bottom-0 z-20 w-20 bg-gradient-to-r from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/80 to-transparent flex items-center justify-start pl-2"
-                aria-label="Scroll left"
-              >
-                <div className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all duration-200 hover:scale-110 shadow-lg border border-white/10">
-                  <ChevronLeft className="w-8 h-8 text-white" />
-                </div>
-              </motion.button>
-            )}
-        </AnimatePresence>
+        {showLeftArrow && (
+          <button
+            onClick={() => scroll("left")}
+            className="absolute left-0 top-0 bottom-0 z-20 w-20 bg-gradient-to-r from-[var(--bg-base)] via-[var(--bg-base)]/80 to-transparent flex items-center justify-start pl-2 animate-fade-in"
+            aria-label="Scroll left"
+          >
+            <div className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all duration-200 hover:scale-110 shadow-lg border border-white/10">
+              <CaretLeft weight="bold" className="w-6 h-6 text-white" />
+            </div>
+          </button>
+        )}
 
         {/* Right scroll button */}
-        <AnimatePresence>
-          {showRightArrow && (
-              <motion.button
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => scroll("right")}
-                className="absolute right-0 top-0 bottom-0 z-20 w-20 bg-gradient-to-l from-[var(--color-bg-primary)] via-[var(--color-bg-primary)]/80 to-transparent flex items-center justify-end pr-2"
-                aria-label="Scroll right"
-              >
-                <div className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all duration-200 hover:scale-110 shadow-lg border border-white/10">
-                  <ChevronRight className="w-8 h-8 text-white" />
-                </div>
-              </motion.button>
-            )}
-        </AnimatePresence>
+        {showRightArrow && (
+          <button
+            onClick={() => scroll("right")}
+            className="absolute right-0 top-0 bottom-0 z-20 w-20 bg-gradient-to-l from-[var(--bg-base)] via-[var(--bg-base)]/80 to-transparent flex items-center justify-end pr-2 animate-fade-in"
+            aria-label="Scroll right"
+          >
+            <div className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all duration-200 hover:scale-110 shadow-lg border border-white/10">
+              <CaretRight weight="bold" className="w-6 h-6 text-white" />
+            </div>
+          </button>
+        )}
 
         {/* Scrollable container */}
         <div
@@ -140,7 +124,7 @@ const CastRow = React.memo(({ items, title }: CastRowProps) => {
           ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -162,21 +146,12 @@ function CastCard({ item, index }: CastCardProps) {
     : "/placeholder-avatar.svg";
 
   return (
-    <motion.div
-      className="flex-shrink-0 cursor-pointer card"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.5,
-        delay: index * 0.05,
-        ease: [0.16, 1, 0.3, 1],
+    <div
+      className="flex-shrink-0 cursor-pointer card animate-scale-in transition-transform duration-300 ease-[var(--ease-out-expo)] hover:scale-105 hover:-translate-y-2"
+      style={{ 
+        animationDelay: `${index * 0.05}s`,
+        scrollSnapAlign: "start"
       }}
-      whileHover={{
-        scale: 1.05,
-        y: -8,
-        transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
-      }}
-      whileTap={{ scale: 0.96 }}
       onClick={onClick}
       tabIndex={0}
       role="button"
@@ -184,12 +159,10 @@ function CastCard({ item, index }: CastCardProps) {
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") onClick();
       }}
-      style={{ scrollSnapAlign: "start" }}
     >
       <div className="relative group/card w-32 sm:w-40">
         {/* Image container */}
-        <div className="relative aspect-[2/3] overflow-hidden bg-[var(--color-bg-tertiary)] vignette">
-          {/* Actual image */}
+        <div className="relative aspect-[2/3] overflow-hidden bg-[var(--bg-raised)] vignette">
           <Image
             src={profileUrl}
             alt={item.name}
@@ -207,22 +180,22 @@ function CastCard({ item, index }: CastCardProps) {
           />
 
           {/* Cinematic Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-400" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-400" />
         </div>
 
         {/* Name */}
         <div className="mt-3 text-center px-1 pb-2">
-          <p className="text-white text-sm font-bold line-clamp-1 group-hover/card:text-[var(--color-accent-primary)] transition-colors">
+          <p className="text-white text-sm font-bold line-clamp-1 group-hover/card:text-[var(--accent)] transition-colors">
             {item.name}
           </p>
           {item.character && (
-            <p className="text-[var(--color-text-secondary)] text-xs line-clamp-1 mt-1 font-medium">
+            <p className="text-[var(--text-secondary)] text-xs line-clamp-1 mt-1 font-medium">
               {item.character}
             </p>
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

@@ -24,8 +24,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://api.fontshare.com" />
       </head>
-      <body className="bg-[var(--bg-base)] text-[var(--text-primary)] min-h-screen flex flex-col antialiased">
+      <body className="bg-[var(--bg-base)] text-[var(--text-primary)] min-h-screen flex flex-col antialiased pb-20 md:pb-0">
         <Providers>
           <NavbarWrapper />
           <ErrorBoundary>

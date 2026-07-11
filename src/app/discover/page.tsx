@@ -9,14 +9,14 @@ import {
 } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Grid,
+  SquaresFour,
   List,
   Star,
-  Calendar,
+  CalendarBlank,
   X,
   SlidersHorizontal,
   Play,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -200,7 +200,7 @@ const Discover = () => {
                     : "text-[var(--text-muted)] hover:text-white"
                 }`}
               >
-                <Grid className="w-4 h-4" />
+                <SquaresFour className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
@@ -242,7 +242,7 @@ const Discover = () => {
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent"></div>
                 
                 <div className="flex justify-between items-center mb-8">
-                  <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em', fontSize: '1.5rem' }} className="text-white uppercase">
+                  <h2 style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.05em', fontSize: '1.5rem' }} className="text-white uppercase">
                     Advanced Filters
                   </h2>
                   <button
@@ -538,7 +538,7 @@ const ResultListItem = ({ item, router, getImageUrl }: any) => {
           </div>
           <div className="flex items-center gap-3 mb-3 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-3 h-3" />
+               <CalendarBlank className="w-3 h-3" />
               <span className="t-meta">{year}</span>
             </div>
             <span className="meta-chip py-0.5">{mediaType === "movie" ? "Film" : "Series"}</span>

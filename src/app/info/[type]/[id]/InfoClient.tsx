@@ -23,16 +23,16 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
-  Trash2,
+  Trash,
   Plus,
   Star,
-  Film,
+  FilmStrip,
   X,
   Check,
-  Loader2,
-  ChevronDown,
-  Calendar
-} from "lucide-react";
+  Spinner,
+  CaretDown,
+  CalendarBlank
+} from "@phosphor-icons/react";
 import { isReleased, formatReleaseDate } from "../../../../lib/release";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -393,7 +393,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                       disabled
                       className="btn bg-white/5 border border-white/10 text-white/40 cursor-not-allowed h-14 px-8 md:px-12 text-xs uppercase tracking-widest font-extrabold flex items-center gap-2"
                     >
-                      <Calendar className="w-4 h-4 text-white/40" />
+                      <CalendarBlank className="w-4 h-4 text-white/40" />
                       Not Yet Released
                     </button>
                     {releaseDate && (
@@ -410,7 +410,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                   className="btn bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 h-14 px-6 md:px-8 text-xs uppercase tracking-widest font-extrabold text-white hover:scale-105 transition-all duration-300 min-w-[160px]"
                 >
                   {watchlistLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Spinner className="w-4 h-4 animate-spin" />
                   ) : watchlist ? (
                     <><Check className="w-4 h-4 text-green-500" /> Saved</>
                   ) : (
@@ -423,7 +423,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                     onClick={() => setShowTrailer(true)}
                     className="btn btn-ghost h-14 px-6 text-xs uppercase tracking-widest font-extrabold border border-transparent hover:border-white/10 transition-all hover:bg-white/[0.04]"
                   >
-                    <Film className="w-4 h-4 mr-2" />
+                    <FilmStrip className="w-4 h-4 mr-2" />
                     Trailer
                   </button>
                 )}
@@ -520,7 +520,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                         <span className="t-label text-[var(--accent)] tracking-[0.2em]">Select Season</span>
                         <div className="w-px h-4 bg-white/10" />
                         <span className="font-bold text-white">Season {selectedSeason}</span>
-                        <ChevronDown className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 ${showSeasonMenu ? "rotate-180" : ""}`} />
+                         <CaretDown className={`w-4 h-4 text-[var(--text-muted)] transition-transform duration-300 ${showSeasonMenu ? "rotate-180" : ""}`} weight="bold" />
                       </button>
 
                       <AnimatePresence>
@@ -721,7 +721,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                         {company.logo_path ? (
                           <Image src={`https://image.tmdb.org/t/p/w200${company.logo_path}`} alt={company.name} fill className="object-contain p-1" />
                         ) : (
-                          <Film className="absolute inset-0 m-auto w-4 h-4 text-white/30" />
+                           <FilmStrip className="absolute inset-0 m-auto w-4 h-4 text-white/30" />
                         )}
                       </div>
                       <span className="text-white/90 text-sm font-medium line-clamp-1">{company.name}</span>
@@ -830,7 +830,7 @@ const EpisodeCard = ({ episode, index, type, id, selectedSeason, getImageUrl, ro
         ) : (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <div className="w-12 h-12 rounded-[var(--radius-sm)] bg-white/5 border border-white/10 flex items-center justify-center text-white/50 backdrop-blur-sm">
-               <Calendar className="w-5 h-5" />
+               <CalendarBlank className="w-5 h-5" />
             </div>
           </div>
         )}

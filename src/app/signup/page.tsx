@@ -8,8 +8,7 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { motion } from "framer-motion";
-import { Eye, EyeOff, ArrowLeft, Film, ChevronRight, UserPlus } from "lucide-react";
+import { Eye, EyeSlash, ArrowLeft, FilmStrip, CaretRight, UserPlus } from "@phosphor-icons/react";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -185,12 +184,7 @@ const SignUp = () => {
     <div className="relative min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[var(--bg-base)] overflow-y-auto lg:overflow-hidden">
       {/* Cinematic Backdrop - Full Screen on Mobile, Left Side on Desktop */}
       <div className="absolute inset-0 lg:relative lg:block border-r border-[var(--border-faint)] bg-[#050505] z-0">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="absolute inset-0"
-        >
+        <div className="absolute inset-0 animate-fade-in" style={{ animationDuration: '0.8s' }}>
           {backdrop ? (
             <Image 
               src={backdrop.replace('/original/', '/w1280/')} 
@@ -207,13 +201,13 @@ const SignUp = () => {
           {/* Cinematic Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/80 lg:via-transparent to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-base)] via-transparent to-transparent" />
-        </motion.div>
+        </div>
 
         {/* Brand Overlay (Desktop) */}
         <div className="hidden lg:block absolute top-12 left-12 z-20">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-[var(--accent)] rounded-[4px] flex items-center justify-center shadow-[0_0_20px_var(--accent-glow)]">
-              <Film className="text-white w-5 h-5" />
+              <FilmStrip className="text-white w-5 h-5" weight="fill" />
             </div>
             <span className="t-hero text-2xl tracking-[0.2em] pt-1">NETFLYER</span>
           </Link>
@@ -221,17 +215,13 @@ const SignUp = () => {
 
         {/* Editorial Text (Desktop) */}
         <div className="hidden lg:block absolute bottom-16 left-12 right-12 z-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-          >
+          <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
             <span className="t-label text-[var(--accent)] mb-4 block">Joining Netflyer</span>
             <h2 className="t-hero text-6xl mb-4 line-clamp-2">{movieTitle}</h2>
             <p className="t-body max-w-md opacity-60">
               Create an account to start your journey through the history of cinema. Save your favorites and watch anywhere.
             </p>
-          </motion.div>
+          </div>
         </div>
       </div>
 
@@ -241,18 +231,14 @@ const SignUp = () => {
         <div className="lg:hidden absolute top-8 left-8">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-[var(--accent)] rounded-[4px] flex items-center justify-center">
-              <Film className="text-white w-4 h-4" />
+              <FilmStrip className="text-white w-4 h-4" weight="fill" />
             </div>
             <span className="t-hero text-lg tracking-[0.15em] pt-1">NETFLYER</span>
           </Link>
         </div>
 
         <div className="w-full max-w-sm mx-auto lg:mx-0">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
+          <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <header className="mb-10">
               <h1 className="t-title text-5xl mb-3">Join Us</h1>
               <p className="t-body text-[var(--text-secondary)]">
@@ -269,7 +255,7 @@ const SignUp = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="cinephile_24"
-                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
                   required
                 />
               </div>
@@ -282,7 +268,7 @@ const SignUp = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
                   required
                 />
               </div>
@@ -296,7 +282,7 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
                     required
                   />
                   <button
@@ -304,7 +290,7 @@ const SignUp = () => {
                     onClick={toggleVisibility}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white transition-colors"
                   >
-                    {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {isVisible ? <EyeSlash size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
                 <p className="t-meta text-[10px] ml-1 opacity-50">MINIMUM 6 CHARACTERS</p>
@@ -322,7 +308,7 @@ const SignUp = () => {
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Create Account <ChevronRight className="w-4 h-4" />
+                    Create Account <CaretRight className="w-4 h-4" weight="bold" />
                   </span>
                 )}
               </button>
@@ -336,11 +322,11 @@ const SignUp = () => {
                   className="text-white font-bold hover:text-[var(--accent)] transition-colors inline-flex items-center gap-1 group"
                 >
                   Sign in instead
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  <CaretRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" weight="bold" />
                 </Link>
               </p>
             </footer>
-          </motion.div>
+          </div>
         </div>
 
         {/* Back to Home */}
@@ -348,7 +334,7 @@ const SignUp = () => {
           href="/"
           className="absolute bottom-8 left-8 lg:left-auto lg:right-12 flex items-center gap-2 t-meta hover:text-white transition-colors group"
         >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" weight="bold" />
           Back to cinema
         </Link>
       </div>

@@ -3,7 +3,7 @@
 import { SearchSkeleton } from "../../components/Skeleton";
 import { useSettings } from "../../hooks/useSettings";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Clock, Star, Calendar, Play } from "lucide-react";
+import { MagnifyingGlass, X, Clock, Star, CalendarBlank, Play } from "@phosphor-icons/react";
 import React, { useEffect, useState, useMemo, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -104,7 +104,7 @@ const SearchPage = () => {
         >
           <label className="t-label block mb-4">Explore Library</label>
           <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors" />
+            <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors" />
             <input
               ref={inputRef}
               type="text"
@@ -115,7 +115,7 @@ const SearchPage = () => {
               placeholder="Title, actor, genre..."
               autoComplete="off"
               suppressHydrationWarning
-              className="w-full pl-12 pr-12 py-4 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[var(--radius-md)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] font-['DM_Sans'] text-lg focus:outline-none focus:shadow-[0_0_15px_rgba(229,9,20,0.15)] transition-all duration-300"
+              className="w-full pl-12 pr-12 py-4 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[var(--radius-md)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-lg focus:outline-none focus:shadow-[0_0_15px_rgba(229,9,20,0.15)] transition-all duration-300"
             />
             {query && (
               <button

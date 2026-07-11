@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from "framer-motion";
 import React from "react";
 
 interface SkeletonBlockProps {
@@ -10,9 +9,6 @@ interface SkeletonBlockProps {
   rounded?: string;
 }
 
-/**
- * Simple Skeleton Block - Basic loading placeholder
- */
 export const SkeletonBlock = ({
   className = "",
   width,
@@ -27,9 +23,6 @@ export const SkeletonBlock = ({
   );
 };
 
-/**
- * Hero Skeleton - Simplified loading state
- */
 export const HeroSkeleton = () => {
   return (
     <div className="relative w-full h-[70vh] md:h-[85vh] lg:h-[90vh] bg-[var(--bg-base)] overflow-hidden">
@@ -48,9 +41,6 @@ export const HeroSkeleton = () => {
   );
 };
 
-/**
- * Movie Card Skeleton - For grids and rows
- */
 export const MovieCardSkeleton = () => {
   return (
     <div className="w-full">
@@ -61,9 +51,6 @@ export const MovieCardSkeleton = () => {
   );
 };
 
-/**
- * Movie Row Skeleton - Horizontal row of cards
- */
 export const MovieRowSkeleton = ({ title = true, count = 6 }: { title?: boolean; count?: number }) => {
   return (
     <div className="my-10">
@@ -83,16 +70,10 @@ export const MovieRowSkeleton = ({ title = true, count = 6 }: { title?: boolean;
   );
 };
 
-/**
- * Info Page Skeleton - For detail pages
- */
 export const InfoSkeleton = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-base)]">
-      {/* Hero */}
       <div className="h-[45vw] min-h-[220px] max-h-[420px] skeleton opacity-20" />
-
-      {/* Content */}
       <div className="container relative -mt-24 sm:-mt-32 z-10 pb-20">
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-end">
           <div className="w-32 sm:w-40 md:w-48 aspect-poster skeleton rounded-[var(--radius-md)] border border-[var(--border-subtle)] shadow-2xl" />
@@ -105,14 +86,10 @@ export const InfoSkeleton = () => {
             </div>
           </div>
         </div>
-
-        {/* Actions */}
         <div className="flex gap-3 mt-10 justify-center sm:justify-start">
           <div className="h-11 w-36 skeleton rounded-[var(--radius-sm)]" />
           <div className="h-11 w-36 skeleton rounded-[var(--radius-sm)]" />
         </div>
-
-        {/* Cast Row */}
         <div className="mt-16">
           <div className="h-4 w-24 skeleton rounded-[var(--radius-sm)] mb-8" />
           <div className="flex gap-6 overflow-hidden">
@@ -129,9 +106,6 @@ export const InfoSkeleton = () => {
   );
 };
 
-/**
- * Search Results Skeleton
- */
 export const SearchSkeleton = () => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
@@ -142,33 +116,22 @@ export const SearchSkeleton = () => {
   );
 };
 
-/**
- * Page Loading Spinner
- */
 export const PageSkeleton = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col items-center"
-      >
+      <div className="flex flex-col items-center animate-fade-in">
         <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
         <p className="t-meta uppercase tracking-widest opacity-40">Loading</p>
-      </motion.div>
+      </div>
     </div>
   );
 };
 
-/**
- * Actor Info Skeleton
- */
 export const ActorInfoSkeleton = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] pt-32 pb-20">
       <div className="container">
         <div className="h-4 w-20 skeleton rounded-[var(--radius-sm)] mb-10" />
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
           <div className="lg:col-span-1">
             <div className="aspect-[2/3] skeleton rounded-[var(--radius-md)] border border-[var(--border-subtle)] mb-8" />
@@ -177,11 +140,9 @@ export const ActorInfoSkeleton = () => {
               <div className="h-10 skeleton rounded-[var(--radius-sm)] w-3/4" />
             </div>
           </div>
-
           <div className="lg:col-span-3 space-y-8">
             <div className="h-20 w-2/3 skeleton rounded-[var(--radius-sm)]" />
             <div className="h-32 w-full skeleton rounded-[var(--radius-sm)]" />
-            
             <div className="pt-8 border-t border-[var(--border-faint)]">
               <div className="h-8 w-48 skeleton rounded-[var(--radius-sm)] mb-8" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
@@ -197,9 +158,6 @@ export const ActorInfoSkeleton = () => {
   );
 };
 
-/**
- * Cast Row Skeleton
- */
 export const CastRowSkeleton = ({ count = 8 }: { count?: number }) => {
   return (
     <div className="my-10">

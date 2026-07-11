@@ -16,12 +16,12 @@ interface HomeClientProps {
   airingToday: { results: any[] };
 }
 
-export default function HomeClient({ 
-  trendingMovies, 
-  trendingTV, 
-  anime, 
-  popular, 
-  airingToday 
+export default function HomeClient({
+  trendingMovies,
+  trendingTV,
+  anime,
+  popular,
+  airingToday
 }: HomeClientProps) {
   const [continueWatching, setContinueWatching] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -48,7 +48,7 @@ export default function HomeClient({
           );
           const querySnapshot = await getDocs(q);
           const historyItems: any[] = [];
-          
+
           querySnapshot.forEach((doc) => {
             historyItems.push({ ...doc.data(), docId: doc.id });
           });
@@ -87,15 +87,15 @@ export default function HomeClient({
   return (
     <div className="max-w-7xl mx-auto px-4 mt-6 md:-mt-12 relative z-20">
       {/* Genre Tags */}
-      <div className="flex overflow-x-auto scrollbar-hide gap-3.5 mb-10 py-4 -mx-4 px-4">
+      <div className="flex overflow-x-auto scrollbar-hide gap-3 mb-10 py-4 -mx-4 px-4">
         {genres.map(genre => (
-          <button 
+          <button
             key={genre}
             onClick={() => setActiveGenre(genre)}
-            className={`relative rounded-full text-xs font-semibold tracking-widest uppercase transition-all duration-300 ease-[var(--ease-out-expo)] px-6 py-2 h-10 whitespace-nowrap cursor-pointer select-none border ${
-              activeGenre === genre 
-                ? "bg-[var(--accent)] border-[var(--accent)] text-white shadow-[0_0_15px_var(--accent-glow)] scale-[1.03]" 
-                : "bg-white/[0.03] border-white/[0.05] text-[var(--text-secondary)] hover:text-white hover:bg-white/[0.08] hover:border-white/[0.1] active:scale-[0.97]"
+            className={`chip-base whitespace-nowrap select-none border ${
+              activeGenre === genre
+                ? "chip-primary shadow-[0_0_15px_var(--accent-glow)] scale-[1.03]"
+                : "chip-secondary"
             }`}
           >
             {genre}
@@ -107,7 +107,7 @@ export default function HomeClient({
         {!loadingHistory && continueWatching.length > 0 && activeGenre === "All" && (
           <Row items={continueWatching} title="Continue Watching" />
         )}
-        
+
         {filterByGenre(trendingMovies.results)?.length > 0 && (
           <Row items={filterByGenre(trendingMovies.results)} title="Trending Movies" />
         )}

@@ -1,4 +1,4 @@
-import { Github, ExternalLink } from "lucide-react";
+import { GithubLogo, ArrowSquareOut } from "@phosphor-icons/react";
 import Link from "next/link";
 
 const Footer = () => {
@@ -12,12 +12,12 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <p
-              className="text-white mb-2 tracking-widest"
-              style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.25rem', letterSpacing: '0.2em' }}
+              className="text-white mb-2 tracking-[0.2em] font-bold"
+              style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.15rem' }}
             >
               NETFLYER
             </p>
-            <p className="t-body text-sm italic opacity-60">Cinema, anytime. Anywhere.</p>
+            <p className="t-body text-sm opacity-50">Cinema, anytime. Anywhere.</p>
           </div>
 
           {/* Navigation */}
@@ -31,9 +31,9 @@ const Footer = () => {
                 { path: '/watchlist', label: 'Watchlist' },
                 { path: '/settings', label: 'Settings' }
               ].map((item) => (
-                <Link 
-                  key={item.path} 
-                  href={item.path} 
+                <Link
+                  key={item.path}
+                  href={item.path}
                   className="t-body text-sm hover:text-white transition-colors w-fit"
                 >
                   {item.label}
@@ -48,7 +48,7 @@ const Footer = () => {
             <div className="flex flex-col gap-2.5">
               <a href="https://github.com/madsykle/netflyer" target="_blank" rel="noopener noreferrer"
                  className="t-body text-sm hover:text-white transition-colors flex items-center gap-2 w-fit">
-                GitHub Repository <ExternalLink className="w-3 h-3" />
+                GitHub Repository <ArrowSquareOut className="w-3 h-3" />
               </a>
             </div>
             <p className="t-body text-[10px] mt-4 leading-relaxed opacity-40 uppercase tracking-wider">
@@ -59,7 +59,6 @@ const Footer = () => {
 
         <div className="mt-10 pt-6 border-t border-[var(--border-faint)] flex items-center justify-between">
           <p className="t-meta text-[10px]">© {currentYear} Netflyer. MIT License.</p>
-          <p className="t-meta text-[10px]">v2.0.0</p>
         </div>
       </div>
     </footer>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { AlertCircle } from "lucide-react";
+import { Warning } from "@phosphor-icons/react";
 
 interface Props {
   children?: ReactNode;
@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center">
           <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
-            <AlertCircle className="w-8 h-8 text-red-500" />
+             <Warning className="w-8 h-8 text-red-500" weight="fill" />
           </div>
           <h2 className="heading-2 mb-4">Something went wrong</h2>
           <p className="text-[var(--color-text-secondary)] mb-8 max-w-md">

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react';
+import { CheckCircle, XCircle, Info, Warning, X } from '@phosphor-icons/react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'dark';
 
@@ -74,8 +74,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               <div className="flex items-center gap-3">
                 {toast.type === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
                 {toast.type === 'error' && <XCircle className="w-5 h-5 text-red-500" />}
-                {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-yellow-500" />}
-                {(toast.type === 'info' || toast.type === 'dark') && <Info className="w-5 h-5 text-blue-500" />}
+                 {toast.type === 'warning' && <Warning className="w-5 h-5 text-yellow-500" weight="fill" />}
+                 {(toast.type === 'info' || toast.type === 'dark') && <Info className="w-5 h-5 text-blue-500" weight="fill" />}
                 <p className="text-sm font-medium text-white">{toast.message}</p>
               </div>
               

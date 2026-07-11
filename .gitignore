@@ -67,3 +67,5 @@ next-env.d.ts
 .cache
 .vite
 .eslintcache
+.env*
+.env.local
