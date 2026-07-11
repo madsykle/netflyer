@@ -8,7 +8,6 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { motion } from "framer-motion";
 import { Eye, EyeSlash, ArrowLeft, FilmStrip, CaretRight, UserPlus } from "@phosphor-icons/react";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -185,12 +184,7 @@ const SignUp = () => {
     <div className="relative min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-[var(--bg-base)] overflow-y-auto lg:overflow-hidden">
       {/* Cinematic Backdrop - Full Screen on Mobile, Left Side on Desktop */}
       <div className="absolute inset-0 lg:relative lg:block border-r border-[var(--border-faint)] bg-[#050505] z-0">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="absolute inset-0"
-        >
+        <div className="absolute inset-0 animate-fade-in" style={{ animationDuration: '0.8s' }}>
           {backdrop ? (
             <Image 
               src={backdrop.replace('/original/', '/w1280/')} 
@@ -207,7 +201,7 @@ const SignUp = () => {
           {/* Cinematic Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/80 lg:via-transparent to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-base)] via-transparent to-transparent" />
-        </motion.div>
+        </div>
 
         {/* Brand Overlay (Desktop) */}
         <div className="hidden lg:block absolute top-12 left-12 z-20">
@@ -221,17 +215,13 @@ const SignUp = () => {
 
         {/* Editorial Text (Desktop) */}
         <div className="hidden lg:block absolute bottom-16 left-12 right-12 z-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-          >
+          <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
             <span className="t-label text-[var(--accent)] mb-4 block">Joining Netflyer</span>
             <h2 className="t-hero text-6xl mb-4 line-clamp-2">{movieTitle}</h2>
             <p className="t-body max-w-md opacity-60">
               Create an account to start your journey through the history of cinema. Save your favorites and watch anywhere.
             </p>
-          </motion.div>
+          </div>
         </div>
       </div>
 
@@ -248,11 +238,7 @@ const SignUp = () => {
         </div>
 
         <div className="w-full max-w-sm mx-auto lg:mx-0">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
+          <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <header className="mb-10">
               <h1 className="t-title text-5xl mb-3">Join Us</h1>
               <p className="t-body text-[var(--text-secondary)]">
@@ -340,7 +326,7 @@ const SignUp = () => {
                 </Link>
               </p>
             </footer>
-          </motion.div>
+          </div>
         </div>
 
         {/* Back to Home */}

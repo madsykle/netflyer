@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from "framer-motion";
 import React from "react";
 
 interface SkeletonBlockProps {
@@ -120,14 +119,10 @@ export const SearchSkeleton = () => {
 export const PageSkeleton = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col items-center"
-      >
+      <div className="flex flex-col items-center animate-fade-in">
         <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
         <p className="t-meta uppercase tracking-widest opacity-40">Loading</p>
-      </motion.div>
+      </div>
     </div>
   );
 };

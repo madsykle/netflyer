@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { ArrowLeft, FilmStrip, MagnifyingGlass } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { tmdbService } from "../lib/tmdb";
@@ -32,11 +31,9 @@ export default function NotFoundClient() {
     <div className="relative min-h-screen bg-[var(--bg-base)] flex items-center justify-center overflow-hidden">
       {/* Cinematic Backdrop */}
       <div className="absolute inset-0 z-0">
-        <motion.div
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, ease: "easeOut" }}
-          className="absolute inset-0"
+        <div 
+          className="absolute inset-0 animate-scale-in" 
+          style={{ animationDuration: '2s' }}
         >
           {backdrop && (
             <Image 
@@ -51,15 +48,14 @@ export default function NotFoundClient() {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-base)]/40 via-transparent to-transparent" />
-        </motion.div>
+        </div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 container max-w-2xl text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+        <div 
+          className="animate-slide-up" 
+          style={{ animationDelay: '0.2s' }}
         >
           <span className="t-label text-[var(--accent)] mb-6 block tracking-[0.4em]">Error 404</span>
           <h1 className="t-hero text-8xl md:text-[10rem] mb-8">LOST</h1>
@@ -78,7 +74,7 @@ export default function NotFoundClient() {
               Search Library
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Brand Watermark */}

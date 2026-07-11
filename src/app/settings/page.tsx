@@ -1,7 +1,6 @@
 'use client';
 
 import { useSettings } from "../../hooks/useSettings";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Monitor,
   Check,
@@ -101,21 +100,15 @@ const Settings = () => {
 
       <div className="container relative z-10 max-w-3xl">
         
-        <motion.button 
+        <button 
           onClick={() => router.back()} 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 t-label text-[var(--text-muted)] hover:text-white transition-colors mb-10 group"
+          className="flex items-center gap-2 t-label text-[var(--text-muted)] hover:text-white transition-colors mb-10 group animate-fade-in"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" weight="bold" />
           <span>Back</span>
-        </motion.button>
+        </button>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="animate-slide-up">
           <div className="flex items-center gap-4 mb-12">
             <div className="w-12 h-12 bg-[var(--accent)]/10 rounded-[var(--radius-md)] flex items-center justify-center border border-[var(--accent)]/20">
               <Gear className="w-6 h-6 text-[var(--accent)]" weight="fill" />
@@ -130,11 +123,9 @@ const Settings = () => {
 
           <div className="space-y-10">
             {/* Appearance Section */}
-            <motion.section 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="space-y-6"
+            <section 
+              className="space-y-6 animate-slide-up"
+              style={{ animationDelay: '0.1s' }}
             >
               <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-faint)]">
                 <Monitor className="w-4 h-4 text-[var(--accent)]" />
@@ -181,10 +172,9 @@ const Settings = () => {
                       settings.reduceMotion ? "bg-[var(--accent)]" : "bg-white/10"
                     }`}
                   >
-                    <motion.div
-                      animate={{ x: settings.reduceMotion ? 28 : 4 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    <div
+                      className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-[var(--ease-out-expo)]`}
+                      style={{ transform: `translateX(${settings.reduceMotion ? 28 : 4}px)` }}
                     />
                   </button>
                 </div>
@@ -201,10 +191,9 @@ const Settings = () => {
                       settings.compactMode ? "bg-[var(--accent)]" : "bg-white/10"
                     }`}
                   >
-                    <motion.div
-                      animate={{ x: settings.compactMode ? 28 : 4 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    <div
+                      className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-[var(--ease-out-expo)]`}
+                      style={{ transform: `translateX(${settings.compactMode ? 28 : 4}px)` }}
                     />
                   </button>
                 </div>
@@ -221,22 +210,19 @@ const Settings = () => {
                       settings.showScrollIndicators ? "bg-[var(--accent)]" : "bg-white/10"
                     }`}
                   >
-                    <motion.div
-                      animate={{ x: settings.showScrollIndicators ? 28 : 4 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    <div
+                      className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-[var(--ease-out-expo)]`}
+                      style={{ transform: `translateX(${settings.showScrollIndicators ? 28 : 4}px)` }}
                     />
                   </button>
                 </div>
               </div>
-            </motion.section>
+            </section>
 
             {/* Playback Section */}
-            <motion.section 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="space-y-6"
+            <section 
+              className="space-y-6 animate-slide-up"
+              style={{ animationDelay: '0.2s' }}
             >
               <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-faint)]">
                 <Play className="w-4 h-4 text-[var(--accent)]" />
@@ -256,10 +242,9 @@ const Settings = () => {
                       settings.dataSaver ? "bg-[var(--accent)]" : "bg-white/10"
                     }`}
                   >
-                    <motion.div
-                      animate={{ x: settings.dataSaver ? 28 : 4 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    <div
+                      className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-[var(--ease-out-expo)]`}
+                      style={{ transform: `translateX(${settings.dataSaver ? 28 : 4}px)` }}
                     />
                   </button>
                 </div>
@@ -277,10 +262,9 @@ const Settings = () => {
                       settings.dataSaver ? "opacity-50 cursor-not-allowed bg-white/5" : settings.autoplayTrailers ? "bg-[var(--accent)]" : "bg-white/10"
                     }`}
                   >
-                    <motion.div
-                      animate={{ x: settings.dataSaver ? 4 : settings.autoplayTrailers ? 28 : 4 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+                    <div
+                      className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-[var(--ease-out-expo)]`}
+                      style={{ transform: `translateX(${settings.dataSaver ? 4 : settings.autoplayTrailers ? 28 : 4}px)` }}
                     />
                   </button>
                 </div>
@@ -318,14 +302,12 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-            </motion.section>
+            </section>
 
             {/* Advanced Section */}
-            <motion.section 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-6"
+            <section 
+              className="space-y-6 animate-slide-up"
+              style={{ animationDelay: '0.3s' }}
             >
               <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-faint)]">
                 <Gauge className="w-4 h-4 text-[var(--accent)]" />
@@ -352,9 +334,9 @@ const Settings = () => {
                   </button>
                 </div>
               </div>
-            </motion.section>
+            </section>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

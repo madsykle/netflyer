@@ -1,7 +1,6 @@
 'use client';
 
 import { GithubLogo, Code, Server, Database, Stack, Archive, ArrowSquareOut, Lightning, Eye, Heart, GitFork, Star, Warning, CalendarBlank } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
 import React, { useState, useEffect } from "react";
 
 export default function AboutPage() {
@@ -109,39 +108,31 @@ export default function AboutPage() {
         <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+      <div
         className="container relative z-10 max-w-5xl"
       >
         {/* Header - Cinematic intro */}
-        <motion.section variants={itemVariants} className="mb-28">
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-6"
+        <section className="mb-28">
+          <div 
+            className="mb-6 animate-slide-up"
           >
             <span className="t-label text-[var(--accent)] mb-4 block">About</span>
             <h1 className="t-hero text-[clamp(3rem,8vw,7rem)] mb-8 leading-[0.9]">
               Cinema,<br />
               <span className="text-[var(--accent)]">reimagined.</span>
             </h1>
-          </motion.div>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="t-body text-xl md:text-2xl text-[var(--text-secondary)] max-w-3xl leading-relaxed"
+          </div>
+          <p 
+            className="t-body text-xl md:text-2xl text-[var(--text-secondary)] max-w-3xl leading-relaxed animate-slide-up"
+            style={{ animationDelay: '0.2s' }}
           >
             A premium, open-source streaming interface for film enthusiasts who value 
             minimalism, speed, and privacy. No ads. No tracking. Just cinema.
-          </motion.p>
-        </motion.section>
+          </p>
+        </section>
 
         {/* Vision Section */}
-        <motion.section variants={itemVariants} className="mb-28">
+        <section className="mb-28 animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <div className="relative">
             {/* Decorative line */}
             <div className="absolute -left-8 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--accent)] via-[var(--accent)]/30 to-transparent" />
@@ -235,10 +226,10 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
-        </motion.section>
+        </section>
 
         {/* Core Principles */}
-        <motion.section variants={itemVariants} className="mb-28">
+        <section className="mb-28 animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <h2 className="t-label mb-12 flex items-center gap-4">
             <div className="w-8 h-px bg-[var(--accent)]"></div>
             Core Principles
@@ -246,12 +237,10 @@ export default function AboutPage() {
           
           <div className="grid md:grid-cols-3 gap-6">
             {principles.map((principle, index) => (
-              <motion.div
+              <div
                 key={principle.title}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className="group"
+                className="group animate-scale-in"
+                style={{ animationDelay: `${0.5 + index * 0.1}s` }}
               >
                 <div className="surface border-[var(--border-faint)] rounded-[var(--radius-lg)] p-8 h-full hover:border-[var(--accent)]/50 transition-all duration-500 relative overflow-hidden">
                   {/* Hover glow */}
@@ -267,13 +256,13 @@ export default function AboutPage() {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.section>
+        </section>
 
         {/* Tech Stack */}
-        <motion.section variants={itemVariants} className="mb-20">
+        <section className="mb-20 animate-slide-up" style={{ animationDelay: '0.6s' }}>
           <h2 className="t-label mb-12 flex items-center gap-4">
             <div className="w-8 h-px bg-[var(--accent)]"></div>
             Built With
@@ -281,24 +270,22 @@ export default function AboutPage() {
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {techStack.map((tech, index) => (
-              <motion.div
+              <div
                 key={tech.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 + index * 0.05 }}
-                className="group"
+                className="group animate-scale-in"
+                style={{ animationDelay: `${0.7 + index * 0.05}s` }}
               >
                 <div className="surface border-[var(--border-faint)] rounded-[var(--radius-md)] p-6 flex flex-col items-center justify-center text-center hover:border-[var(--accent)]/50 hover:bg-[var(--accent-dim)]/30 transition-all duration-300 cursor-default">
                   <span className="text-white font-semibold mb-1">{tech.name}</span>
                   <span className="t-meta text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{tech.desc}</span>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.section>
+        </section>
 
         {/* CTA */}
-        <motion.section variants={itemVariants} className="pt-16 border-t border-[var(--border-faint)]">
+        <section className="pt-16 border-t border-[var(--border-faint)] animate-slide-up" style={{ animationDelay: '0.8s' }}>
           <div className="flex flex-wrap gap-6">
             <a
               href="https://github.com/madsykle/netflyer"
@@ -319,8 +306,8 @@ export default function AboutPage() {
               <span>More Projects</span>
             </a>
           </div>
-        </motion.section>
-      </motion.div>
+        </section>
+      </div>
     </div>
   );
 }
