@@ -378,13 +378,11 @@ export default function Navbar() {
       </motion.div>
 
       {/* MOBILE BOTTOM DOCK */}
-      <motion.div
-        initial={{ y: 80 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed bottom-4 inset-x-4 z-[100] md:hidden"
-      >
-        <div className="glass-strong bg-black/60 border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.6)] rounded-2xl py-2 px-3 flex justify-between items-center max-w-md mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden pointer-events-none">
+        <div 
+          className="mx-3 mb-3 pointer-events-auto glass-strong bg-[var(--bg-surface)]/95 backdrop-blur-xl border border-white/[0.1] shadow-[0_-4px_30px_rgba(0,0,0,0.5)] rounded-2xl py-2 px-3 flex justify-between items-center max-w-md"
+          style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom, 0.5rem))" }}
+        >
           {MOBILE_NAV_ITEMS.map(({ path, label, icon: Icon }) => {
             const active = isActive(path);
             return (
@@ -418,7 +416,7 @@ export default function Navbar() {
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
       {/* MOBILE PROFILE DRAWER */}
       <AnimatePresence>
