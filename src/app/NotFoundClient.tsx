@@ -81,7 +81,7 @@ export default function NotFoundClient() {
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10 opacity-20">
         <div className="flex items-center gap-2">
           <FilmStrip className="w-4 h-4" />
-          <span className="t-hero text-xl tracking-[0.2em] pt-1">NETFLYER</span>
+          <span className="t-hero text-xl tracking-[0.2em] pt-1">TARKOSI</span>
         </div>
       </div>
     </div>

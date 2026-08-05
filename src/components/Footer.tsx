@@ -15,7 +15,7 @@ const Footer = () => {
               className="text-white mb-2 tracking-[0.2em] font-bold"
               style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.15rem' }}
             >
-              NETFLYER
+              TARKOSI
             </p>
             <p className="t-body text-sm opacity-50">Cinema, anytime. Anywhere.</p>
           </div>
@@ -52,13 +52,13 @@ const Footer = () => {
               </a>
             </div>
             <p className="t-body text-[10px] mt-4 leading-relaxed opacity-40 uppercase tracking-wider">
-              Netflyer does not host any files. All content is provided by non-affiliated third parties.
+              Tarkosi does not host any files. All content is provided by non-affiliated third parties.
             </p>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t border-[var(--border-faint)] flex items-center justify-between">
-          <p className="t-meta text-[10px]">© {currentYear} Netflyer. MIT License.</p>
+          <p className="t-meta text-[10px]">© {currentYear} Tarkosi. MIT License.</p>
         </div>
       </div>
     </footer>

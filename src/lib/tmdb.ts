@@ -12,6 +12,7 @@ import {
   TVShow, 
   Season 
 } from '../types/tmdb';
+import { env } from './env';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -28,7 +29,7 @@ class TMDBService {
   private readonly DEFAULT_CACHE_TIME = 1000 * 60 * 60; // 1 hour
 
   constructor() {
-    const serverApiKey = process.env.TMDB_API_KEY;
+    const serverApiKey = env.TMDB_API_KEY;
     this.apiKey = serverApiKey || '';
     
     if (typeof window === 'undefined' && !this.apiKey) {

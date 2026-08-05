@@ -10,7 +10,7 @@ import Image from "next/image";
 import { tmdbService } from "../../lib/tmdb";
 import { Movie, TVShow } from "../../types/tmdb";
 
-const RECENT_SEARCHES_KEY = "netflyer_recent_searches";
+const RECENT_SEARCHES_KEY = "tarkosi_recent_searches";
 const MAX_RECENT_SEARCHES = 10;
 
 const SearchPage = () => {
@@ -115,7 +115,7 @@ const SearchPage = () => {
               placeholder="Title, actor, genre..."
               autoComplete="off"
               suppressHydrationWarning
-              className="w-full pl-12 pr-12 py-4 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[var(--radius-md)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-lg focus:outline-none focus:shadow-[0_0_15px_rgba(229,9,20,0.15)] transition-all duration-300"
+              className="w-full pl-12 pr-12 py-4 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[var(--radius-md)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-lg focus:outline-none focus:shadow-[0_0_15px_var(--accent-glow)] transition-all duration-300"
             />
             {query && (
               <button

@@ -37,7 +37,7 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
-const SETTINGS_KEY = "netflyer_settings";
+const SETTINGS_KEY = "tarkosi_settings";
 
 const defaultSettings: Settings = {
   imageQuality: "high",

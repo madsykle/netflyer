@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { redis } from "../../../lib/redis";
+import { env } from "../../../lib/env";
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 // Use server-only TMDB_API_KEY — NEVER fall back to NEXT_PUBLIC_ to avoid client bundle exposure
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_API_KEY = env.TMDB_API_KEY;
 
 // Cache TTL in seconds (1 hour)
 const CACHE_TTL = 3600;

@@ -1,14 +1,10 @@
 'use client';
 
-import { HeroUIProvider } from "@heroui/react";
 import { SettingsProvider } from "../hooks/useSettings";
 import { ToastProvider } from "../components/ToastProvider";
-import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -25,12 +21,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <HeroUIProvider navigate={router.push}>
-      <SettingsProvider>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
-      </SettingsProvider>
-    </HeroUIProvider>
+    <SettingsProvider>
+      <ToastProvider>{children}</ToastProvider>
+    </SettingsProvider>
   );
 }

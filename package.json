@@ -1,18 +1,20 @@
 {
-  "name": "netflyer",
-  "description": "netflyer is a free movie streaming platform. Watch your favorite movies, anime and TV shows online for free.",
+  "name": "tarkosi",
+  "description": "Tarkosi is a free cinematic streaming platform for movies, anime, and TV shows.",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "npm@11.16.0",
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "NODE_OPTIONS='--max-old-space-size=2048' next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
   },
   "author": "madsykle <Nesbeer As nesbeeras3@gmail.com>",
   "license": "MIT",
-  "homepage": "https://netflyer.vercel.app",
+  "homepage": "https://tarkosi.vercel.app",
   "repository": {
     "type": "git",
     "url": "https://github.com/madsykle/netflyer.git"
@@ -21,8 +23,8 @@
     "url": "https://github.com/madsykle/netflyer/issues"
   },
   "keywords": [
-    "netflyer",
-    "netflix",
+    "tarkosi",
+    "cinema",
     "free",
     "movie",
     "series",
@@ -30,8 +32,8 @@
     "streaming"
   ],
   "dependencies": {
-    "@heroui/react": "2.8.4",
     "@phosphor-icons/react": "^2.1.10",
+    "@t3-oss/env-nextjs": "^0.12.0",
     "@upstash/redis": "^1.36.3",
     "crypto-js": "^4.2.0",
     "firebase": "^10.4.0",
@@ -41,8 +43,8 @@
     "next": "^15.3.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-icons": "^4.10.1",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
@@ -50,10 +52,11 @@
     "@types/node": "^25.3.5",
     "@types/react": "19",
     "@types/react-dom": "19",
-    "eslint": "8.57.0",
-    "eslint-config-next": "15.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.3.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^17.9.0",
     "postcss": "^8.4.27",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.9.3"

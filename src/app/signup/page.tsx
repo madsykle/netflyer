@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useToast } from "../../components/ToastProvider";
 import { tmdbService } from "../../lib/tmdb";
 import Loading from "../../components/Loading";
+import { env } from "../../lib/env";
 
 const checkForBadWords = (text: string) => {
   return isProfane(text);
@@ -135,7 +136,7 @@ const SignUp = () => {
         createdAt: new Date().toISOString(),
       });
 
-      const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || window.location.origin;
+      const websiteUrl = env.NEXT_PUBLIC_WEBSITE_URL || window.location.origin;
       await sendEmailVerification(user, {
         url: `${websiteUrl}/signup?verified=true`,
       });
@@ -209,14 +210,14 @@ const SignUp = () => {
             <div className="w-10 h-10 bg-[var(--accent)] rounded-[4px] flex items-center justify-center shadow-[0_0_20px_var(--accent-glow)]">
               <FilmStrip className="text-white w-5 h-5" weight="fill" />
             </div>
-            <span className="t-hero text-2xl tracking-[0.2em] pt-1">NETFLYER</span>
+            <span className="t-hero text-2xl tracking-[0.2em] pt-1">TARKOSI</span>
           </Link>
         </div>
 
         {/* Editorial Text (Desktop) */}
         <div className="hidden lg:block absolute bottom-16 left-12 right-12 z-20">
           <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
-            <span className="t-label text-[var(--accent)] mb-4 block">Joining Netflyer</span>
+            <span className="t-label text-[var(--accent)] mb-4 block">Joining Tarkosi</span>
             <h2 className="t-hero text-6xl mb-4 line-clamp-2">{movieTitle}</h2>
             <p className="t-body max-w-md opacity-60">
               Create an account to start your journey through the history of cinema. Save your favorites and watch anywhere.
@@ -233,7 +234,7 @@ const SignUp = () => {
             <div className="w-8 h-8 bg-[var(--accent)] rounded-[4px] flex items-center justify-center">
               <FilmStrip className="text-white w-4 h-4" weight="fill" />
             </div>
-            <span className="t-hero text-lg tracking-[0.15em] pt-1">NETFLYER</span>
+            <span className="t-hero text-lg tracking-[0.15em] pt-1">TARKOSI</span>
           </Link>
         </div>
 
@@ -255,7 +256,7 @@ const SignUp = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="cinephile_24"
-                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-300"
                   required
                 />
               </div>
@@ -268,7 +269,7 @@ const SignUp = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-300"
                   required
                 />
               </div>
@@ -282,7 +283,7 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-300"
                     required
                   />
                   <button

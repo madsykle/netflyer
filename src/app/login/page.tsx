@@ -154,7 +154,7 @@ const Login = () => {
             <div className="w-10 h-10 bg-[var(--accent)] rounded-[4px] flex items-center justify-center shadow-[0_0_20px_var(--accent-glow)]">
               <FilmStrip className="text-white w-5 h-5" weight="fill" />
             </div>
-            <span className="t-hero text-2xl tracking-[0.2em] pt-1">NETFLYER</span>
+            <span className="t-hero text-2xl tracking-[0.2em] pt-1">TARKOSI</span>
           </Link>
         </div>
 
@@ -178,7 +178,7 @@ const Login = () => {
             <div className="w-8 h-8 bg-[var(--accent)] rounded-[4px] flex items-center justify-center">
               <FilmStrip className="text-white w-4 h-4" weight="fill" />
             </div>
-            <span className="t-hero text-lg tracking-[0.15em] pt-1">NETFLYER</span>
+            <span className="t-hero text-lg tracking-[0.15em] pt-1">TARKOSI</span>
           </Link>
         </div>
 
@@ -187,7 +187,7 @@ const Login = () => {
             <header className="mb-10">
               <h1 className="t-title text-5xl mb-3">Sign In</h1>
               <p className="t-body text-[var(--text-secondary)]">
-                Welcome back to Netflyer.
+                Welcome back to Tarkosi.
               </p>
             </header>
 
@@ -200,7 +200,7 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                  className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-300"
                   required
                 />
               </div>
@@ -223,7 +223,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_rgba(229,9,20,0.15)] transition-all duration-300"
+                    className="w-full px-4 py-3.5 bg-white/[0.01] hover:bg-white/[0.03] border border-[var(--border-subtle)] focus:border-[var(--accent)] focus:bg-white/[0.02] rounded-[4px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-base focus:outline-none focus:shadow-[0_0_12px_var(--accent-glow)] transition-all duration-300"
                     required
                   />
                   <button
@@ -256,7 +256,7 @@ const Login = () => {
 
             <footer className="mt-12 pt-8 border-t border-[var(--border-faint)]">
               <p className="t-body text-sm">
-                New to Netflyer?{" "}
+                New to Tarkosi?{" "}
                 <Link
                   href="/signup"
                   className="text-white font-bold hover:text-[var(--accent)] transition-colors inline-flex items-center gap-1 group"

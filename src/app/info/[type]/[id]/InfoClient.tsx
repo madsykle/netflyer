@@ -3,11 +3,7 @@
 import { useSettings } from "../../../../hooks/useSettings";
 import { auth, db } from "../../../../lib/firebase";
 import { filterText } from "../../../../lib/profanity";
-import {
-  Select,
-  SelectItem,
-  Textarea,
-} from "@heroui/react";
+import { Textarea } from "../../../../components/ui";
 import { onAuthStateChanged, User } from "firebase/auth";
 import {
   addDoc,
@@ -39,6 +35,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useToast } from "../../../../components/ToastProvider";
 import { MovieDetails, TVShowDetails, Cast, Movie, TVShow, Episode } from "../../../../types/tmdb";
+import type { ArtworkResult } from "../../../../lib/artwork";
 import { tmdbService } from "../../../../lib/tmdb";
 import Link from "next/link";
 
@@ -49,6 +46,7 @@ interface InfoClientProps {
   cast: Cast[];
   recommendations: (Movie | TVShow)[];
   similar: (Movie | TVShow)[];
+  artwork?: ArtworkResult;
 }
 
 interface Review {
@@ -65,7 +63,7 @@ interface Review {
   updatedAt: any;
 }
 
-const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoClientProps) => {
+const InfoClient = ({ type, id, details, cast, recommendations, similar, artwork }: InfoClientProps) => {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [episodesLoading, setEpisodesLoading] = useState(false);
@@ -275,11 +273,12 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
     setWatchlistLoading(false);
   };
 
-  const backdropUrl = details.backdrop_path 
-    ? `https://image.tmdb.org/t/p/w1280${details.backdrop_path}` 
+  const posterFallbackUrl = getImageUrl(details.poster_path, "poster");
+  const backdropFallbackUrl = details.backdrop_path
+    ? `https://image.tmdb.org/t/p/w1280${details.backdrop_path}`
     : getImageUrl(details.poster_path, "backdrop");
-  
-  const posterUrl = getImageUrl(details.poster_path, "poster");
+  const [posterUrl, setPosterUrl] = useState(artwork?.poster || posterFallbackUrl);
+  const [resolvedBackdropUrl, setResolvedBackdropUrl] = useState(artwork?.backdrop || backdropFallbackUrl);
 
   const tabs = ["overview", ...(isTV ? ["episodes"] : []), "similar", "reviews"];
 
@@ -300,13 +299,14 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
             </div>
           ) : (
             <Image
-              src={backdropUrl}
+              src={resolvedBackdropUrl}
               alt=""
               fill
               priority
               className="object-cover object-top opacity-50"
               sizes="100vw"
               onLoad={() => setImageLoaded(p => ({...p, backdrop: true}))}
+              onError={() => setResolvedBackdropUrl(backdropFallbackUrl)}
               style={{ opacity: imageLoaded.backdrop ? 0.6 : 0, transition: 'opacity 1.5s ease-in-out' }}
             />
           )}
@@ -329,6 +329,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 sizes="(max-width: 1024px) 192px, 256px"
                 onLoad={() => setImageLoaded(p => ({...p, poster: true}))}
+                onError={() => setPosterUrl(posterFallbackUrl)}
               />
             </div>
           </div>
@@ -372,7 +373,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                 )}
                 <div className="flex gap-2 ml-2">
                   {details.genres?.slice(0, 3).map((g: any) => (
-                    <span key={g.id} className="genre-chip !rounded-[4px] !px-3 !py-1.5 !text-xs !bg-[var(--accent-dim)] !border-[rgba(229,9,20,0.25)]">{g.name}</span>
+                    <span key={g.id} className="genre-chip !rounded-[4px] !px-3 !py-1.5 !text-xs !bg-[var(--accent-dim)] !border-[var(--accent)]/40">{g.name}</span>
                   ))}
                 </div>
               </div>
@@ -382,7 +383,7 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                 {released ? (
                   <button
                     onClick={() => router.push(type === 'tv' ? `/watch/tv/${id}/1/1` : `/watch/movie/${id}`)}
-                    className="btn btn-primary h-14 px-8 md:px-12 text-xs uppercase tracking-widest font-extrabold shadow-[0_0_20px_rgba(229,9,20,0.3)] hover:scale-105 transition-all duration-300"
+                    className="btn btn-primary h-14 px-8 md:px-12 text-xs uppercase tracking-widest font-extrabold shadow-[0_0_20px_var(--accent-glow)] hover:scale-105 transition-all duration-300"
                   >
                     <Play className="w-4 h-4 fill-current mr-0.5" />
                     Play Now
@@ -633,16 +634,11 @@ const InfoClient = ({ type, id, details, cast, recommendations, similar }: InfoC
                         <div className="space-y-4">
                           <div className="relative group">
                             <Textarea
-                              variant="bordered"
                               placeholder="Critique this film..."
-                              minRows={4}
+                              rows={4}
                               value={newReview}
-                              onChange={(e) => setNewReview(e.target.value)}
-                              disableAnimation
-                              classNames={{
-                                input: "text-base text-white font-['DM_Sans'] placeholder:text-[var(--text-muted)] p-0",
-                                inputWrapper: "border-[var(--border-subtle)] group-hover:border-[var(--border-visible)] group-data-[focus=true]:border-[var(--accent)] bg-[#050505] rounded-[var(--radius-sm)] p-5 transition-all shadow-inner group-data-[focus=true]:shadow-[0_0_15px_rgba(229,9,26,0.1)] min-h-[140px]"
-                              }}
+                              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewReview(e.target.value)}
+                              className="min-h-[140px]"
                             />
                           </div>
                           <div className="flex justify-end pt-2">

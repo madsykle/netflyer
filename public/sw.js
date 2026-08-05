@@ -1,6 +1,6 @@
-const CACHE_NAME = 'netflyer-cache-v1';
-const IMAGE_CACHE_NAME = 'netflyer-images-v1';
-const API_CACHE_NAME = 'netflyer-api-v1';
+const CACHE_NAME = 'tarkosi-cache-v2';
+const IMAGE_CACHE_NAME = 'tarkosi-images-v2';
+const API_CACHE_NAME = 'tarkosi-api-v2';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -37,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // 1. TMDB Images Caching: Cache-First Strategy
-  if (url.hostname === 'image.tmdb.org') {
+  if (url.hostname === 'image.tmdb.org' || url.hostname === 'btttr.cc' || url.hostname === 'tcdn.fanart.tv') {
     event.respondWith(
       caches.open(IMAGE_CACHE_NAME).then((cache) => {
         return cache.match(event.request).then((cachedResponse) => {

@@ -858,7 +858,7 @@ const WatchClient = ({ params }: Props) => {
                 
                 <div className="space-y-4 mb-8">
                   <p className="t-body text-[var(--text-secondary)] leading-relaxed">
-                    Netflyer does not host content. We provide a clean interface for 3rd-party cinematic streams.
+                    Tarkosi does not host content. We provide a clean interface for 3rd-party cinematic streams.
                   </p>
                   <p className="t-body text-sm font-bold text-white/90">
                     The player may contain external advertisements which we cannot control.

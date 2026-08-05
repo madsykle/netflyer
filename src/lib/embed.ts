@@ -31,8 +31,8 @@ export interface StreamsResponse {
 export const providerUrls: Record<Provider, (type: ContentType, id: number, s?: number, e?: number) => string> = {
   vidking: (type, id, s, e) =>
     type === 'tv'
-      ? `https://www.vidking.net/embed/tv/${id}/${s || 1}/${e || 1}?color=e50914&nextEpisode=true&episodeSelector=true`
-      : `https://www.vidking.net/embed/movie/${id}?color=e50914&nextEpisode=true&episodeSelector=true`,
+      ? `https://www.vidking.net/embed/tv/${id}/${s || 1}/${e || 1}?color=202833&nextEpisode=true&episodeSelector=true`
+      : `https://www.vidking.net/embed/movie/${id}?color=202833&nextEpisode=true&episodeSelector=true`,
   'vidsrc-pk': (type, id, s, e) =>
     type === 'tv'
       ? `https://vidsrc.pk/embed/tv/${id}/${s || 1}/${e || 1}`
