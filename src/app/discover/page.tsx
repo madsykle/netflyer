@@ -6,7 +6,7 @@ import {
   SelectItem,
   Pagination,
   Slider,
-} from "@heroui/react";
+} from "../../components/ui";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   SquaresFour,
@@ -31,7 +31,7 @@ const Discover = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -103,7 +103,7 @@ const Discover = () => {
 
   useEffect(() => {
     fetchResults();
-    
+
     // Update URL
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -240,7 +240,7 @@ const Discover = () => {
             >
               <div className="glass-panel p-8 rounded-[var(--radius-md)] shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent"></div>
-                
+
                 <div className="flex justify-between items-center mb-8">
                   <h2 style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.05em', fontSize: '1.5rem' }} className="text-white uppercase">
                     Advanced Filters
@@ -259,21 +259,14 @@ const Discover = () => {
                     <Select
                       label="Content Type"
                       selectedKeys={[filters.type]}
-                      onSelectionChange={(keys) =>
+                      onSelectionChange={(keys: Set<React.Key>) =>
                         handleFilterChange("type", Array.from(keys)[0])
                       }
                       className="w-full"
-                      variant="bordered"
-                      classNames={{
-                        label: "t-label text-[10px]",
-                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
-                        value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
-                      }}
+
                     >
                       {typeOptions.map((option) => (
-                        <SelectItem key={option.key} textValue={option.label} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
+                        <SelectItem key={option.key} textValue={option.label}>
                           {option.label}
                         </SelectItem>
                       ))}
@@ -284,22 +277,15 @@ const Discover = () => {
                     <Select
                       label="Genre"
                       selectedKeys={filters.genre ? [filters.genre] : []}
-                      onSelectionChange={(keys) =>
+                      onSelectionChange={(keys: Set<React.Key>) =>
                         handleFilterChange("genre", Array.from(keys)[0] || "")
                       }
                       placeholder="All Genres"
                       className="w-full"
-                      variant="bordered"
-                      classNames={{
-                        label: "t-label text-[10px]",
-                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
-                        value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
-                      }}
+
                     >
                       {(filters.type === "movie" ? genres.movie : filters.type === "tv" ? genres.tv : [...genres.movie, ...genres.tv]).map((genre) => (
-                        <SelectItem key={genre.id.toString()} textValue={genre.name} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
+                        <SelectItem key={genre.id.toString()} textValue={genre.name}>
                           {genre.name}
                         </SelectItem>
                       ))}
@@ -310,22 +296,15 @@ const Discover = () => {
                     <Select
                       label="Year"
                       selectedKeys={filters.year ? [filters.year] : []}
-                      onSelectionChange={(keys) =>
+                      onSelectionChange={(keys: Set<React.Key>) =>
                         handleFilterChange("year", Array.from(keys)[0] || "")
                       }
                       placeholder="Any Year"
                       className="w-full"
-                      variant="bordered"
-                      classNames={{
-                        label: "t-label text-[10px]",
-                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
-                        value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
-                      }}
+
                     >
                       {generateYearOptions().slice(0, 50).map((year) => (
-                        <SelectItem key={year.key} textValue={year.label} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
+                        <SelectItem key={year.key} textValue={year.label}>
                           {year.label}
                         </SelectItem>
                       ))}
@@ -336,21 +315,14 @@ const Discover = () => {
                     <Select
                       label="Sort By"
                       selectedKeys={[filters.sort_by]}
-                      onSelectionChange={(keys) =>
+                      onSelectionChange={(keys: Set<React.Key>) =>
                         handleFilterChange("sort_by", Array.from(keys)[0])
                       }
                       className="w-full"
-                      variant="bordered"
-                      classNames={{
-                        label: "t-label text-[10px]",
-                        trigger: "border-[var(--border-subtle)] hover:border-[var(--border-visible)] text-white h-14 px-4 bg-white/5 rounded-[var(--radius-sm)]",
-                        value: "font-bold text-white text-sm",
-                        listbox: "bg-[var(--bg-overlay)] p-2 max-h-[250px] overflow-y-auto custom-scrollbar",
-                        popoverContent: "bg-[var(--bg-overlay)] border border-[var(--border-visible)] shadow-2xl !opacity-100 max-h-[280px] overflow-y-auto custom-scrollbar",
-                      }}
+
                     >
                       {sortOptions.map((option) => (
-                        <SelectItem key={option.key} textValue={option.label} classNames={{ base: "rounded-[var(--radius-sm)] data-[hover=true]:bg-white/5 px-3 py-2.5", title: "font-bold text-sm text-white" }}>
+                        <SelectItem key={option.key} textValue={option.label}>
                           {option.label}
                         </SelectItem>
                       ))}
@@ -374,11 +346,6 @@ const Discover = () => {
                     value={filters.rating}
                     onChange={(value) => handleFilterChange("rating", value)}
                     className="w-full"
-                    classNames={{
-                      track: "bg-white/5 h-1",
-                      filler: "bg-[var(--accent)]",
-                      thumb: "bg-white w-4 h-4 after:bg-white shadow-xl"
-                    }}
                   />
                 </div>
               </div>
@@ -430,13 +397,7 @@ const Discover = () => {
                   page={filters.page}
                   onChange={(page) => handleFilterChange("page", page)}
                   showControls
-                  classNames={{
-                    wrapper: "gap-2",
-                    item: "bg-transparent border border-transparent hover:bg-white/5 text-[var(--text-secondary)] hover:text-white font-bold text-xs",
-                    cursor: "bg-white/10 border border-white/20 text-white",
-                    next: "bg-transparent text-[var(--text-secondary)] hover:text-white",
-                    prev: "bg-transparent text-[var(--text-secondary)] hover:text-white",
-                  }}
+
                 />
               </motion.div>
             )}
@@ -475,7 +436,7 @@ const ResultCard = ({ item, router, getImageUrl }: any) => {
           onLoad={() => setImageLoaded(true)}
           sizes="(max-width: 768px) 50vw, 20vw"
         />
-        
+
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute inset-0 flex items-center justify-center">

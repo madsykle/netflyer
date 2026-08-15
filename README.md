@@ -1,6 +1,6 @@
-# Netflyer
+# Tarkosi
 
-**Netflyer** is a premium, free movie and series streaming platform with a high-fidelity cinematic editorial UI.
+**Tarkosi** is a premium, free movie and series streaming platform with a high-fidelity cinematic editorial UI.
 
 Rebuilt from the ground up for maximum performance, global scalability, and security.
 

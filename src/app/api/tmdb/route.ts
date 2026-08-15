@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { enforceRateLimit, isOriginAllowed } from "../../../lib/api-guard";
 import { redis } from "../../../lib/redis";
+import { env } from "../../../lib/env";
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 // Use server-only TMDB_API_KEY — NEVER fall back to NEXT_PUBLIC_ to avoid client bundle exposure
-const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_API_KEY = env.TMDB_API_KEY;
 
 // Cache TTL in seconds (1 hour)
 const CACHE_TTL = 3600;
@@ -15,47 +17,6 @@ const MAX_PATH_LENGTH = 200;
 // Max total query params to prevent cache key DoS
 const MAX_QUERY_PARAMS = 10;
 
-/**
- * Build a composite rate-limit fingerprint that cannot be trivially spoofed.
- * Combines X-Forwarded-For (if present), User-Agent, and Accept-Language
- * into a single key. An attacker would need to spoof ALL three simultaneously.
- */
-function getRateLimitFingerprint(request: NextRequest): string {
-  const ip = request.headers.get('x-real-ip') || '127.0.0.1';
-  const ua = request.headers.get('user-agent') || '';
-  const lang = request.headers.get('accept-language') || '';
-  // Simple hash: combine and truncate for a stable key
-  const raw = `${ip}|${ua}|${lang}`;
-  // Use a simple djb2 hash for a compact, stable fingerprint
-  let hash = 5381;
-  for (let i = 0; i < raw.length; i++) {
-    hash = ((hash << 5) + hash + raw.charCodeAt(i)) & 0xFFFFFFFF;
-  }
-  return hash.toString(36);
-}
-
-/**
- * Validate that the request origin matches the expected host exactly.
- * Uses URL parsing instead of substring matching to prevent bypass.
- */
-function isOriginAllowed(origin: string | null, host: string | null): boolean {
-  // No origin header = same-origin navigation or server-side request — allow
-  if (!origin) return true;
-  
-  try {
-    const originUrl = new URL(origin);
-    // Extract just the hostname:port from host header for exact comparison
-    const expectedHost = host?.split(':')[0] || '';
-    const originHost = originUrl.hostname;
-    
-    // Exact match only — no substring matching
-    return originHost === expectedHost || originHost === 'localhost';
-  } catch {
-    // Malformed origin — reject
-    return false;
-  }
-}
-
 export async function GET(request: NextRequest) {
   // 1. Origin validation with exact hostname matching (prevents substring bypass)
   const origin = request.headers.get('origin');
@@ -66,25 +27,12 @@ export async function GET(request: NextRequest) {
   }
 
   // 2. Rate Limiting using composite fingerprint (prevents X-Forwarded-For spoofing)
-  const fingerprint = getRateLimitFingerprint(request);
-  const rateLimitKey = `ratelimit:${fingerprint}`;
-  
-  try {
-    const requests = await redis.incr(rateLimitKey);
-    if (requests === 1) {
-      await redis.expire(rateLimitKey, RATE_LIMIT_WINDOW);
-    }
-    
-    if (requests > RATE_LIMIT) {
-      return NextResponse.json(
-        { error: 'Too many requests. Please slow down.' }, 
-        { status: 429, headers: { 'Retry-After': RATE_LIMIT_WINDOW.toString() } }
-      );
-    }
-  } catch (err) {
-    console.error('Redis Rate Limit Error:', err);
-    // Continue if Redis fails to avoid blocking users
-  }
+  const limited = await enforceRateLimit(request, {
+    prefix: "tmdb",
+    limit: RATE_LIMIT,
+    window: RATE_LIMIT_WINDOW,
+  });
+  if (limited) return limited;
 
   const searchParams = request.nextUrl.searchParams;
   const path = searchParams.get('path');

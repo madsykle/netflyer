@@ -2,21 +2,7 @@
 
 import { auth, db } from "../../lib/firebase";
 import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Divider,
   Input,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  Textarea,
-  Select,
-  SelectItem,
   Chip,
   Avatar,
   Tabs,
@@ -27,9 +13,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Pagination,
-  Image as HeroImage,
-} from "@heroui/react";
+} from "../../components/ui";
 import NextImage from "next/image";
 import {
   onAuthStateChanged,
@@ -66,7 +50,7 @@ import {
   SignOut,
   Shield,
   Database,
-  Activity,
+  Pulse as ActivityIcon,
   ArrowSquareOut,
   CaretLeft,
   Bell
@@ -75,7 +59,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../components/ToastProvider";
 
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "asnesbeer3@gmail.com,mads@netflyer.icu").split(",").map(e => e.trim());
+import { env } from "../../lib/env";
+
+const ADMIN_EMAILS = env.NEXT_PUBLIC_ADMIN_EMAILS.split(",").map((email: string) => email.trim()).filter(Boolean);
 
 export default function AdminDashboard() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -97,9 +83,6 @@ export default function AdminDashboard() {
 
   const router = useRouter();
   const { createToast } = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [editingItem, setEditingItem] = useState(null);
-  const [editType, setEditType] = useState(""); // 'user', 'movie', 'tv', 'review'
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -233,7 +216,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white uppercase tracking-widest">
-                Netflyer Admin
+                Tarkosi Admin
               </h1>
               <p className="text-[10px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.2em]">System Management v2.0</p>
             </div>
@@ -279,7 +262,7 @@ export default function AdminDashboard() {
             trend="+12%"
           />
           <StatCard
-            icon={<Activity className="w-6 h-6 text-orange-400" />}
+            icon={<ActivityIcon className="w-6 h-6 text-orange-400" />}
             label="Active Users"
             value={stats.activeUsers}
             trend="+3%"
@@ -422,7 +405,7 @@ function SystemCard({ title, status, details, lastCheck }: any) {
     <div className="glass-light p-8 rounded-2xl border border-white/5">
       <div className="flex gap-4 mb-6">
         <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-          <Activity className="w-6 h-6 text-[var(--color-accent-primary)]" />
+          <ActivityIcon className="w-6 h-6 text-[var(--color-accent-primary)]" />
         </div>
         <div className="flex flex-col justify-center">
           <p className="text-lg font-bold text-white uppercase tracking-wider">{title}</p>

@@ -20,6 +20,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { providers, getEmbedUrl, decodeBase64Url, Provider, StreamInfo } from "../../../lib/embed";
 import { tmdbService } from "../../../lib/tmdb";
+import VideoPlayer from "../../../components/VideoPlayer";
+import { useSettings } from "../../../hooks/useSettings";
 import { isReleased } from "../../../lib/release";
 import { ContentType, MovieDetails, TVShowDetails, Season } from "../../../types/tmdb";
 import { auth, db } from "../../../lib/firebase";
@@ -30,6 +32,20 @@ interface Props {
   params: Promise<{
     params: string[];
   }>;
+}
+
+/**
+ * Build the playable URL for a direct scraped stream. The vidsrc CDN serves
+ * its media segments behind an Origin allowlist that a browser can never
+ * satisfy (segments 403 unless there is no Origin header). So every stream URL
+ * is routed through our server-side proxy, which fetches playlists + segments
+ * without an Origin header and relays them back to hls.js.
+ */
+function directStreamUrl(stream: StreamInfo): string {
+  if (stream.behaviorHints?.tokenHost) {
+    return `/api/stream/proxy?url=${encodeURIComponent(stream.url)}`;
+  }
+  return stream.url;
 }
 
 const WatchClient = ({ params }: Props) => {
@@ -56,6 +72,7 @@ const WatchClient = ({ params }: Props) => {
   const currentEpisode = isValidEpisode ? parsedEpisode : 1;
 
   const router = useRouter();
+  const { settings } = useSettings();
 
   const [provider, setProvider] = useState<Provider>(providers[0].key as Provider);
   const [embedUrl, setEmbedUrl] = useState("");
@@ -192,7 +209,33 @@ const WatchClient = ({ params }: Props) => {
         }
       }
 
-      let url = getEmbedUrl(provider, type, parseInt(id), currentSeason, currentEpisode);
+      // Best-source first: try the self-built direct scraper before falling back
+      // to provider iframes (#8 integration).
+      try {
+        const q = new URLSearchParams({ type, id });
+        if (type === "tv") {
+          q.set("season", String(currentSeason));
+          q.set("episode", String(currentEpisode));
+        }
+        const res = await fetch(`/api/stream?${q.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          const found = (data.streams ?? []) as StreamInfo[];
+          for (const s of found) {
+            const url = directStreamUrl(s);
+            if (url) {
+              setStreams(found);
+              setSelectedStream({ ...s, url });
+              setLoading(false);
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Direct stream resolution failed, falling back to iframe:", e);
+      }
+
+      let url = getEmbedUrl(provider, type, parseInt(id), currentSeason, currentEpisode, settings.defaultVideoQuality);
       if (url) {
         if (provider === 'vidking') {
           const storageKey = type === "tv"
@@ -224,7 +267,7 @@ const WatchClient = ({ params }: Props) => {
       setError("Video source unavailable. Try another provider.");
       setLoading(false);
     }
-  }, [provider, type, id, currentSeason, currentEpisode, details]);
+  }, [provider, type, id, currentSeason, currentEpisode, details, settings.defaultVideoQuality]);
 
   // Fetch title info and episodes if TV
   useEffect(() => {
@@ -423,7 +466,7 @@ const WatchClient = ({ params }: Props) => {
   const posterUrl = details?.backdrop_path ? `https://image.tmdb.org/t/p/original${details.backdrop_path}` : undefined;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[var(--text-primary)] flex flex-col font-['DM_Sans']">
+    <div className="min-h-screen bg-[#050505] text-[var(--text-primary)] flex flex-col">
       {/* Cinematic Top Bar */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-black/90 via-black/60 to-transparent pt-4 pb-10 px-4 sm:px-10 flex items-start justify-between pointer-events-none transition-opacity duration-300">
         <div className="flex items-center gap-3 sm:gap-6 pointer-events-auto">
@@ -439,7 +482,7 @@ const WatchClient = ({ params }: Props) => {
               {type === "movie" ? <FilmStrip className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Television className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               <span>{type === "movie" ? "Feature Film" : "Television Series"}</span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-lg" style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.05em' }}>
+            <h1 className="text-xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-lg" style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.02em' }}>
               {fullTitle}
             </h1>
           </div>
@@ -463,7 +506,8 @@ const WatchClient = ({ params }: Props) => {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                  style={{ transformOrigin: "top right" }}
                   className="absolute right-0 top-full mt-2 w-64 glass-premium rounded-[var(--radius-md)] shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-50"
                 >
                   <div className="px-4 py-3 border-b border-[var(--border-faint)] bg-black/20">
@@ -582,6 +626,20 @@ const WatchClient = ({ params }: Props) => {
                     </>
                   )}
                 </motion.div>
+              ) : selectedStream ? (
+                <motion.div
+                  key="player"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1 }}
+                  className="absolute inset-0 w-full h-full"
+                >
+                    <VideoPlayer
+                      url={selectedStream.url}
+                      title={fullTitle}
+                      poster={posterUrl}
+                    />
+                </motion.div>
               ) : embedUrl ? (
                 <motion.div
                   key="player"
@@ -627,6 +685,7 @@ const WatchClient = ({ params }: Props) => {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   className="absolute bottom-6 right-6 z-30 max-w-sm bg-[#0a0a0c]/95 border border-white/10 rounded-[var(--radius-md)] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-md"
                 >
                   <p className="text-[10px] text-[var(--accent)] font-bold uppercase tracking-[0.2em] mb-1">Up Next</p>
@@ -660,7 +719,7 @@ const WatchClient = ({ params }: Props) => {
           {/* Player Status Bar */}
           <div className="py-2.5 sm:h-12 bg-[#0a0a0c] border-t border-white/5 flex items-center justify-between px-4 sm:px-6 shrink-0 flex-wrap gap-2.5">
             <div className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full ${embedUrl && !loading ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-[var(--accent)] animate-pulse shadow-[0_0_10px_var(--accent-glow)]'}`} />
+              <div className={`w-2 h-2 rounded-full ${(embedUrl || selectedStream) && !loading ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-[var(--accent)] animate-pulse shadow-[0_0_10px_var(--accent-glow)]'}`} />
               <span className="t-meta text-[10px] text-[var(--text-secondary)]">
                 {loading ? "BUFFERING" : error ? "OFFLINE" : "LIVE"}
               </span>
@@ -686,8 +745,19 @@ const WatchClient = ({ params }: Props) => {
               )}
             </div>
 
-            <div className="hidden md:block t-meta text-[10px] text-[var(--text-muted)]">
-              HOST: <span className="text-white">{currentProvider?.label.toUpperCase()}</span>
+            <div className="hidden md:flex items-center gap-4 t-meta text-[10px] text-[var(--text-muted)]">
+              <span>
+                {selectedStream ? (
+                  <span className="text-white">SOURCE: DIRECT</span>
+                ) : (
+                  <>HOST: <span className="text-white">{currentProvider?.label.toUpperCase()}</span></>
+                )}
+              </span>
+              {settings.defaultVideoQuality !== "auto" && (
+                <span>
+                  QUALITY: <span className="text-white">{settings.defaultVideoQuality.toUpperCase()}</span>
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -712,11 +782,12 @@ const WatchClient = ({ params }: Props) => {
                   <AnimatePresence>
                     {showSeasonMenu && (
                       <motion.div
-                        initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-full mt-2 w-36 glass-premium rounded-[var(--radius-sm)] shadow-2xl z-50 p-1"
+                  initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                  style={{ transformOrigin: "top right" }}
+                  className="absolute right-0 top-full mt-2 w-36 glass-premium rounded-[var(--radius-sm)] shadow-2xl z-50 p-1"
                       >
                         <div className="max-h-[40vh] overflow-y-auto custom-scrollbar">
                           {details.seasons?.filter(s => s.season_number > 0).map(s => (
@@ -858,7 +929,7 @@ const WatchClient = ({ params }: Props) => {
                 
                 <div className="space-y-4 mb-8">
                   <p className="t-body text-[var(--text-secondary)] leading-relaxed">
-                    Netflyer does not host content. We provide a clean interface for 3rd-party cinematic streams.
+                    Tarkosi does not host content. We provide a clean interface for 3rd-party cinematic streams.
                   </p>
                   <p className="t-body text-sm font-bold text-white/90">
                     The player may contain external advertisements which we cannot control.

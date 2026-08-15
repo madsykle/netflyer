@@ -124,18 +124,18 @@ export default function Navbar() {
             <div className="relative">
               <Image
                 src="/logo.png"
-                alt="Netflyer"
+                alt="Tarkosi"
                 width={30}
                 height={30}
                 className="object-contain rounded-[4px] transition-all duration-300 group-hover:scale-105"
               />
-              <div className="absolute inset-0 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_16px_rgba(229,9,20,0.6)]" />
+              <div className="absolute inset-0 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_16px_var(--accent-glow)]" />
             </div>
             <span
               className="text-white tracking-[0.2em] font-bold transition-all duration-300"
               style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.15rem' }}
             >
-              NETFLYER
+              TARKOSI
             </span>
           </Link>
 
@@ -190,7 +190,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 group cursor-pointer focus:outline-none"
                   aria-label="User menu"
                 >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#600000] border border-white/20 flex items-center justify-center text-white text-xs font-bold shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:border-[var(--accent)] group-hover:shadow-[0_0_12px_rgba(229,9,20,0.4)]">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#600000] border border-white/20 flex items-center justify-center text-white text-xs font-bold shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:border-[var(--accent)] group-hover:shadow-[0_0_12px_var(--accent-glow)]">
                     {user.photoURL ? (
                       <Image
                         src={user.photoURL}
@@ -256,7 +256,7 @@ export default function Navbar() {
                         className="flex items-center gap-3 px-2.5 py-2 rounded-[var(--radius-sm)] text-xs font-semibold text-[var(--text-secondary)] hover:text-white hover:bg-white/[0.04] transition-all duration-200"
                       >
                         <Info className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                        About Netflyer
+                        About Tarkosi
                       </Link>
                     </div>
 
@@ -264,7 +264,7 @@ export default function Navbar() {
 
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center justify-center gap-2 w-full py-2 bg-white/[0.03] border border-white/[0.06] hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400 rounded-[var(--radius-sm)] text-xs font-bold text-[var(--text-primary)] transition-all duration-200 cursor-pointer"
+                      className="flex items-center justify-center gap-2 w-full py-2 bg-white/[0.03] border border-white/[0.06] hover:bg-[var(--accent)]/20 hover:border-[var(--accent)]/40 hover:text-white rounded-[var(--radius-sm)] text-xs font-bold text-[var(--text-primary)] transition-all duration-200 cursor-pointer"
                     >
                       <SignOut className="w-3.5 h-3.5" />
                       Sign Out
@@ -298,7 +298,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/logo.png"
-            alt="Netflyer"
+            alt="Tarkosi"
             width={24}
             height={24}
             className="object-contain rounded-[4px]"
@@ -307,7 +307,7 @@ export default function Navbar() {
             className="text-white tracking-[0.2em] font-bold"
             style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1rem' }}
           >
-            NETFLYER
+            TARKOSI
           </span>
         </Link>
 
@@ -474,7 +474,7 @@ export default function Navbar() {
                 >
                   <div className="flex items-center gap-3">
                     <Info className="w-4 h-4 text-[var(--accent)]" />
-                    <span>About Netflyer</span>
+                    <span>About Tarkosi</span>
                   </div>
                   <CaretRight className="w-4 h-4 text-white/30" />
                 </Link>
@@ -487,7 +487,7 @@ export default function Navbar() {
                   className="flex items-center justify-center gap-2.5 w-full py-3.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500/15 hover:border-red-500/30 text-red-400 rounded-xl text-sm font-bold transition-all cursor-pointer mt-2"
                 >
                   <SignOut className="w-4 h-4" />
-                  Sign Out of Netflyer
+                  Sign Out of Tarkosi
                 </button>
               )}
             </div>

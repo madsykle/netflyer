@@ -12,6 +12,7 @@ import {
   TVShow, 
   Season 
 } from '../types/tmdb';
+import { env } from './env';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -28,8 +29,10 @@ class TMDBService {
   private readonly DEFAULT_CACHE_TIME = 1000 * 60 * 60; // 1 hour
 
   constructor() {
-    const serverApiKey = process.env.TMDB_API_KEY;
-    this.apiKey = serverApiKey || '';
+    // TMDB_API_KEY is server-only: the t3-oss env proxy throws if it is read
+    // in the client bundle, and this module is imported by client components.
+    const serverApiKey = typeof window === 'undefined' ? env.TMDB_API_KEY : '';
+    this.apiKey = serverApiKey;
     
     if (typeof window === 'undefined' && !this.apiKey) {
       console.warn('TMDB_API_KEY is not set. Server-side API calls will fail.');

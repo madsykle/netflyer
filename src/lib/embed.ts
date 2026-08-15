@@ -17,6 +17,12 @@ export interface StreamInfo {
   behaviorHints?: {
     notWebReady?: boolean;
     headers?: Record<string, string>;
+    /**
+     * For direct scraped sources: the URL the client must fetch to mint a
+     * short-lived, IP-bound play token and append as `?token=` before playing.
+     * (vidsrc lineage: `{stream-origin}/generate.php`.)
+     */
+    tokenHost?: string;
   };
 }
 
@@ -31,8 +37,8 @@ export interface StreamsResponse {
 export const providerUrls: Record<Provider, (type: ContentType, id: number, s?: number, e?: number) => string> = {
   vidking: (type, id, s, e) =>
     type === 'tv'
-      ? `https://www.vidking.net/embed/tv/${id}/${s || 1}/${e || 1}?color=e50914&nextEpisode=true&episodeSelector=true`
-      : `https://www.vidking.net/embed/movie/${id}?color=e50914&nextEpisode=true&episodeSelector=true`,
+      ? `https://www.vidking.net/embed/tv/${id}/${s || 1}/${e || 1}?color=202833&nextEpisode=true&episodeSelector=true`
+      : `https://www.vidking.net/embed/movie/${id}?color=202833&nextEpisode=true&episodeSelector=true`,
   'vidsrc-pk': (type, id, s, e) =>
     type === 'tv'
       ? `https://vidsrc.pk/embed/tv/${id}/${s || 1}/${e || 1}`
@@ -74,8 +80,23 @@ export function decodeBase64Url(encoded: string): string {
   }
 }
 
-export function getEmbedUrl(provider: Provider, type: ContentType, id: number, s?: number, e?: number): string {
+export function getEmbedUrl(
+  provider: Provider,
+  type: ContentType,
+  id: number,
+  s?: number,
+  e?: number,
+  quality?: string
+): string {
   const providerFn = providerUrls[provider];
-  if (!providerFn) return providerUrls['vidking'](type, id, s, e);
-  return providerFn(type, id, s, e);
+  let url = providerFn ? providerFn(type, id, s, e) : providerUrls['vidking'](type, id, s, e);
+
+  // Pass the user's preferred quality through to embed providers that support it.
+  // 'auto' (or unset) means "let the provider decide" — send nothing.
+  if (quality && quality !== 'auto') {
+    const sep = url.includes('?') ? '&' : '?';
+    url += `${sep}quality=${encodeURIComponent(quality)}`;
+  }
+
+  return url;
 }

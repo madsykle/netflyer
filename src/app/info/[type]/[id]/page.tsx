@@ -2,6 +2,7 @@ import { tmdbService } from "../../../../lib/tmdb";
 import InfoClient from "./InfoClient";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { resolveArtwork } from "../../../../lib/artwork";
 
 interface Props {
   params: Promise<{
@@ -20,17 +21,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : undefined;
 
   return {
-    title: `${title} | Netflyer`,
+    title: `${title} | Tarkosi`,
     description,
     openGraph: {
-      title: `${title} | Netflyer`,
+      title: `${title} | Tarkosi`,
       description,
       images: image ? [{ url: image, width: 1280, height: 720 }] : [],
       type: type === 'movie' ? 'video.movie' : 'video.tv_show',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | Netflyer`,
+      title: `${title} | Tarkosi`,
       description,
       images: image ? [image] : [],
     },
@@ -48,11 +49,12 @@ export default async function InfoPage({ params }: Props) {
   const contentType = type as "movie" | "tv";
 
   try {
-    const [details, castData, recommendations, similar] = await Promise.all([
+    const [details, castData, recommendations, similar, artwork] = await Promise.all([
       tmdbService.getContentDetails(contentType, contentId),
       tmdbService.getContentCredits(contentType, contentId),
       tmdbService.getRecommendations(contentType, contentId),
       tmdbService.getSimilar(contentType, contentId),
+      resolveArtwork(contentType, contentId),
     ]);
 
     return (
@@ -63,6 +65,7 @@ export default async function InfoPage({ params }: Props) {
         cast={(castData as any).cast?.slice(0, 15) || []}
         recommendations={recommendations.results?.slice(0, 10) || []}
         similar={similar.results?.slice(0, 10) || []}
+        artwork={artwork}
       />
     );
   } catch (error) {

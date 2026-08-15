@@ -18,17 +18,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : undefined;
 
   return {
-    title: `${title} | Netflyer`,
+    title: `${title} | Tarkosi`,
     description,
     openGraph: {
-      title: `${title} | Netflyer`,
+      title: `${title} | Tarkosi`,
       description,
       images: image ? [{ url: image }] : [],
       type: 'profile',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | Netflyer`,
+      title: `${title} | Tarkosi`,
       description,
       images: image ? [image] : [],
     },

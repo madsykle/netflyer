@@ -1,20 +1,26 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Netflyer',
-    short_name: 'Netflyer',
-    description: 'Stream your favorite movies and TV shows in a clean cinematic player.',
-    start_url: '/',
-    display: 'standalone',
-    background_color: '#080809',
-    theme_color: '#e5091a',
+    name: "Tarkosi",
+    short_name: "Tarkosi",
+    description: "A calm, cinematic home for movies and TV shows.",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#050505",
+    theme_color: "#202833",
     icons: [
       {
-        src: '/logo.png',
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'any maskable' as any,
+        src: "/logo.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/logo.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

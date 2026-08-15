@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const episode = routeParams[3];
 
   let title = "Watch";
-  let description = "Watch movies and TV shows on Netflyer.";
+  let description = "Watch movies and TV shows on Tarkosi.";
   let image;
 
   try {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title = name;
     }
 
-    description = `Watch ${title} on Netflyer. ${details.overview?.substring(0, 160)}`;
+    description = `Watch ${title} on Tarkosi. ${details.overview?.substring(0, 160)}`;
     image = details.backdrop_path
       ? `https://image.tmdb.org/t/p/w1280${details.backdrop_path}`
       : undefined;
@@ -40,17 +40,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `Watch ${title} | Netflyer`,
+    title: `Watch ${title} | Tarkosi`,
     description,
     openGraph: {
-      title: `Watch ${title} | Netflyer`,
+      title: `Watch ${title} | Tarkosi`,
       description,
       images: image ? [{ url: image, width: 1280, height: 720 }] : [],
       type: 'video.other',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Watch ${title} | Netflyer`,
+      title: `Watch ${title} | Tarkosi`,
       description,
       images: image ? [image] : [],
     },
