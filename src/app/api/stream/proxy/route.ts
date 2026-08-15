@@ -190,15 +190,24 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  const isPartial = upstream.status === 206;
   const headers: Record<string, string> = {
     "content-type":
       upstream.headers.get("content-type") || "application/octet-stream",
-    "cache-control": "public, max-age=14400",
     "accept-ranges": "bytes",
   };
-  if (upstream.status === 206) {
+
+  if (isPartial) {
+    // Range responses are request-specific — never CDN-cache them.
+    headers["cache-control"] = "no-store";
     const contentRange = upstream.headers.get("content-range");
     if (contentRange) headers["content-range"] = contentRange;
+  } else {
+    // Segments are content-addressed (the path embeds a content hash), so they
+    // are immutable. Cache hard at the CDN edge so repeat viewers hit Vercel's
+    // cache instead of our server + the upstream CDN.
+    headers["cache-control"] = "public, max-age=31536000, s-maxage=31536000, immutable";
+    headers["CDN-Cache-Control"] = "public, max-age=31536000, immutable";
   }
 
   return new NextResponse(body, { status: upstream.status, headers });
