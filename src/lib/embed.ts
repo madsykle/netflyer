@@ -80,8 +80,23 @@ export function decodeBase64Url(encoded: string): string {
   }
 }
 
-export function getEmbedUrl(provider: Provider, type: ContentType, id: number, s?: number, e?: number): string {
+export function getEmbedUrl(
+  provider: Provider,
+  type: ContentType,
+  id: number,
+  s?: number,
+  e?: number,
+  quality?: string
+): string {
   const providerFn = providerUrls[provider];
-  if (!providerFn) return providerUrls['vidking'](type, id, s, e);
-  return providerFn(type, id, s, e);
+  let url = providerFn ? providerFn(type, id, s, e) : providerUrls['vidking'](type, id, s, e);
+
+  // Pass the user's preferred quality through to embed providers that support it.
+  // 'auto' (or unset) means "let the provider decide" — send nothing.
+  if (quality && quality !== 'auto') {
+    const sep = url.includes('?') ? '&' : '?';
+    url += `${sep}quality=${encodeURIComponent(quality)}`;
+  }
+
+  return url;
 }
