@@ -36,7 +36,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   
   const [playing, setPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
+  // Start muted: browsers only allow muted autoplay without a user gesture.
+  const [muted, setMuted] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [buffering, setBuffering] = useState(true);
@@ -96,14 +97,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }, [muted]);
 
-  // Synchronize volume state with the actual HTML5 video element
+  // Synchronize volume + mute state with the actual HTML5 video element
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.volume = volume;
-      if (volume > 0 && muted) {
-        setMuted(false);
-        videoRef.current.muted = false;
-      }
+      videoRef.current.muted = muted;
     }
   }, [volume, muted]);
 
@@ -160,7 +158,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         hls.loadSource(url);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (autoPlay) video.play().catch(() => {});
+          if (autoPlay) {
+            // Muted autoplay is allowed without a gesture; the viewer unmutes.
+            video.muted = true;
+            video.play().catch(() => {});
+          }
         });
         hls.on(Hls.Events.ERROR, (_, data) => {
           if (data.fatal) {
@@ -268,6 +270,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onClick={togglePlay}
         onDoubleClick={toggleFullscreen}
         playsInline
+        muted={muted}
         crossOrigin="anonymous"
       />
 
