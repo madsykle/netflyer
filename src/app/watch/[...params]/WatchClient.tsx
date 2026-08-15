@@ -35,23 +35,17 @@ interface Props {
 }
 
 /**
- * Mint the client-side play token for a direct stream and return the playable
- * URL. The JWT is IP-bound and rate-limited (~1/min), so this MUST run in the
- * browser (never on the server). Returns null when the token can't be minted.
+ * Build the playable URL for a direct scraped stream. The vidsrc CDN serves
+ * its media segments behind an Origin allowlist that a browser can never
+ * satisfy (segments 403 unless there is no Origin header). So every stream URL
+ * is routed through our server-side proxy, which fetches playlists + segments
+ * without an Origin header and relays them back to hls.js.
  */
-async function mintDirectUrl(stream: StreamInfo): Promise<string | null> {
-  const tokenHost = stream.behaviorHints?.tokenHost;
-  if (!tokenHost) return stream.url; // no token needed
-  try {
-    const res = await fetch(tokenHost, { cache: "no-store" });
-    if (!res.ok) return null;
-    const token = (await res.text()).trim();
-    if (!token) return null;
-    const sep = stream.url.includes("?") ? "&" : "?";
-    return `${stream.url}${sep}token=${encodeURIComponent(token)}`;
-  } catch {
-    return null;
+function directStreamUrl(stream: StreamInfo): string {
+  if (stream.behaviorHints?.tokenHost) {
+    return `/api/stream/proxy?url=${encodeURIComponent(stream.url)}`;
   }
+  return stream.url;
 }
 
 const WatchClient = ({ params }: Props) => {
@@ -228,7 +222,7 @@ const WatchClient = ({ params }: Props) => {
           const data = await res.json();
           const found = (data.streams ?? []) as StreamInfo[];
           for (const s of found) {
-            const url = await mintDirectUrl(s);
+            const url = directStreamUrl(s);
             if (url) {
               setStreams(found);
               setSelectedStream({ ...s, url });
