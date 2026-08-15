@@ -17,6 +17,12 @@ export interface StreamInfo {
   behaviorHints?: {
     notWebReady?: boolean;
     headers?: Record<string, string>;
+    /**
+     * For direct scraped sources: the URL the client must fetch to mint a
+     * short-lived, IP-bound play token and append as `?token=` before playing.
+     * (vidsrc lineage: `{stream-origin}/generate.php`.)
+     */
+    tokenHost?: string;
   };
 }
 

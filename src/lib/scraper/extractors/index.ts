@@ -1,19 +1,14 @@
 import type { ProviderExtractor } from "../types";
+import { VidsrcExtractor } from "./vidsrc";
 
 /**
- * Provider extractor registry.
+ * Provider extractor registry, in best-source-first order. The engine runs
+ * these in order and stops at the first that yields streams.
  *
- * Empty for now — the engine core + route shell land first (#6), and the
- * vidsrc lineage extractor plugs in next using the prototype findings (#7).
- * To wire a provider, instantiate it here:
- *
- *   return [new VidsrcExtractor(), ...];
- *
- * The vidsrc extractor implements the chain proved in
- * `.scratch/wayfinder-scraper/prototype-findings.md`:
- *   api.php?type&imdb[&season&episode]&stream_urls → wasm ChaCha20 decrypt →
- *   master.m3u8 URL(s). The CDN `?token=` JWT is minted client-side (#8).
+ * The vidsrc lineage extractor implements the chain proved in
+ * `.scratch/wayfinder-scraper/prototype-findings.md` (#7). Add future providers
+ * here as they land (e.g. `new SomeOtherExtractor()`).
  */
 export function createExtractors(): ProviderExtractor[] {
-  return [];
+  return [new VidsrcExtractor()];
 }

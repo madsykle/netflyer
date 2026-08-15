@@ -1,3 +1,5 @@
+import type { MovieDetails, TVShowDetails } from "../../types/tmdb";
+import { tmdbService } from "../tmdb";
 import type { StreamInfo } from "../embed";
 import type { ExtractorContext, ProviderExtractor, ScrapeRequest, ScrapeResult } from "./types";
 
@@ -20,9 +22,24 @@ export class ScrapeEngine {
 
   private createContext(): ExtractorContext {
     return {
-      // TMDB→IMDB mapping is a follow-on (map "not yet specified"). Until it
-      // lands, extractors must be handed the id they need (imdbId) up front.
-      resolveId: async (_kind, _type, _tmdbId) => null,
+      // Resolve an IMDb id from a TMDB id via the existing server-side TMDB
+      // service (movie.imdb_id / tv.external_ids.imdb_id). This settles the
+      // map's open TMDB→IMDB question: providers keyed on IMDb are handed the
+      // id up front, and the route's Redis cache + tmdbService memory cache
+      // absorb repeat lookups.
+      resolveId: async (kind, type, tmdbId) => {
+        if (kind !== "imdb") return null;
+        try {
+          const details = await tmdbService.getContentDetails(type, parseInt(tmdbId, 10));
+          if (type === "movie") {
+            return (details as MovieDetails).imdb_id ?? null;
+          }
+          return (details as TVShowDetails).external_ids?.imdb_id ?? null;
+        } catch (err) {
+          console.error("[scraper] resolveId(imdb) failed:", err);
+          return null;
+        }
+      },
     };
   }
 
