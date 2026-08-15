@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Hls, { FetchLoader, type FragmentLoaderConstructor, type PlaylistLoaderConstructor } from 'hls.js';
+import Hls from 'hls.js';
 import { 
   Play, 
   Pause, 
@@ -152,18 +152,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         const hls = new Hls({
           enableWorker: true,
           lowLatencyMode: true,
-          backBufferLength: 90,
-          // The vidsrc CDN serves media segments with an anti-hotlink check
-          // that rejects any request carrying a Referer header (403). hls.js's
-          // default XHR loader always sends the page's Referer, so we use the
-          // fetch loader and drop the Referer on every request we make.
-          fLoader: FetchLoader as FragmentLoaderConstructor,
-          pLoader: FetchLoader as PlaylistLoaderConstructor,
-          fetchSetup: (context, initParams) =>
-            new Request(context.url, {
-              ...initParams,
-              referrerPolicy: 'no-referrer',
-            }),
+          backBufferLength: 90
         });
         hlsRef.current = hls;
         hls.loadSource(url);
@@ -340,21 +329,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                  <button onClick={togglePlay} className="text-white hover:text-[var(--accent)] transition-[color,transform] duration-150 active:scale-90">
+                  <button onClick={togglePlay} className="text-white hover:text-[var(--accent)] transition-colors">
                     {playing ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current" />}
                   </button>
 
                   <div className="flex items-center gap-2">
-                    <button onClick={() => skip(-10)} className="text-white/80 hover:text-white transition-[color,transform] duration-150 active:scale-90">
+                    <button onClick={() => skip(-10)} className="text-white/80 hover:text-white transition-colors">
                        <ArrowUUpLeft className="w-5 h-5" />
                     </button>
-                    <button onClick={() => skip(10)} className="text-white/80 hover:text-white transition-[color,transform] duration-150 active:scale-90">
+                    <button onClick={() => skip(10)} className="text-white/80 hover:text-white transition-colors">
                        <ArrowUUpRight className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="flex items-center gap-3 group/volume">
-                    <button onClick={toggleMute} className="text-white hover:text-[var(--accent)] transition-[color,transform] duration-150 active:scale-90">
+                    <button onClick={toggleMute} className="text-white hover:text-[var(--accent)] transition-colors">
                        {muted || volume === 0 ? <SpeakerSlash className="w-6 h-6" /> : volume < 0.5 ? <SpeakerSimpleHigh className="w-6 h-6" /> : <SpeakerHigh className="w-6 h-6" />}
                     </button>
                     <div className="w-0 group-hover/volume:w-24 transition-all duration-300 overflow-hidden flex items-center">
@@ -379,7 +368,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   <div className="relative">
                     <button 
                       onClick={() => setShowStreamSettings(!showSettings)}
-                      className="text-white hover:text-[var(--accent)] transition-[color,transform] duration-150 active:scale-90"
+                      className="text-white hover:text-[var(--accent)] transition-colors"
                     >
                        <Gear className="w-5 h-5" />
                     </button>
@@ -387,11 +376,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     <AnimatePresence>
                       {showSettings && (
                         <motion.div 
-                          initial={{ opacity: 0, y: -10, scale: 0.96 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -10, scale: 0.96 }}
-                          transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                          style={{ transformOrigin: "bottom right" }}
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
                           className="absolute bottom-full right-0 mb-4 w-48 bg-[#161619] border border-white/10 rounded-[var(--radius-sm)] shadow-2xl p-2 z-50"
                         >
                           <div className="text-[10px] uppercase font-bold text-white/40 px-3 py-2 mb-1 border-b border-white/5">
@@ -415,7 +402,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     </AnimatePresence>
                   </div>
 
-                  <button onClick={toggleFullscreen} className="text-white hover:text-[var(--accent)] transition-[color,transform] duration-150 active:scale-90">
+                  <button onClick={toggleFullscreen} className="text-white hover:text-[var(--accent)] transition-colors">
                      {isFullscreen ? <ArrowsIn className="w-6 h-6" /> : <ArrowsOut className="w-6 h-6" />}
                   </button>
                 </div>
