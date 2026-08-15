@@ -23,7 +23,9 @@ export const dynamic = "force-dynamic";
 const RATE_LIMIT = 300;
 const RATE_LIMIT_WINDOW = 60;
 const MAX_URL_LENGTH = 2048;
+const MAX_BODY_BYTES = 32 * 1024 * 1024;
 const MINT_ATTEMPTS = 3;
+const MAX_REDIRECTS = 3;
 
 const BROWSER_UA =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36";
@@ -36,13 +38,10 @@ function sleep(ms: number): Promise<void> {
 async function mintToken(host: string): Promise<string | null> {
   for (let attempt = 0; attempt < MINT_ATTEMPTS; attempt++) {
     try {
-      const res = await fetch(`${host}/generate.php`, {
-        headers: { "user-agent": BROWSER_UA },
-        cache: "no-store",
-      });
+      const { response: res } = await fetchUpstream(new URL(`${host}/generate.php`));
       if (res.ok) {
         const token = (await res.text()).trim();
-        if (token) return token;
+        if (token && token.length <= 4096) return token;
       }
       if (res.status === 429) {
         // Rate-limited: brief backoff. The window is ~1min, but a short wait
@@ -73,20 +72,54 @@ function withToken(target: URL, token: string): URL {
   return u;
 }
 
-/** Fetch upstream, never throwing — a network failure becomes a 502 response. */
-async function fetchUpstream(url: URL, range?: string | null): Promise<Response> {
+/** Limit this public relay to HLS playlists and media-like child resources. */
+function isProxyableMediaUrl(target: URL): boolean {
+  const path = target.pathname.toLowerCase();
+  return path.endsWith(".m3u8") || path.includes("/content/") ||
+    /\\.(?:ts|m4s|mp4|aac|mp3|html|key)$/.test(path);
+}
+
+/** A response plus the URL reached after validated redirects. */
+interface UpstreamResult {
+  response: Response;
+  finalUrl: URL;
+}
+
+/**
+ * Fetch upstream with manually validated redirects. Native `redirect: follow`
+ * would allow an upstream redirect to bypass the initial SSRF validation.
+ */
+async function fetchUpstream(url: URL, range?: string | null): Promise<UpstreamResult> {
   const headers: Record<string, string> = { "user-agent": BROWSER_UA };
   if (range) headers.range = range;
-  try {
-    return await fetch(url.toString(), {
-      headers,
-      redirect: "follow",
-      cache: "no-store",
-    });
-  } catch (err) {
-    console.error("Proxy upstream fetch error:", err);
-    return new Response(null, { status: 502 });
+  let current = url;
+
+  for (let redirect = 0; redirect <= MAX_REDIRECTS; redirect++) {
+    try {
+      const response = await fetch(current.toString(), {
+        headers,
+        redirect: "manual",
+        cache: "no-store",
+      });
+      const isRedirect = response.status >= 300 && response.status < 400;
+      if (!isRedirect) return { response, finalUrl: current };
+
+      const location = response.headers.get("location");
+      if (!location || redirect === MAX_REDIRECTS) {
+        return { response: new Response("Upstream redirect limit exceeded", { status: 502 }), finalUrl: current };
+      }
+      const next = await safeFetchUrl(new URL(location, current).toString());
+      if (!next || !isProxyableMediaUrl(next)) {
+        return { response: new Response("Disallowed upstream redirect", { status: 502 }), finalUrl: current };
+      }
+      current = next;
+    } catch (err) {
+      console.error("Proxy upstream fetch error:", err);
+      return { response: new Response(null, { status: 502 }), finalUrl: current };
+    }
   }
+
+  return { response: new Response(null, { status: 502 }), finalUrl: current };
 }
 
 /** Rewrite a playlist body so every URI routes back through this proxy. */
@@ -150,8 +183,8 @@ export async function GET(request: NextRequest) {
   }
 
   const target = await safeFetchUrl(rawUrl);
-  if (!target) {
-    return NextResponse.json({ error: "Disallowed url" }, { status: 400 });
+  if (!target || !isProxyableMediaUrl(target)) {
+    return NextResponse.json({ error: "Disallowed media url" }, { status: 400 });
   }
 
   const bare = withoutToken(target);
@@ -159,18 +192,25 @@ export async function GET(request: NextRequest) {
 
   // Fetch bare first: segments need no token, and playlists reject us (401)
   // so we only mint when actually required — sparing the 1/min rate limit.
-  let upstream = await fetchUpstream(bare, range);
+  let upstreamResult = await fetchUpstream(bare, range);
+  let upstream = upstreamResult.response;
   if (upstream.status === 401 || upstream.status === 403) {
     const token = await mintToken(bare.origin);
     if (!token) {
       return NextResponse.json({ error: "Could not mint stream token" }, { status: 502 });
     }
-    upstream = await fetchUpstream(withToken(bare, token), range);
+    upstreamResult = await fetchUpstream(withToken(bare, token), range);
+    upstream = upstreamResult.response;
   }
 
   if (!upstream.ok) {
     // Relay the real failure rather than masking it as a 200 with an error body.
     return new NextResponse(await upstream.text(), { status: upstream.status });
+  }
+
+  const contentLength = Number(upstream.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Upstream media response is too large" }, { status: 413 });
   }
 
   const body = await upstream.arrayBuffer();
@@ -179,8 +219,10 @@ export async function GET(request: NextRequest) {
   // Playlists start with #EXTM3U — rewrite their URIs; everything else is a
   // binary media segment, relayed as-is.
   if (text.startsWith("#EXTM3U")) {
-    const proxyBase = `https://${request.headers.get("x-forwarded-host") || host}`;
-    const rewritten = rewritePlaylist(text, bare.toString(), proxyBase);
+    // Use same-origin relative URLs. Never trust forwarded host headers when
+    // generating links, otherwise an attacker could turn this into a redirect
+    // or cache-poisoning primitive.
+    const rewritten = rewritePlaylist(text, upstreamResult.finalUrl.toString(), "");
     return new NextResponse(rewritten, {
       status: 200,
       headers: {

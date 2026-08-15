@@ -11,32 +11,36 @@ export function isOriginAllowed(origin: string | null, host: string | null): boo
 
   try {
     const originUrl = new URL(origin);
-    // Extract just the hostname:port from host header for exact comparison
-    const expectedHost = host?.split(":")[0] || "";
-    const originHost = originUrl.hostname;
+    if (originUrl.protocol !== "http:" && originUrl.protocol !== "https:") return false;
 
-    // Exact match only — no substring matching
-    return originHost === expectedHost || originHost === "localhost";
+    // Parse Host as an authority instead of splitting on ':' (which breaks
+    // IPv6 and lets ports be ignored). Browser origins must match host and
+    // effective port exactly.
+    const expected = host ? new URL(`https://${host}`) : null;
+    if (!expected || expected.username || expected.password || expected.pathname !== "/") return false;
+    const expectedPort = expected.port || "443";
+    const originPort = originUrl.port || (originUrl.protocol === "https:" ? "443" : "80");
+
+    return originUrl.hostname === expected.hostname && originPort === expectedPort;
   } catch {
-    // Malformed origin — reject
+    // Malformed origin/host — reject
     return false;
   }
 }
 
 /**
- * Build a composite rate-limit fingerprint that cannot be trivially spoofed.
- * Combines X-Forwarded-For (if present), User-Agent, and Accept-Language
- * into a single key. An attacker would need to spoof ALL three simultaneously.
+ * Build a stable rate-limit fingerprint from the platform-provided client IP.
+ * Do not include user-controlled UA/language values: callers could vary those
+ * headers on every request and bypass a composite fingerprint.
  */
 export function getRateLimitFingerprint(request: NextRequest): string {
-  const ip = request.headers.get("x-real-ip") || "127.0.0.1";
-  const ua = request.headers.get("user-agent") || "";
-  const lang = request.headers.get("accept-language") || "";
-  const raw = `${ip}|${ua}|${lang}`;
+  const requestWithIp = request as NextRequest & { ip?: string };
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const ip = requestWithIp.ip || request.headers.get("x-real-ip") || forwarded || "unknown";
   // djb2 hash for a compact, stable fingerprint
   let hash = 5381;
-  for (let i = 0; i < raw.length; i++) {
-    hash = ((hash << 5) + hash + raw.charCodeAt(i)) & 0xffffffff;
+  for (let i = 0; i < ip.length; i++) {
+    hash = ((hash << 5) + hash + ip.charCodeAt(i)) & 0xffffffff;
   }
   return hash.toString(36);
 }

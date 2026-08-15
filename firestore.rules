@@ -6,9 +6,10 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.admin == true ||
-        request.auth.token.email == 'mads@netflyer.icu' ||
-        request.auth.token.email == 'admin@example.com' ||
-        request.auth.token.email == 'madsykle@gmail.com'
+        (request.auth.token.email_verified == true && (
+          request.auth.token.email == 'mads@netflyer.icu' ||
+          request.auth.token.email == 'madsykle@gmail.com'
+        ))
       );
     }
 
@@ -20,12 +21,26 @@ service cloud.firestore {
 
     // Reviews collection
     // Anyone can read
-    // Any authenticated user can create
-    // Only owner or admin can update/delete
+    // Any authenticated user can create only for themselves.
+    // Owners may update content, but ownership cannot be transferred.
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.itemId is string
+        && request.resource.data.type in ['movie', 'tv']
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 1000
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update: if request.auth != null && (
+        isAdmin() || (
+          request.auth.uid == resource.data.userId
+          && request.resource.data.userId == resource.data.userId
+        )
+      );
+      allow delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
     }
 
     // Watchlist collection

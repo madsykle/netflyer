@@ -90,7 +90,7 @@ export default function AdminDashboard() {
         setUser(currentUser);
         try {
           const token = await currentUser.getIdTokenResult();
-          if (token.claims.admin === true || (currentUser.email && ADMIN_EMAILS.includes(currentUser.email))) {
+          if (token.claims.admin === true || (currentUser.emailVerified && currentUser.email && ADMIN_EMAILS.includes(currentUser.email))) {
             setIsAdmin(true);
             fetchData();
           } else {

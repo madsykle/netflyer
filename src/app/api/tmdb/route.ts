@@ -48,12 +48,19 @@ export async function GET(request: NextRequest) {
 
   // Prevent SSRF and TMDB key leakage by verifying path is a valid relative TMDB API path
   // Also decode the path first to catch URL-encoded bypass attempts
-  const decodedPath = decodeURIComponent(path);
+  let decodedPath: string;
+  try {
+    decodedPath = decodeURIComponent(path);
+  } catch {
+    return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+  }
   if (
     !decodedPath.startsWith('/') ||
     decodedPath.includes('//') ||
     decodedPath.includes('@') ||
     decodedPath.includes(':') ||
+    decodedPath.includes('?') ||
+    decodedPath.includes('#') ||
     decodedPath.includes('..') ||
     decodedPath.includes('\\') ||
     decodedPath.includes('\0')

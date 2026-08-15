@@ -81,6 +81,9 @@ export async function GET(request: NextRequest) {
   const season = sp.get("season");
   const episode = sp.get("episode");
   const quality = sp.get("quality") ?? undefined;
+  if (quality && !/^(auto|360p|480p|720p|1080p)$/.test(quality)) {
+    return badRequest("quality is invalid");
+  }
 
   if (type !== "movie" && type !== "tv") {
     return badRequest("type must be 'movie' or 'tv'");
