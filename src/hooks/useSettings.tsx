@@ -31,8 +31,8 @@ interface SettingsContextValue {
   getAnimationProps: (props?: Record<string, unknown>) => Record<string, unknown>;
   isLoaded: boolean;
   imageSizes: typeof imageSizes;
-  clearCache: () => boolean;
-  getStorageUsage: () => string;
+  clearCache: () => Promise<boolean>;
+  getStorageUsage: () => Promise<string>;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -277,35 +277,54 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // Clear all cached data (LocalStorage + Service Worker Cache)
-  const clearCache = useCallback(() => {
+  // Returns a promise that resolves once caches are actually deleted,
+  // so callers can re-measure storage usage accurately afterwards.
+  const clearCache = useCallback(async () => {
     const currentSettings = localStorage.getItem(SETTINGS_KEY);
     localStorage.clear();
     if (currentSettings) {
       localStorage.setItem(SETTINGS_KEY, currentSettings);
     }
 
-    // Delete Service Worker Caches
+    // Delete Service Worker Caches and wait for the deletions to finish
     if (typeof window !== "undefined" && "caches" in window) {
-      caches.keys().then((keys) => {
-        keys.forEach((key) => {
-          caches.delete(key);
-        });
-      });
+      try {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      } catch (e) {
+        console.error("Failed to clear service worker caches:", e);
+      }
     }
     return true;
   }, []);
 
-  // Calculate storage usage
-  const getStorageUsage = useCallback(() => {
+  // Calculate real storage usage: localStorage + Cache Storage + IndexedDB
+  const getStorageUsage = useCallback(async () => {
     let total = 0;
+
+    // 1. localStorage (UTF-16: 2 bytes per char)
     if (typeof localStorage !== 'undefined') {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key) {
-          total += (localStorage.getItem(key)?.length || 0) * 2; // UTF-16 encoding
+          total += (localStorage.getItem(key)?.length || 0) * 2;
         }
       }
     }
+
+    // 2. Browser storage estimate — includes Cache Storage (service worker),
+    //    IndexedDB and other origins storage. This is the number users actually care about.
+    if (typeof navigator !== 'undefined' && navigator.storage?.estimate) {
+      try {
+        const estimate = await navigator.storage.estimate();
+        if (estimate.usage) {
+          total = Math.max(total, estimate.usage);
+        }
+      } catch (e) {
+        console.error('Failed to estimate storage usage:', e);
+      }
+    }
+
     return (total / 1024 / 1024).toFixed(2);
   }, []);
 

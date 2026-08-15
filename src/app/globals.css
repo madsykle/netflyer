@@ -82,11 +82,15 @@
 
 html {
   font-family: 'Satoshi', -apple-system, sans-serif;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-base);
   color: var(--text-primary);
   overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -108,23 +112,28 @@ body {
    ================================ */
 
 /* Hero display - Clash Display, massive, editorial */
+/* Apple: large display type wants NEGATIVE tracking + tight leading; tighten as it grows */
 .t-hero {
   font-family: 'Clash Display', sans-serif;
   font-size: clamp(3rem, 8vw, 6rem);
-  line-height: 0.95;
-  letter-spacing: -0.02em;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
   font-weight: 700;
   color: var(--text-primary);
+  text-wrap: balance;
+  font-optical-sizing: auto;
 }
 
 /* Section/page title */
 .t-title {
   font-family: 'Clash Display', sans-serif;
   font-size: clamp(1.75rem, 4vw, 3rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
   font-weight: 600;
   color: var(--text-primary);
+  text-wrap: balance;
+  font-optical-sizing: auto;
 }
 
 /* Card title */
@@ -143,6 +152,7 @@ body {
   line-height: 1.65;
   font-weight: 400;
   color: var(--text-secondary);
+  text-wrap: pretty;
 }
 
 /* Meta data - years, ratings, runtime */
@@ -204,6 +214,15 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
+/* Premium material — deeper, heavier glass for menus and elevated panels.
+   (Apple: bigger surfaces read as thicker — stronger blur, deeper shadow.) */
+.glass-premium {
+  background: rgba(10, 10, 14, 0.85);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--border-subtle);
+}
+
 /* ================================
    BUTTONS
    ================================ */
@@ -239,7 +258,7 @@ body {
   transform: translateY(-1px);
 }
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(1px) scale(0.98);
   box-shadow: none;
 }
 
@@ -280,6 +299,15 @@ body {
   color: var(--text-primary);
   border-color: var(--border-subtle);
 }
+
+/* Apple (Response): feedback lives on the press — instant, on pointer-down.
+   Placed after the :hover rules so :hover:active wins the cascade. */
+.btn:active { transform: translateY(1px) scale(0.98); }
+.btn:hover:active { transform: translateY(1px) scale(0.98); }
+.btn-icon:active { transform: scale(0.94); }
+.btn-icon:hover:active { transform: scale(0.94); }
+
+.chip-base:active { transform: translateY(1px) scale(0.97); }
 
 /* ================================
    CARDS & HOVERS
@@ -350,6 +378,13 @@ body {
   border-color: var(--border-visible);
   transform: translateY(-4px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px var(--accent-dim);
+}
+
+/* Press feedback on cards — a card you grab should respond on pointer-down */
+.card:active { transform: scale(0.99); }
+.spotlight-card:active {
+  transform: translateY(-2px) scale(0.99);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.4);
 }
 
 /* ================================
@@ -548,6 +583,26 @@ body {
 }
 
 /* ================================
+   AUTH / APPLE FORM FIELDS
+   ================================ */
+.auth-field {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  min-height: 3.5rem;
+  padding: 0 .95rem;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 18px;
+  background: rgba(255,255,255,.045);
+  color: var(--text-primary);
+  transition: background 180ms var(--ease-out-expo), border-color 180ms var(--ease-out-expo), box-shadow 180ms var(--ease-out-expo);
+}
+.auth-field:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.18); }
+.auth-field:focus-within { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.42); box-shadow: 0 0 0 4px rgba(255,255,255,.07); }
+.auth-field input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-size: .95rem; }
+.auth-field input::placeholder { color: rgba(255,255,255,.25); }
+
+/* ================================
    TOGGLE SWITCH
    ================================ */
 .toggle-track {
@@ -735,13 +790,66 @@ html.compact-mode .mb-12 {
   animation: scaleIn 0.3s ease-out forwards;
 }
 
-/* Respect reduced motion preference */
+/* ================================
+   ACCESSIBILITY & REDUCED MOTION
+   ================================ */
+
+/* Apple: reduced motion doesn't mean zero feedback — it means a gentler,
+   non-vestibular equivalent. Kill the moving backgrounds, spinners and
+   shimmer, keep the opacity/color changes that aid comprehension. */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
   .animate-fade-in,
   .animate-slide-up,
+  .animate-slide-down,
   .animate-scale-in {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
+
+  .animate-kenburns,
+  .animate-pulse,
+  .animate-spin,
+  .skeleton {
+    animation: none !important;
+  }
+}
+
+/* Apple: prefers-reduced-transparency — make glass frostier / near-solid */
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-strong, .glass-panel, .glass-premium {
+    background: rgba(10, 10, 14, 0.97);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Apple: prefers-contrast: more — defined borders, near-solid surfaces */
+@media (prefers-contrast: more) {
+  .surface, .glass, .glass-strong, .glass-panel, .glass-premium,
+  .card, .spotlight-card {
+    border-color: var(--border-visible);
+  }
+}
+
+/* Don't let hover-lift states get stuck on touch devices */
+@media (hover: none) {
+  .card:hover, .spotlight-card:hover, .glow-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Visible focus ring for keyboard users (Apple: safety & predictability) */
+:where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
 }

@@ -180,7 +180,7 @@ function CastCard({ item, index }: CastCardProps) {
           />
 
           {/* Cinematic Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-400" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
         </div>
 
         {/* Name */}

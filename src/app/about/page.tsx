@@ -17,45 +17,53 @@ export default function AboutPage() {
   });
 
   useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
     const fetchGithub = async () => {
       try {
-        const res = await fetch("https://api.github.com/repos/madsykle/netflyer");
-        if (res.ok) {
-          const data = await res.json();
-          let pushDateStr = "Recent";
-          if (data.pushed_at) {
-            const date = new Date(data.pushed_at);
-            pushDateStr = date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          }
-          setGithubStats({
-            stars: data.stargazers_count,
-            forks: data.forks_count,
-            issues: data.open_issues_count,
-            lastPush: pushDateStr,
-          });
-        } else {
-          setGithubStats({
-            stars: 12,
-            forks: 4,
-            issues: 0,
-            lastPush: "May 2026",
+        const res = await fetch("https://api.github.com/repos/madsykle/netflyer", {
+          signal: controller.signal,
+          headers: { Accept: "application/vnd.github+json" },
+        });
+        if (!res.ok) {
+          // Rate limited or unavailable — leave the stats as "—" placeholders
+          console.warn(`GitHub stats unavailable (${res.status})`);
+          return;
+        }
+        const data = await res.json();
+        if (cancelled) return;
+        let pushDateStr = "Recent";
+        if (data.pushed_at) {
+          const date = new Date(data.pushed_at);
+          pushDateStr = date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
           });
         }
-      } catch (error) {
-        console.error("Error fetching github stats:", error);
         setGithubStats({
-          stars: 12,
-          forks: 4,
-          issues: 0,
-          lastPush: "May 2026",
+          stars: data.stargazers_count,
+          forks: data.forks_count,
+          issues: data.open_issues_count,
+          lastPush: pushDateStr,
         });
+      } catch (error) {
+        if (cancelled) return;
+        // Never show fabricated numbers — keep the honest "—" placeholders
+        console.warn("Could not load GitHub stats, showing placeholders:", error);
+      } finally {
+        clearTimeout(timeout);
       }
     };
+
     fetchGithub();
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const containerVariants = {
@@ -221,7 +229,7 @@ export default function AboutPage() {
                     Active Development
                   </span>
                   <span className="opacity-20">|</span>
-                  <span className="t-meta text-xs">Updated {githubStats.lastPush ? githubStats.lastPush : "March 2026"}</span>
+                  <span className="t-meta text-xs">Updated {githubStats.lastPush ? githubStats.lastPush : "—"}</span>
                 </div>
               </div>
             </div>

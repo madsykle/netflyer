@@ -1,15 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ArrowLeft,
-  CalendarBlank,
-  MapPin,
-  Star,
-  FilmStrip,
-  Television,
-  CaretRight,
-} from "@phosphor-icons/react";
+import { ArrowLeft, CalendarBlank, FilmStrip, MapPin, Star, Television } from "@phosphor-icons/react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -25,162 +17,70 @@ const ActorClient = ({ actor, credits }: ActorClientProps) => {
   const [selectedTab, setSelectedTab] = useState<"movies" | "tv">("movies");
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const profileUrl = actor.profile_path
-    ? `https://image.tmdb.org/t/p/h632/${actor.profile_path}`
-    : "/placeholder-avatar.svg";
-
-  const movies = credits.cast
-    .filter((c) => c.media_type === "movie")
-    .sort((a, b) => (b as Movie).popularity - (a as Movie).popularity);
-  
-  const tvShows = credits.cast
-    .filter((c) => c.media_type === "tv")
-    .sort((a, b) => (b as TVShow).popularity - (a as TVShow).popularity);
-
+  const profileUrl = actor.profile_path ? `https://image.tmdb.org/t/p/h632/${actor.profile_path}` : "/placeholder-avatar.svg";
+  const movies = credits.cast.filter((credit) => credit.media_type === "movie").sort((a, b) => (b as Movie).popularity - (a as Movie).popularity);
+  const tvShows = credits.cast.filter((credit) => credit.media_type === "tv").sort((a, b) => (b as TVShow).popularity - (a as TVShow).popularity);
   const displayedCredits = selectedTab === "movies" ? movies : tvShows;
+  const biography = actor.biography?.trim() || "No biography is available for this performer yet.";
+  const born = actor.birthday ? new Date(actor.birthday).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pt-32 pb-20">
+    <main className="actor-experience min-h-screen bg-[#08090b] pb-24 pt-20 text-white sm:pt-24">
       <div className="container">
-        {/* Back Button */}
-        <button 
-          onClick={() => router.back()} 
-          className="flex items-center gap-2 t-label text-[var(--text-muted)] hover:text-white transition-colors mb-10 group"
-        >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-          <span>Back</span>
-        </button>
+        <button onClick={() => router.back()} className="mb-10 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-white/60 transition hover:border-white/25 hover:bg-white/10 hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to browsing</button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-16">
-          {/* Left Column: Profile */}
-          <div className="lg:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative w-full aspect-[2/3] rounded-[var(--radius-md)] overflow-hidden border border-[var(--border-subtle)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] bg-[var(--bg-raised)] mb-8"
-            >
-              <Image
-                src={profileUrl}
-                alt={actor.name}
-                fill
-                priority
-                className={`object-cover transition-opacity duration-700 ${
-                  imageLoaded ? "opacity-100" : "opacity-0"
-                }`}
-                onLoad={() => setImageLoaded(true)}
-                sizes="(max-width: 1024px) 100vw, 400px"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
-            </motion.div>
-
-            <div className="space-y-6">
-              <div>
-                <h3 className="t-label text-[10px] mb-2 opacity-50">Known For</h3>
-                <p className="t-body text-sm text-white font-medium">{actor.known_for_department}</p>
-              </div>
-              
-              {actor.birthday && (
-                <div>
-                  <h3 className="t-label text-[10px] mb-2 opacity-50">Born</h3>
-                  <p className="t-body text-sm text-white font-medium">
-                    {new Date(actor.birthday).toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
-                  </p>
-                </div>
-              )}
-
-              {actor.place_of_birth && (
-                <div>
-                  <h3 className="t-label text-[10px] mb-2 opacity-50">Birthplace</h3>
-                  <p className="t-body text-sm text-white font-medium">{actor.place_of_birth}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column: Bio & Credits */}
-          <div className="lg:col-span-3">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <h1 
-                className="text-white font-bold leading-tight mb-6"
-                style={{ fontFamily: "'Clash Display', sans-serif", fontSize: 'clamp(3rem, 8vw, 5rem)', letterSpacing: '0.02em' }}
-              >
-                {actor.name}
-              </h1>
-
-              {actor.biography && (
-                <div className="mb-12">
-                  <h3 className="t-label mb-4">Biography</h3>
-                  <p className="t-body text-[var(--text-secondary)] leading-relaxed max-w-4xl">
-                    {actor.biography}
-                  </p>
-                </div>
-              )}
-
-              {/* Credits Tabs */}
-              <div className="mb-10">
-                <div className="flex gap-8 border-b border-[var(--border-faint)] mb-8">
-                  <button
-                    onClick={() => setSelectedTab("movies")}
-                    className={`tab-item ${selectedTab === "movies" ? "active" : ""}`}
-                  >
-                    Films ({movies.length})
-                  </button>
-                  <button
-                    onClick={() => setSelectedTab("tv")}
-                    className={`tab-item ${selectedTab === "tv" ? "active" : ""}`}
-                  >
-                    Series ({tvShows.length})
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
-                  <AnimatePresence mode="wait">
-                    {displayedCredits.slice(0, 20).map((item, idx) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ delay: idx * 0.03 }}
-                        whileHover={{ y: -6 }}
-                        className="group cursor-pointer"
-                        onClick={() => router.push(`/info/${selectedTab}/${item.id}`)}
-                      >
-                        <div className="relative aspect-poster rounded-[var(--radius-md)] overflow-hidden border border-[var(--border-faint)] group-hover:border-[var(--border-subtle)] transition-all bg-[var(--bg-raised)] mb-3">
-                          <Image
-                            src={item.poster_path ? `https://image.tmdb.org/t/p/w342/${item.poster_path}` : "/not-found.png"}
-                            alt={""}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-700"
-                            sizes="(max-width: 768px) 50vw, 200px"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                        <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-[var(--accent)] transition-colors mb-1">
-                          {(item as any).title || (item as any).name}
-                        </h4>
-                        <p className="t-meta text-[10px] opacity-50 uppercase">
-                          {((item as any).release_date || (item as any).first_air_date)?.split('-')[0]}
-                        </p>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
+        <section className="relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-white/[0.035] p-5 shadow-[0_28px_90px_rgba(0,0,0,.28)] sm:p-8 lg:p-10">
+          <div className="pointer-events-none absolute -right-24 -top-32 h-96 w-96 rounded-full bg-white/[0.04] blur-3xl" />
+          <div className="relative grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="mx-auto w-48 sm:w-56 lg:mx-0 lg:w-[240px]">
+              <div className="relative aspect-[2/3] overflow-hidden rounded-[24px] border border-white/15 bg-[#15171a] shadow-2xl">
+                <Image src={profileUrl} alt={actor.name} fill priority sizes="240px" className={`object-cover transition duration-700 ${imageLoaded ? "opacity-100" : "opacity-0"}`} onLoad={() => setImageLoaded(true)} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               </div>
             </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }} className="flex min-w-0 flex-col justify-end">
+              <div className="mb-5 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40"><FilmStrip className="h-3.5 w-3.5 text-white/65" /> Performer profile</div>
+              <h1 className="text-[clamp(3rem,8vw,7rem)] font-semibold leading-[.92] tracking-[-.05em] text-white">{actor.name}</h1>
+              <div className="mt-7 flex flex-wrap gap-2"><span className="rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs text-white/65">{actor.known_for_department || "Acting"}</span><span className="rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs text-white/65">{movies.length} films</span><span className="rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs text-white/65">{tvShows.length} series</span></div>
+              <div className="mt-8 grid gap-4 border-t border-white/[0.08] pt-6 sm:grid-cols-2 lg:max-w-xl"><MetaItem icon={<CalendarBlank className="h-4 w-4" />} label="Born" value={born || "Not listed"} /><MetaItem icon={<MapPin className="h-4 w-4" />} label="From" value={actor.place_of_birth || "Not listed"} /></div>
+            </motion.div>
           </div>
+        </section>
+
+        <div className="mt-12 grid gap-14 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-20">
+          <section className="min-w-0">
+            <div className="mb-12 max-w-3xl"><p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/38">The person</p><h2 className="mb-5 text-2xl font-semibold tracking-tight text-white">A life in frames</h2><p className="whitespace-pre-line text-base leading-[1.8] text-white/58 sm:text-lg">{biography}</p></div>
+
+            <div className="sticky top-[68px] z-20 -mx-4 mb-8 border-b border-white/[0.08] bg-[#08090b]/85 px-4 backdrop-blur-2xl sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10"><div className="flex gap-7"><TabButton active={selectedTab === "movies"} onClick={() => setSelectedTab("movies")} icon={<FilmStrip className="h-4 w-4" />}>Films <span className="text-white/35">{movies.length}</span></TabButton><TabButton active={selectedTab === "tv"} onClick={() => setSelectedTab("tv")} icon={<Television className="h-4 w-4" />}>Series <span className="text-white/35">{tvShows.length}</span></TabButton></div></div>
+
+            <AnimatePresence mode="wait"><motion.div key={selectedTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .25 }} className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4">{displayedCredits.slice(0, 20).map((item, index) => <CreditCard key={item.id} item={item} index={index} onOpen={() => router.push(`/info/${selectedTab}/${item.id}`)} />)}</motion.div></AnimatePresence>
+          </section>
+
+          <aside className="space-y-6 lg:pt-1"><div className="rounded-[24px] border border-white/10 bg-white/[0.045] p-5 backdrop-blur-xl"><p className="mb-5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/38">Career snapshot</p><div className="space-y-4"><Stat label="Film credits" value={movies.length} /><Stat label="Series credits" value={tvShows.length} /><Stat label="Total appearances" value={movies.length + tvShows.length} /></div></div><div className="rounded-[24px] border border-dashed border-white/10 p-5"><p className="text-sm font-semibold text-white/75">Explore the work</p><p className="mt-2 text-xs leading-relaxed text-white/38">Open any title to see its full cast, details, and available playback sources.</p></div></aside>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
+
+function MetaItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return <div className="flex min-w-0 items-start gap-3"><span className="mt-0.5 text-white/45">{icon}</span><div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/35">{label}</p><p className="mt-1 truncate text-sm text-white/75">{value}</p></div></div>;
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return <div className="flex items-center justify-between border-b border-white/[0.07] pb-3 last:border-0 last:pb-0"><span className="text-xs text-white/42">{label}</span><span className="font-mono text-sm font-semibold text-white/80">{value}</span></div>;
+}
+
+function TabButton({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
+  return <button onClick={onClick} className={`relative inline-flex min-h-14 items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] transition ${active ? "text-white" : "text-white/38 hover:text-white/75"}`}>{icon}{children}{active && <motion.span layoutId="actor-tab-indicator" className="absolute inset-x-0 bottom-0 h-0.5 bg-white" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}</button>;
+}
+
+function CreditCard({ item, index, onOpen }: { item: Movie | TVShow & { media_type: string }; index: number; onOpen: () => void }) {
+  const itemTitle = "title" in item ? item.title : item.name;
+  const releaseDate = "release_date" in item ? item.release_date : item.first_air_date;
+  const poster = item.poster_path ? `https://image.tmdb.org/t/p/w342/${item.poster_path}` : "/not-found.png";
+  return <motion.button initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index, 10) * .025 }} onClick={onOpen} className="group min-w-0 text-left"><div className="relative aspect-[2/3] overflow-hidden rounded-[20px] border border-white/[0.08] bg-white/[0.04] transition duration-300 group-hover:-translate-y-1 group-hover:border-white/20 group-hover:shadow-[0_16px_32px_rgba(0,0,0,.35)]"><Image src={poster} alt={itemTitle} fill sizes="220px" className="object-cover transition duration-700 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-75" /><div className="absolute inset-x-3 bottom-3"><p className="line-clamp-2 text-sm font-semibold leading-tight text-white">{itemTitle}</p>{item.vote_average > 0 && <span className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] text-amber-200"><Star className="h-3 w-3 fill-current" />{item.vote_average.toFixed(1)}</span>}</div></div><p className="mt-3 truncate text-xs font-semibold text-white/65 group-hover:text-white">{itemTitle}</p><p className="mt-1 font-mono text-[10px] text-white/30">{releaseDate?.split("-")[0] || "—"}</p></motion.button>;
+}
 
 export default ActorClient;

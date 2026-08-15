@@ -187,7 +187,7 @@ const WatchlistPage = () => {
             
             <h2 
               className="text-white text-4xl mb-3"
-              style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.02em' }}
+              style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.02em' }}
             >
               Your Watchlist is Empty
             </h2>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useSettings } from "../../hooks/useSettings";
+import { useToast } from "../../components/ToastProvider";
 import {
   Monitor,
   Check,
@@ -38,13 +39,20 @@ const CURATED_FILMS = [
 
 const Settings = () => {
   const { settings, updateSetting, clearCache, getStorageUsage } = useSettings();
+  const { createToast } = useToast();
   const router = useRouter();
   const [cacheCleared, setCacheCleared] = useState(false);
   const [backdropUrl, setBackdropUrl] = useState("");
   const [storageUsage, setStorageUsage] = useState("0.00");
 
   useEffect(() => {
-    setStorageUsage(getStorageUsage());
+    let cancelled = false;
+    getStorageUsage().then((usage) => {
+      if (!cancelled) setStorageUsage(usage);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [getStorageUsage]);
 
   useEffect(() => {
@@ -64,14 +72,26 @@ const Settings = () => {
   }, []);
 
   const handleClearCache = () => {
-    if (confirm("This will reset your local settings and clear search history. Continue?")) {
-      clearCache();
-      setCacheCleared(true);
-      setTimeout(() => {
-        setCacheCleared(false);
-        window.location.reload();
-      }, 1500);
-    }
+    // Ask for confirmation inside the app (no browser chrome popup)
+    createToast("Clear all local data? This wipes search history and watch progress.", {
+      type: "warning",
+      timeout: 0,
+      cancel: "Cancel",
+      action: {
+        text: "Clear",
+        callback: async (toast) => {
+          toast.destroy();
+          setCacheCleared(true);
+          // Await the actual cache deletion before re-measuring so the
+          // refreshed number reflects the cleared state.
+          await clearCache();
+          const usage = await getStorageUsage();
+          setStorageUsage(usage);
+          setCacheCleared(false);
+          createToast("All local data cleared", { type: "success" });
+        },
+      },
+    });
   };
 
   const qualityOptions = [
@@ -115,7 +135,7 @@ const Settings = () => {
             </div>
             <h1 
               className="text-white text-5xl"
-              style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.02em' }}
+              style={{ fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.02em' }}
             >
               Settings
             </h1>

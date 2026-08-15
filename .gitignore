@@ -72,3 +72,7 @@ next-env.d.ts
 
 # local plans
 /NEW.md
+
+# agent scratch workspaces
+/.scratch/
+/.commandcode/

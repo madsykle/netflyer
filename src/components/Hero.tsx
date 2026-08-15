@@ -16,6 +16,7 @@ interface HeroSectionProps {
 const HeroSection = ({ movies }: HeroSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [paused, setPaused] = useState(false);
   const { getImageUrl } = useSettings();
   const router = useRouter();
 
@@ -24,12 +25,14 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
   }, [activeIndex]);
 
   useEffect(() => {
-    if (!movies || movies.length <= 1) return;
+    if (paused || !movies || movies.length <= 1) return;
+    // Respect reduced motion: no auto-rotating full-viewport backdrop
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % movies.length);
     }, 7000);
     return () => clearInterval(interval);
-  }, [movies]);
+  }, [movies, paused]);
 
   if (!movies || movies.length === 0) return <HeroSkeleton />;
 
@@ -65,7 +68,11 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative w-full h-[70vh] md:h-[85vh] lg:h-[90vh] overflow-hidden group">
+    <div
+      className="relative w-full h-[70vh] md:h-[85vh] lg:h-[90vh] overflow-hidden group"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       {/* Backdrop with Ken Burns */}
       <div className="absolute inset-0 z-0">
         <div

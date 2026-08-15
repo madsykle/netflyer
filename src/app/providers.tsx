@@ -2,6 +2,7 @@
 
 import { SettingsProvider } from "../hooks/useSettings";
 import { ToastProvider } from "../components/ToastProvider";
+import { MotionConfig } from "framer-motion";
 import React, { useEffect } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -21,8 +22,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SettingsProvider>
-      <ToastProvider>{children}</ToastProvider>
-    </SettingsProvider>
+    // reducedMotion="user" makes every framer-motion animation across the app
+    // respect prefers-reduced-motion (Apple: gentler, non-vestibular motion)
+    <MotionConfig reducedMotion="user">
+      <SettingsProvider>
+        <ToastProvider>{children}</ToastProvider>
+      </SettingsProvider>
+    </MotionConfig>
   );
 }

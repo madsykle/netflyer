@@ -2,7 +2,7 @@
 
 import { auth } from "../lib/firebase";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   MagnifyingGlass,
   Compass,
@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 const DESKTOP_NAV_ITEMS = [
   { path: "/",          label: "Home",      icon: House },
@@ -48,8 +49,28 @@ export default function Navbar() {
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const drawerScrollRef = useRef<HTMLDivElement>(null);
+  const [drawerScroll, setDrawerScroll] = useState({ scrollable: false, atTop: true });
   const pathname = usePathname();
   const router = useRouter();
+
+  // Apple sheets: dragging the sheet only takes over when its content is
+  // scrolled to the top — once you scroll the list, the sheet stops capturing
+  const handleDrawerScroll = useCallback(() => {
+    const el = drawerScrollRef.current;
+    if (!el) return;
+    setDrawerScroll({
+      scrollable: el.scrollHeight > el.clientHeight + 1,
+      atTop: el.scrollTop <= 2,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (drawerOpen) {
+      const frame = requestAnimationFrame(handleDrawerScroll);
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [drawerOpen, handleDrawerScroll]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -151,7 +172,7 @@ export default function Navbar() {
                   key={path}
                   href={path}
                   onMouseEnter={() => setHoveredPath(path)}
-                  className={`relative px-4 py-2 text-xs font-semibold tracking-widest uppercase transition-colors duration-300 rounded-[var(--radius-sm)] select-none flex items-center gap-2 ${
+                  className={`relative px-4 py-2 text-xs font-semibold tracking-widest uppercase transition-colors duration-300 active:scale-95 rounded-[var(--radius-sm)] select-none flex items-center gap-2 ${
                     active
                       ? "text-white"
                       : "text-[var(--text-secondary)] hover:text-white"
@@ -167,10 +188,13 @@ export default function Navbar() {
                     />
                   )}
 
-                  {/* Active indicator */}
+                  {/* Active indicator — slides between items with a spring
+                      (Apple: spatial consistency — the underline physically moves) */}
                   {active && (
-                    <div
-                      className="absolute bottom-0 inset-x-4 h-[2px] bg-[var(--accent)] rounded-full shadow-[0_0_8px_var(--accent)] animate-fade-in"
+                    <motion.div
+                      layoutId="desktop-nav-active"
+                      transition={{ type: "spring", stiffness: 480, damping: 36 }}
+                      className="absolute bottom-0 inset-x-4 h-[2px] bg-[var(--accent)] rounded-full shadow-[0_0_8px_var(--accent)]"
                     />
                   )}
                 </Link>
@@ -205,10 +229,16 @@ export default function Navbar() {
                   </div>
                 </button>
 
-                {/* Profile Dropdown */}
+                {/* Profile Dropdown — springs in from the trigger (anchored origin) */}
+                <AnimatePresence>
                 {dropdownOpen && (
-                  <div
-                    className="absolute right-0 top-12 w-64 glass-strong rounded-[var(--radius-md)] shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3.5 z-[110] animate-scale-in"
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                    style={{ transformOrigin: "top right" }}
+                    className="absolute right-0 top-12 w-64 glass-strong rounded-[var(--radius-md)] shadow-[0_10px_40px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3.5 z-[110]"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#600000] border border-white/10 flex items-center justify-center text-white text-sm font-bold shadow-inner">
@@ -269,8 +299,9 @@ export default function Navbar() {
                       <SignOut className="w-3.5 h-3.5" />
                       Sign Out
                     </button>
-                  </div>
+                  </motion.div>
                 )}
+                </AnimatePresence>
               </div>
             ) : (
               <Link
@@ -359,10 +390,12 @@ export default function Navbar() {
                 href={path}
                 className="relative flex flex-col items-center justify-center flex-1 py-1.5 cursor-pointer"
               >
-                {/* Bubble Highlight */}
+                {/* Bubble Highlight — slides between tabs like an iOS tab bar */}
                 {active && (
-                  <div
-                    className="absolute inset-x-1.5 inset-y-0.5 bg-[var(--accent)]/15 border border-[var(--accent)]/20 rounded-xl -z-10 animate-fade-in"
+                  <motion.div
+                    layoutId="mobile-dock-active"
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    className="absolute inset-x-1.5 inset-y-0.5 bg-[var(--accent)]/15 border border-[var(--accent)]/20 rounded-xl -z-10"
                   />
                 )}
 
@@ -382,21 +415,39 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE PROFILE DRAWER */}
+      {/* MOBILE PROFILE DRAWER — a real bottom sheet: spring in/out,
+          rubber-bands past the bottom edge, drag-to-dismiss with velocity */}
+      <AnimatePresence>
       {drawerOpen && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-[120] bg-black/75 backdrop-blur-sm md:hidden animate-fade-in"
+          <motion.div
+            key="drawer-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[120] bg-black/75 backdrop-blur-sm md:hidden"
             onClick={() => setDrawerOpen(false)}
           />
 
           {/* Bottom Sheet */}
-          <div
-            className="fixed bottom-0 inset-x-0 z-[130] bg-[var(--bg-surface)] border-t border-white/[0.08] rounded-t-2xl md:hidden max-h-[80vh] flex flex-col animate-slide-up"
+          <motion.div
+            key="drawer-sheet"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 380, damping: 34 }}
+            drag={drawerScroll.scrollable && !drawerScroll.atTop ? false : "y"}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.5 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 90 || info.velocity.y > 500) setDrawerOpen(false);
+            }}
+            className="fixed bottom-0 inset-x-0 z-[130] bg-[var(--bg-surface)] border-t border-white/[0.08] rounded-t-2xl md:hidden max-h-[80vh] flex flex-col will-change-transform"
           >
             {/* Drag handle decoration */}
-            <div className="py-3 flex justify-center cursor-pointer" onClick={() => setDrawerOpen(false)}>
+            <div className="py-3 flex justify-center cursor-grab active:cursor-grabbing" onClick={() => setDrawerOpen(false)}>
               <div className="w-12 h-1 bg-white/20 rounded-full" />
             </div>
 
@@ -414,7 +465,7 @@ export default function Navbar() {
             </div>
 
             {/* Drawer Content */}
-            <div className="p-5 flex flex-col gap-6 overflow-y-auto flex-grow pb-10">
+            <div ref={drawerScrollRef} onScroll={handleDrawerScroll} className="p-5 flex flex-col gap-6 overflow-y-auto flex-grow pb-10">
               {user && (
                 <div className="flex items-center gap-4 bg-white/[0.02] border border-white/[0.04] p-4 rounded-xl">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#600000] border border-white/10 flex items-center justify-center text-white text-base font-bold shadow-inner">
@@ -491,9 +542,10 @@ export default function Navbar() {
                 </button>
               )}
             </div>
-          </div>
+          </motion.div>
         </>
       )}
+      </AnimatePresence>
     </>
   );
 }

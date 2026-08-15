@@ -259,14 +259,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`relative w-full h-full bg-black group select-none ${isFullscreen ? 'fixed inset-0 z-[9999]' : ''}`}
+      className={`relative w-full h-full bg-[#050607] group select-none ${isFullscreen ? 'fixed inset-0 z-[9999]' : ''}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => playing && setShowControls(false)}
     >
       <video
         ref={videoRef}
         poster={poster}
-        className="w-full h-full"
+        className="h-full w-full object-contain bg-black"
         onClick={togglePlay}
         onDoubleClick={toggleFullscreen}
         playsInline
@@ -295,19 +295,19 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/80 via-transparent to-black/40 z-20"
+            className="absolute inset-0 z-20 flex flex-col justify-between bg-gradient-to-t from-black/85 via-transparent to-black/45"
           >
             {/* Top Bar */}
-            <div className="p-6 flex items-center justify-between">
-              <h3 className="text-white font-medium drop-shadow-md truncate max-w-md">
+            <div className="flex items-center justify-between p-4 sm:p-6">
+              <h3 className="max-w-md truncate rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-xs font-semibold text-white/85 shadow-lg backdrop-blur-xl">
                 {title}
               </h3>
             </div>
 
             {/* Bottom Controls */}
-            <div className="p-6 pt-0 space-y-4">
+            <div className="space-y-3 p-4 pt-0 sm:space-y-4 sm:p-6 sm:pt-0">
               {/* Progress Bar */}
-              <div className="relative w-full h-1.5 group/progress flex items-center">
+              <div className="group/progress relative flex h-1.5 w-full items-center">
                 <input
                   type="range"
                   min={0}
@@ -329,21 +329,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
-                  <button onClick={togglePlay} className="text-white hover:text-[var(--accent)] transition-colors">
+                  <button onClick={togglePlay} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white transition hover:bg-white/[0.16] hover:text-white">
                     {playing ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current" />}
                   </button>
 
                   <div className="flex items-center gap-2">
-                    <button onClick={() => skip(-10)} className="text-white/80 hover:text-white transition-colors">
+                    <button onClick={() => skip(-10)} className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/75 transition hover:bg-white/[0.14] hover:text-white">
                        <ArrowUUpLeft className="w-5 h-5" />
                     </button>
-                    <button onClick={() => skip(10)} className="text-white/80 hover:text-white transition-colors">
+                    <button onClick={() => skip(10)} className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/75 transition hover:bg-white/[0.14] hover:text-white">
                        <ArrowUUpRight className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="flex items-center gap-3 group/volume">
-                    <button onClick={toggleMute} className="text-white hover:text-[var(--accent)] transition-colors">
+                    <button onClick={toggleMute} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white transition hover:bg-white/[0.16] hover:text-white">
                        {muted || volume === 0 ? <SpeakerSlash className="w-6 h-6" /> : volume < 0.5 ? <SpeakerSimpleHigh className="w-6 h-6" /> : <SpeakerHigh className="w-6 h-6" />}
                     </button>
                     <div className="w-0 group-hover/volume:w-24 transition-all duration-300 overflow-hidden flex items-center">
@@ -359,7 +359,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     </div>
                   </div>
 
-                  <div className="text-xs font-medium text-white/80 font-mono">
+                  <div className="rounded-full border border-white/10 bg-black/25 px-3 py-2 font-mono text-[10px] font-medium text-white/75 backdrop-blur-xl">
                     {formatTime(currentTime)} <span className="opacity-40">/</span> {formatTime(duration)}
                   </div>
                 </div>
@@ -368,7 +368,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   <div className="relative">
                     <button 
                       onClick={() => setShowStreamSettings(!showSettings)}
-                      className="text-white hover:text-[var(--accent)] transition-colors"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white transition hover:bg-white/[0.16] hover:text-white"
                     >
                        <Gear className="w-5 h-5" />
                     </button>
@@ -379,7 +379,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          className="absolute bottom-full right-0 mb-4 w-48 bg-[#161619] border border-white/10 rounded-[var(--radius-sm)] shadow-2xl p-2 z-50"
+                          className="absolute bottom-full right-0 z-50 mb-4 w-52 rounded-2xl border border-white/12 bg-[#15171b]/95 p-2 shadow-2xl backdrop-blur-2xl"
                         >
                           <div className="text-[10px] uppercase font-bold text-white/40 px-3 py-2 mb-1 border-b border-white/5">
                             Playback Speed
@@ -402,7 +402,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     </AnimatePresence>
                   </div>
 
-                  <button onClick={toggleFullscreen} className="text-white hover:text-[var(--accent)] transition-colors">
+                  <button onClick={toggleFullscreen} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white transition hover:bg-white/[0.16] hover:text-white">
                      {isFullscreen ? <ArrowsIn className="w-6 h-6" /> : <ArrowsOut className="w-6 h-6" />}
                   </button>
                 </div>

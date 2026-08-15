@@ -197,7 +197,7 @@ const RowCard = ({ item, index }: { item: Movie | TVShow; index: number }) => {
 
           {/* Cinematic overlay on hover */}
           <div
-            className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10 transition-opacity duration-250 ${
+            className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10 transition-opacity duration-300 ${
               isHovered ? "opacity-100" : "opacity-0"
             }`}
           >

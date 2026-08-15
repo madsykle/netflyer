@@ -64,6 +64,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               initial={{ opacity: 0, x: 50, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+              transition={{ type: "spring", stiffness: 500, damping: 35 }}
               className={`pointer-events-auto flex items-center justify-between p-4 min-w-[300px] max-w-md rounded-xl shadow-2xl glass-strong border-l-4 ${
                 toast.type === 'success' ? 'border-l-green-500' :
                 toast.type === 'error' ? 'border-l-red-500' :
@@ -80,6 +81,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
               </div>
               
               <div className="flex items-center gap-2 ml-4">
+                {toast.cancel && (
+                  <button
+                    onClick={() => removeToast(toast.id)}
+                    className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-tertiary)] hover:text-white transition-colors"
+                  >
+                    {toast.cancel}
+                  </button>
+                )}
                 {toast.action && (
                   <button
                     onClick={() => toast.action!.callback({ destroy: () => removeToast(toast.id) })}
@@ -91,6 +100,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
                 <button
                   onClick={() => removeToast(toast.id)}
                   className="text-[var(--color-text-tertiary)] hover:text-white transition-colors"
+                  aria-label="Dismiss notification"
                 >
                   <X className="w-4 h-4" />
                 </button>
